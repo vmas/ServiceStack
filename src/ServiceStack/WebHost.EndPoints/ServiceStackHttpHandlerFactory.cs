@@ -12,6 +12,7 @@ using ServiceStack.Text;
 using ServiceStack.WebHost.Endpoints.Extensions;
 using ServiceStack.WebHost.Endpoints.Metadata;
 using ServiceStack.WebHost.Endpoints.Support;
+using ServiceStack.WebHost.Endpoints.Handlers;
 
 namespace ServiceStack.WebHost.Endpoints
 {
@@ -327,7 +328,8 @@ namespace ServiceStack.WebHost.Endpoints
 
 			var restPath = RestHandler.FindMatchingRestPath(httpMethod, pathInfo);
 			if (restPath != null)
-				return new RestHandler { RestPath = restPath, RequestName = restPath.RequestType.Name };
+				//return new RestHandler { RestPath = restPath, RequestName = restPath.RequestType.Name };
+				return new AsyncRestHandler(restPath) { RequestName = restPath.RequestType.Name };
 
 			return GetCatchAllHandlerIfAny(httpMethod, pathInfo, filePath);
 		}

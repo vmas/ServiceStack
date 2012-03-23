@@ -33,7 +33,7 @@ namespace ServiceStack.WebHost.Endpoints.Support.Tests
 			request.Expect(req => req.IsSecureConnection).Returns(false);
 			request.Expect(req => req.HttpMethod).Returns("GET");
 
-			Assert.AreEqual(expected | EndpointAttributes.HttpGet | EndpointAttributes.InSecure, handler.GetEndpointAttributes(request.Object));
+			Assert.AreEqual(expected | EndpointAttributes.HttpGet | EndpointAttributes.InSecure, EndpointHandlerBase.GetEndpointAttributes(request.Object));
 		}
 
 		public static IEnumerable EndpointExpectations

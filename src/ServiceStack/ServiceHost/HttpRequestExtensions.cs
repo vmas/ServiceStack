@@ -6,6 +6,8 @@ using ServiceStack.Text;
 using ServiceStack.Common;
 using ServiceStack.Common.Web;
 using ServiceStack.WebHost.Endpoints.Extensions;
+using ServiceStack.WebHost.Endpoints;
+using System.Runtime.Serialization;
 
 namespace ServiceStack.ServiceHost
 {
@@ -195,6 +197,38 @@ namespace ServiceStack.ServiceHost
 		public static string GetJsonpCallback(this IHttpRequest httpReq)
 		{
 			return httpReq == null ? null : httpReq.QueryString["callback"];
+		}
+
+		public static object CreateRequestDto(this IHttpRequest httpReq, Type requestType, string contentType = null, ServiceManager serviceManager = null)
+		{
+			try
+			{
+				if (contentType == null)
+					contentType = httpReq.ContentType;
+
+				Func<IHttpRequest, object> requestFactoryFn;
+				(serviceManager ?? EndpointHost.ServiceManager).ServiceController.RequestTypeFactoryMap.TryGetValue(requestType, out requestFactoryFn);
+				if (requestFactoryFn != null)
+				{
+					return requestFactoryFn(httpReq);
+				}
+
+				if (!string.IsNullOrEmpty(contentType) && httpReq.ContentLength > 0)
+				{
+					var deserializer = EndpointHost.AppHost.ContentTypeFilters.GetStreamDeserializer(contentType);
+					if (deserializer != null)
+					{
+						return deserializer(requestType, httpReq.InputStream);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				var msg = "Could not deserialize '{0}' request using {1}'\nError: {2}"
+					.Fmt(contentType, requestType, ex);
+				throw new SerializationException(msg);
+			}
+			return null;
 		}
 	}
 }

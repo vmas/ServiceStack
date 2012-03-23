@@ -222,7 +222,7 @@ namespace ServiceStack.WebHost.Endpoints.Support
 			return null;
 		}
 
-		public EndpointAttributes GetEndpointAttributes(IHttpRequest request)
+		public static EndpointAttributes GetEndpointAttributes(IHttpRequest request)
 		{
 			var portRestrictions = EndpointAttributes.None;
 
