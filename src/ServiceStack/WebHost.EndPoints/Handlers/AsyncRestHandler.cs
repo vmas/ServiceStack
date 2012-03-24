@@ -27,7 +27,7 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 			using (Profiler.Current.Step("Deserialize Request"))
 			{
 				var requestParams = httpReq.GetRequestParams();
-				var requestDto = httpReq.CreateRequestDto(restPath.RequestType, httpReq.ContentType);
+				var requestDto = httpReq.GetRequestDto(restPath.RequestType, httpReq.ContentType);
 				return restPath.CreateRequest(httpReq.PathInfo, requestParams, requestDto);
 			}
 		}
@@ -53,8 +53,7 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 			}
 			catch (Exception ex)
 			{
-                //TODO: improve exception handling
-				this.HandleException(responseContentType, res, req.OperationName, ex);
+				this.HandleException(req, res, ex);
 				return this.CancelRequestProcessing(callback);
 			}
 		}
@@ -70,24 +69,35 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 		{
 			var requestContentType = ContentType.GetEndpointAttributes(httpReq.ResponseContentType);
 
-			//TODO: Fix endpoint attributes detection
 			var endpointAttributes = HandlerAttributes | requestContentType | EndpointHandlerBase.GetEndpointAttributes(httpReq);
 			return EndpointHost.ExecuteService(request, endpointAttributes, httpReq, httpRes);
 		}
 
 		public override void EndProcessRequest(IHttpRequest req, IHttpResponse res, IServiceResult result)
 		{
-			if (res.IsClosed)
-				return;
+			try
+			{
+				if (res.IsClosed)
+					return;
 
-			var callback = req.GetJsonpCallback();
-			var doJsonp = EndpointHost.Config.AllowJsonpRequests
-						  && !string.IsNullOrEmpty(callback);
+				var callback = req.GetJsonpCallback();
+				var doJsonp = EndpointHost.Config.AllowJsonpRequests
+							  && !string.IsNullOrEmpty(callback);
 
-			if (doJsonp)
-				res.WriteToResponse(req, result.Result, (callback + "(").ToUtf8Bytes(), ")".ToUtf8Bytes());
-			else
-				res.WriteToResponse(req, result.Result);
+				if (doJsonp)
+					res.WriteToResponse(req, result.Result, (callback + "(").ToUtf8Bytes(), ")".ToUtf8Bytes());
+				else
+					res.WriteToResponse(req, result.Result);
+			}
+			catch (Exception ex)
+			{
+				this.HandleException(req, res, ex);
+			}
+			finally
+			{
+				if (!res.IsClosed)
+					res.Close();
+			}
 		}
 	}
 }

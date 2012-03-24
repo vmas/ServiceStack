@@ -199,7 +199,7 @@ namespace ServiceStack.ServiceHost
 			return httpReq == null ? null : httpReq.QueryString["callback"];
 		}
 
-		public static object CreateRequestDto(this IHttpRequest httpReq, Type requestType, string contentType = null, ServiceManager serviceManager = null)
+		public static object GetRequestDto(this IHttpRequest httpReq, Type requestType, string contentType = null, ServiceManager serviceManager = null)
 		{
 			try
 			{

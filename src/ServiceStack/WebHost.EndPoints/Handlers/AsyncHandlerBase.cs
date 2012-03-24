@@ -10,11 +10,15 @@ using ServiceStack.ServiceHost;
 using ServiceStack.WebHost.Endpoints.Extensions;
 using ServiceStack.WebHost.Endpoints.Support;
 using System.Runtime.Serialization;
+using ServiceStack.ServiceInterface.ServiceModel;
+using ServiceStack.Logging;
 
 namespace ServiceStack.WebHost.Endpoints.Handlers
 {
 	public abstract class AsyncHandlerBase : IHttpAsyncHandler, IServiceStackHttpAsyncHandler
 	{
+		private static readonly ILog Log = LogManager.GetLogger(typeof(AsyncHandlerBase));
+
 		public string RequestName { get; set; }
 		public IHttpRequest HttpRequest { get; set; }
 		public IHttpResponse HttpResponse { get; set; }
@@ -44,10 +48,18 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 			get { return false; }
 		}
 
-		protected void HandleException(string responseContentType, IHttpResponse httpRes, string operationName, Exception ex)
+		protected virtual void HandleException(IHttpRequest httpReq, IHttpResponse httpRes, Exception ex)
 		{
+			var responseStatus = new { ResponseStatus = new ResponseStatus()
+				{
+					ErrorCode = ex.GetType().Name, 
+					Message = ex.Message,
+					StackTrace = ex.StackTrace
+				}
+			};
+
 			var errorMessage = string.Format("Error occured while Processing Request: {0}", ex.Message);
-			//Log.Error(errorMessage, ex);
+			Log.Error(errorMessage, ex);
 
 			try
 			{
@@ -56,13 +68,13 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 				//if there is a problem writing to response, by now it will be closed
 				if (!httpRes.IsClosed)
 				{
-					httpRes.WriteErrorToResponse(responseContentType, operationName, errorMessage, ex, statusCode);
+					httpRes.WriteToResponse(httpReq, responseStatus);
 				}
 			}
 			catch (Exception writeErrorEx)
 			{
 				//Exception in writing to response should not hide the original exception
-				//Log.Info("Failed to write error to response: {0}", writeErrorEx);
+				Log.Info("Failed to write error to response: {0}", writeErrorEx);
 
 				//rethrow the original exception
 				throw ex;
