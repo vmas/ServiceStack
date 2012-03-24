@@ -7,6 +7,6 @@ namespace ServiceStack.ServiceHost
 {
 	public interface IServiceResult : IAsyncResult
 	{
-		object Result { get; set; }
+		object Result { get; }
 	}
 }

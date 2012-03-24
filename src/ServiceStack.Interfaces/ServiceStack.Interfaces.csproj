@@ -554,6 +554,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ServiceHost\IServiceResult.cs" />
+    <Compile Include="ServiceHost\IResponseBinder.cs" />
     <Compile Include="ServiceHost\IServiceRoutes.cs">
       <SubType>Code</SubType>
     </Compile>

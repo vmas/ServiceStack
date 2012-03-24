@@ -32,6 +32,17 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 			}
 		}
 
+		public IServiceResult ApplyResponseBinders(IHttpRequest req, IHttpResponse res, object responseDto, Action<IServiceResult> callback)
+		{
+			foreach (var converter in EndpointHost.ResponseBinders)
+			{
+				var result = converter.Convert(req, res, responseDto, callback);
+				if (result != null)
+					return result;
+			}
+			return null;
+		}
+
 		public override IServiceResult BeginProcessRequest(IHttpRequest req, IHttpResponse res, Action<IServiceResult> callback)
 		{
 			var responseContentType = EndpointHost.Config.DefaultContentType;
@@ -45,9 +56,11 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 				if (EndpointHost.ApplyRequestFilters(req, res, requestDto)) return this.CancelRequestProcessing(callback);
 
 				var responseDto = this.GetResponseDto(req, res, requestDto);
-				if (EndpointHost.ApplyResponseFilters(req, res, responseDto)) return this.CancelRequestProcessing(callback);
 
-				var serviceResult = new SyncServiceResult() { Result = responseDto };
+				var convertedResponseDto = this.ApplyResponseBinders(req, res, responseDto, callback);
+				if (convertedResponseDto != null) return convertedResponseDto;
+
+				var serviceResult = new SyncServiceResult(responseDto);
 				callback(serviceResult);
 				return serviceResult;
 			}
@@ -80,14 +93,17 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 				if (res.IsClosed)
 					return;
 
+				var responseDto = result.Result;
+				if (EndpointHost.ApplyResponseFilters(req, res, responseDto)) return;
+
 				var callback = req.GetJsonpCallback();
 				var doJsonp = EndpointHost.Config.AllowJsonpRequests
 							  && !string.IsNullOrEmpty(callback);
 
 				if (doJsonp)
-					res.WriteToResponse(req, result.Result, (callback + "(").ToUtf8Bytes(), ")".ToUtf8Bytes());
+					res.WriteToResponse(req, responseDto, (callback + "(").ToUtf8Bytes(), ")".ToUtf8Bytes());
 				else
-					res.WriteToResponse(req, result.Result);
+					res.WriteToResponse(req, responseDto);
 			}
 			catch (Exception ex)
 			{

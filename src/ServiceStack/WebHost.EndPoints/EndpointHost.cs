@@ -27,6 +27,8 @@ namespace ServiceStack.WebHost.Endpoints
 
 		public static List<HttpHandlerResolverDelegate> CatchAllHandlers { get; set; }
 
+		public static List<IResponseBinder> ResponseBinders { get; set; }
+
 		private static bool pluginsLoaded = false;
 
 		public static List<IPlugin> Plugins { get; set; }
@@ -38,6 +40,7 @@ namespace ServiceStack.WebHost.Endpoints
 			ResponseFilters = new List<Action<IHttpRequest, IHttpResponse, object>>();
 			HtmlProviders = new List<StreamSerializerResolverDelegate>();
 			CatchAllHandlers = new List<HttpHandlerResolverDelegate>();
+			ResponseBinders = new List<IResponseBinder>();
 			Plugins = new List<IPlugin> {
 				new HtmlFormat(),
 				new CsvFormat(),

@@ -8,7 +8,14 @@ namespace ServiceStack.WebHost.Endpoints.Support
 {
 	public class SyncServiceResult : IServiceResult
 	{
-		public object Result { get; set; }
+		public SyncServiceResult() { }
+
+		public SyncServiceResult(object result)
+		{
+			this.Result = result;
+		}
+
+		public object Result { get; private set; }
 
 		public object AsyncState
 		{
