@@ -90,7 +90,8 @@ namespace ServiceStack.ServiceHost.Tests
         public void Generic_service_with_recursive_ceneric_type_should_not_get_registered()
         {
             // Tell manager to register GenericService<Generic3<>>, which should not be possible since Generic3<> is an open type
-            var serviceManager = new ServiceManager(null, new ServiceController(() => new[] { typeof(GenericService<>).MakeGenericType(new[] { typeof(Generic3<>) }) }));
+            var serviceManager = new ServiceManager(null, new ServiceController());
+			serviceManager.RegisterService(typeof(GenericService<>).MakeGenericType(new[] { typeof(Generic3<>) }));
 
             serviceManager.Init();
 
@@ -103,14 +104,13 @@ namespace ServiceStack.ServiceHost.Tests
         [Test]
         public void Generic_service_can_be_registered_with_closed_types()
         {
-            var serviceManager = new ServiceManager(null, new ServiceController(() => new[]
-            {
-                typeof(GenericService<Generic1>),
-                typeof(GenericService<>).MakeGenericType(new[] { typeof (Generic2) }), // GenericService<Generic2> created through reflection
-                typeof(GenericService<Generic3<string>>),
-                typeof(GenericService<Generic3<int>>),
-                typeof(GenericService<>).MakeGenericType(new[] { typeof (Generic3<>).MakeGenericType(new[] { typeof(double) }) }), // GenericService<Generic3<double>> created through reflection
-            }));
+			var serviceManager = new ServiceManager(null, new ServiceController());
+			serviceManager.RegisterService(typeof(GenericService<Generic1>));
+			serviceManager.RegisterService(typeof(GenericService<>).MakeGenericType(new[] { typeof(Generic2) })); // GenericService<Generic2> created through reflection
+			serviceManager.RegisterService(typeof(GenericService<Generic3<string>>));
+			serviceManager.RegisterService(typeof(GenericService<Generic3<int>>));
+			// GenericService<Generic3<double>> created through reflection
+			serviceManager.RegisterService(typeof(GenericService<>).MakeGenericType(new[] { typeof(Generic3<>).MakeGenericType(new[] { typeof(double) }) }));
 
             serviceManager.Init();
             var serviceController = serviceManager.ServiceController;

@@ -87,6 +87,7 @@ namespace ServiceStack.WebHost.Endpoints.Support
 			}
 
 			EndpointHost.AfterInit();
+			EndpointHost.RestController.RegisterRestPaths(this.routes.RestPaths);
 
 			var elapsed = DateTime.Now - this.startTime;
 			Log.InfoFormat("Initializing Application took {0}ms", elapsed.TotalMilliseconds);
@@ -267,8 +268,6 @@ namespace ServiceStack.WebHost.Endpoints.Support
 			if (config.ServiceManager == null)
 				config.ServiceManager = EndpointHost.Config.ServiceManager;
 
-			config.ServiceManager.ServiceController.EnableAccessRestrictions = config.EnableAccessRestrictions;
-
 			EndpointHost.Config = config;
 
 			JsonDataContractSerializer.Instance.UseBcl = config.UseBclJsonSerializers;
@@ -300,9 +299,10 @@ namespace ServiceStack.WebHost.Endpoints.Support
 			return this.Container.TryResolve<T>();
 		}
 
+		private ServiceRoutes routes = new ServiceRoutes();
 		public IServiceRoutes Routes
 		{
-			get { return EndpointHost.Config.ServiceController.Routes; }
+			get { return this.routes; }
 		}
 
 		public Dictionary<Type, Func<IHttpRequest, object>> RequestBinders

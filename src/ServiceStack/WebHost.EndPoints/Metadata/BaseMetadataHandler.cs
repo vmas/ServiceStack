@@ -119,7 +119,7 @@ namespace ServiceStack.WebHost.Endpoints.Metadata
 
 		protected virtual string CreateRestPaths(Type operationType)
 		{
-			var map = EndpointHost.ServiceManager.ServiceController.RestPathMap;
+			var map = EndpointHost.RestController.RestPathMap;
 			var paths = new List<RestPath>();
 			foreach (var key in map.Keys)
 			{

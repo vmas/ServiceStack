@@ -52,9 +52,10 @@ namespace ServiceStack.ServiceInterface.Testing
 			get { return EndpointHost.ServiceManager.Container; }
 		}
 
+		private ServiceRoutes routes = new ServiceRoutes();
 		protected IServiceRoutes Routes
 		{
-			get { return EndpointHost.ServiceManager.ServiceController.Routes; }
+			get { return this.routes; }
 		}
 
 		//All integration tests call the Webservices hosted at the following location:
@@ -73,6 +74,7 @@ namespace ServiceStack.ServiceInterface.Testing
 			HasConfigured = true;
 			Configure(Container);
 			EndpointHost.AfterInit();
+			EndpointHost.RestController.RegisterRestPaths(this.routes.RestPaths);
 		}
 
 		public virtual void OnBeforeEachTest()

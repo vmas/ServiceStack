@@ -15,10 +15,12 @@ namespace ServiceStack.ServiceHost
 		private static readonly ILog Log = LogManager.GetLogger(typeof(ServiceManager));
 
 		public Container Container { get; private set; }
-		public ServiceController ServiceController { get; private set; }
+		public IServiceController ServiceController { get; private set; }
 
 		public ServiceOperations ServiceOperations { get; set; }
 		public ServiceOperations AllServiceOperations { get; set; }
+
+		private Assembly[] assembliesWithServices;
 
 		public ServiceManager(params Assembly[] assembliesWithServices)
 		{
@@ -27,10 +29,9 @@ namespace ServiceStack.ServiceHost
 					"No Assemblies provided in your AppHost's base constructor.\n"
 					+ "To register your services, please provide the assemblies where your web services are defined.");
 
+			this.assembliesWithServices = assembliesWithServices;
 			this.Container = new Container();
-			//			this.ServiceController = new ServiceController(
-			//				() => assembliesWithServices.ToList().SelectMany(x => x.GetTypes()));
-			this.ServiceController = new ServiceController(() => GetAssemblyTypes(assembliesWithServices));
+			this.ServiceController = new ServiceController();
 		}
 
 		public ServiceManager(bool autoInitialize, params Assembly[] assembliesWithServices)
@@ -72,7 +73,7 @@ namespace ServiceStack.ServiceHost
 		/// <summary>
 		/// Inject alternative container and strategy for resolving Service Types
 		/// </summary>
-		public ServiceManager(Container container, ServiceController serviceController)
+		public ServiceManager(Container container, IServiceController serviceController)
 		{
 			if (serviceController == null)
 				throw new ArgumentNullException("serviceController");
@@ -86,8 +87,11 @@ namespace ServiceStack.ServiceHost
 		public void Init()
 		{
 			typeFactory = new ContainerResolveCache(this.Container);
-
-			this.ServiceController.Register(typeFactory);
+			if (assembliesWithServices != null)
+			{
+				var serviceTypes = this.GetAssemblyTypes(assembliesWithServices);
+				this.ServiceController.RegisterServices(typeFactory, serviceTypes);
+			}
 
 			ReloadServiceOperations();
 
@@ -139,12 +143,6 @@ namespace ServiceStack.ServiceHost
 			{
 				this.Container.Dispose();
 			}
-		}
-
-		public void AfterInit()
-		{
-			this.ServiceController.AfterInit();
-			ReloadServiceOperations();
 		}
 	}
 

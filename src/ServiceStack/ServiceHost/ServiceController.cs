@@ -17,7 +17,7 @@ namespace ServiceStack.ServiceHost
 		private static readonly ILog Log = LogManager.GetLogger(typeof(ServiceController));
 		private const string ResponseDtoSuffix = "Response";
 
-		public ServiceController(Func<IEnumerable<Type>> resolveServicesFn)
+		public ServiceController()
 		{
 			this.RequestServiceTypeMap = new Dictionary<Type, Type>();
 			this.ResponseServiceTypeMap = new Dictionary<Type, Type>();
@@ -25,9 +25,6 @@ namespace ServiceStack.ServiceHost
 			this.OperationTypes = new List<Type>();
 			this.RequestTypeFactoryMap = new Dictionary<Type, Func<IHttpRequest, object>>();
 			this.ServiceTypes = new HashSet<Type>();
-			this.EnableAccessRestrictions = true;
-			this.routes = new ServiceRoutes();
-			this.ResolveServicesFn = resolveServicesFn;
 		}
 
 		readonly Dictionary<Type, Func<IRequestContext, object, object>> requestExecMap
@@ -35,10 +32,6 @@ namespace ServiceStack.ServiceHost
 
 		readonly Dictionary<Type, ServiceAttribute> requestServiceAttrs
 			= new Dictionary<Type, ServiceAttribute>();
-
-		private readonly ServiceRoutes routes;
-
-		public bool EnableAccessRestrictions { get; set; }
 
 		public Dictionary<Type, Type> ResponseServiceTypeMap { get; set; }
 
@@ -54,16 +47,12 @@ namespace ServiceStack.ServiceHost
 
 		public string DefaultOperationsNamespace { get; set; }
 
-		public IServiceRoutes Routes { get { return routes; } }
-
-		public Func<IEnumerable<Type>> ResolveServicesFn { get; set; }
-
-		public void Register<TReq>(Func<IService<TReq>> invoker)
+		public void RegisterService<TReq>(Func<IService<TReq>> serviceFactoryFn)
 		{
 			var requestType = typeof(TReq);
 			Func<IRequestContext, object, object> handlerFn = (requestContext, dto) =>
 			{
-				var service = invoker();
+				var service = serviceFactoryFn();
 
 				InjectRequestContext(service, requestContext);
 
@@ -72,18 +61,16 @@ namespace ServiceStack.ServiceHost
 					requestContext != null ? requestContext.EndpointAttributes : EndpointAttributes.None);
 			};
 
-			requestExecMap.Add(requestType, handlerFn);
+			this.RegisterService(requestType, typeof(IService<TReq>), handlerFn);
 		}
 
-		public void Register(ITypeFactory serviceFactoryFn)
+		public void RegisterServices(ITypeFactory serviceFactory, IEnumerable<Type> serviceTypes)
 		{
-			foreach (var serviceType in ResolveServicesFn())
-			{
-				RegisterService(serviceFactoryFn, serviceType);
-			}
+			foreach (var serviceType in serviceTypes)
+				RegisterService(serviceFactory, serviceType);
 		}
 
-		public void RegisterService(ITypeFactory serviceFactoryFn, Type serviceType)
+		public void RegisterService(ITypeFactory serviceFactory, Type serviceType)
 		{
 			if (serviceType.IsAbstract || serviceType.ContainsGenericParameters) return;
 
@@ -94,145 +81,17 @@ namespace ServiceStack.ServiceHost
 				) continue;
 
 				var requestType = service.GetGenericArguments()[0];
-
-				Register(requestType, serviceType, serviceFactoryFn);
-
-				RegisterRestPaths(requestType);
-
-				this.ServiceTypes.Add(serviceType);
-
-				this.RequestServiceTypeMap[requestType] = serviceType;
-				this.AllOperationTypes.Add(requestType);
-				this.OperationTypes.Add(requestType);
-
-				var responseTypeName = requestType.FullName + ResponseDtoSuffix;
-				var responseType = AssemblyUtils.FindType(responseTypeName);
-				if (responseType != null)
-				{
-					this.ResponseServiceTypeMap[responseType] = serviceType;
-					this.AllOperationTypes.Add(responseType);
-					this.OperationTypes.Add(responseType);
-				}
-
-				if (typeof(IRequiresRequestStream).IsAssignableFrom(requestType))
-				{
-					this.RequestTypeFactoryMap[requestType] = httpReq => {
-						var rawReq = (IRequiresRequestStream) requestType.CreateInstance();
-						rawReq.RequestStream = httpReq.InputStream;
-						return rawReq;
-					};
-				}
-
-				Log.DebugFormat("Registering {0} service '{1}' with request '{2}'",
-					(responseType != null ? "SyncReply" : "OneWay"), 
-					serviceType.Name, requestType.Name);
+				RegisterService(requestType, serviceType, serviceFactory);
 			}
 		}
 
-		public readonly Dictionary<string, List<RestPath>> RestPathMap = new Dictionary<string, List<RestPath>>();
-
-		public void RegisterRestPaths(Type requestType)
-		{
-			var attrs = requestType.GetCustomAttributes(typeof(RestServiceAttribute), true);
-			foreach (RestServiceAttribute attr in attrs)
-			{
-				var restPath = new RestPath(requestType, attr.Path, attr.Verbs, attr.DefaultContentType);
-				if (!restPath.IsValid)
-					throw new NotSupportedException(string.Format(
-						"RestPath '{0}' on Type '{1}' is not Valid", attr.Path, requestType.Name));
-
-				RegisterRestPath(restPath);
-			}
-		}
-
-		public void RegisterRestPath(RestPath restPath)
-		{
-			List<RestPath> pathsAtFirstMatch;
-			if (!RestPathMap.TryGetValue(restPath.FirstMatchHashKey, out pathsAtFirstMatch))
-			{
-				pathsAtFirstMatch = new List<RestPath>();
-				RestPathMap[restPath.FirstMatchHashKey] = pathsAtFirstMatch;
-			}
-			pathsAtFirstMatch.Add(restPath);
-		}
-
-		public void AfterInit()
-		{
-			foreach (var restPath in this.routes.RestPaths)
-			{
-				RegisterRestPath(restPath);
-			}
-		}
-
-		public IRestPath GetRestPathForRequest(string httpMethod, string pathInfo)
-		{
-			var matchUsingPathParts = RestPath.GetPathPartsForMatching(pathInfo);
-
-			List<RestPath> firstMatches;
-
-			var yieldedHashMatches = RestPath.GetFirstMatchHashKeys(matchUsingPathParts);
-			foreach (var potentialHashMatch in yieldedHashMatches)
-			{
-				if (!this.RestPathMap.TryGetValue(potentialHashMatch, out firstMatches)) continue;
-
-				foreach (var restPath in firstMatches)
-				{
-					if (restPath.IsMatch(httpMethod, matchUsingPathParts)) return restPath;
-				}
-			}
-
-			var yieldedWildcardMatches = RestPath.GetFirstMatchWildCardHashKeys(matchUsingPathParts);
-			foreach (var potentialHashMatch in yieldedWildcardMatches)
-			{
-				if (!this.RestPathMap.TryGetValue(potentialHashMatch, out firstMatches)) continue;
-
-				foreach (var restPath in firstMatches)
-				{
-					if (restPath.IsMatch(httpMethod, matchUsingPathParts)) return restPath;
-				}
-			}
-
-			return null;
-		}
-
-		internal class TypeFactoryWrapper : ITypeFactory
-		{
-			private readonly Func<Type, object> typeCreator;
-
-			public TypeFactoryWrapper(Func<Type, object> typeCreator)
-			{
-				this.typeCreator = typeCreator;
-			}
-
-			public object CreateInstance(Type type)
-			{
-				return typeCreator(type);
-			}
-		}
-
-		public void Register(Type requestType, Type serviceType)
-		{
-			var handlerFactoryFn = Expression.Lambda<Func<Type, object>>
-				(
-					Expression.New(serviceType),
-					Expression.Parameter(typeof(Type), "serviceType")
-				).Compile();
-
-			Register(requestType, serviceType, new TypeFactoryWrapper(handlerFactoryFn));
-		}
-
-		public void Register(Type requestType, Type serviceType, Func<Type, object> handlerFactoryFn)
-		{
-			Register(requestType, serviceType, new TypeFactoryWrapper(handlerFactoryFn));
-		}
-
-		public void Register(Type requestType, Type serviceType, ITypeFactory serviceFactoryFn)
+		public void RegisterService(Type requestType, Type serviceType, ITypeFactory serviceFactory)
 		{
 			var typeFactoryFn = CallServiceExecuteGeneric(requestType, serviceType);
 
 			Func<IRequestContext, object, object> handlerFn = (requestContext, dto) =>
 			{
-				var service = serviceFactoryFn.CreateInstance(serviceType);
+				var service = serviceFactory.CreateInstance(serviceType);
                 using (service as IDisposable) // using is happy if this expression evals to null
                 {
                     InjectRequestContext(service, requestContext);
@@ -257,6 +116,11 @@ namespace ServiceStack.ServiceHost
                 }
 			};
 
+			this.RegisterService(requestType, serviceType, handlerFn);
+		}
+
+		private void RegisterService(Type requestType, Type serviceType, Func<IRequestContext, object, object> handlerFn)
+		{
 			try
 			{
 				requestExecMap.Add(requestType, handlerFn);
@@ -268,10 +132,30 @@ namespace ServiceStack.ServiceHost
 					serviceType.FullName, requestType.Name));
 			}
 
-			var serviceAttrs = requestType.GetCustomAttributes(typeof(ServiceAttribute), false);
-			if (serviceAttrs.Length > 0)
+			EndpointHost.RestController.RegisterRestPaths(requestType);
+			this.ServiceTypes.Add(serviceType);
+
+			this.RequestServiceTypeMap[requestType] = serviceType;
+			this.AllOperationTypes.Add(requestType);
+			this.OperationTypes.Add(requestType);
+
+			var responseTypeName = requestType.FullName + ResponseDtoSuffix;
+			var responseType = AssemblyUtils.FindType(responseTypeName);
+			if (responseType != null)
 			{
-				requestServiceAttrs.Add(requestType, (ServiceAttribute)serviceAttrs[0]);
+				this.ResponseServiceTypeMap[responseType] = serviceType;
+				this.AllOperationTypes.Add(responseType);
+				this.OperationTypes.Add(responseType);
+			}
+
+			if (typeof(IRequiresRequestStream).IsAssignableFrom(requestType))
+			{
+				this.RequestTypeFactoryMap[requestType] = httpReq =>
+				{
+					var rawReq = (IRequiresRequestStream)requestType.CreateInstance();
+					rawReq.RequestStream = httpReq.InputStream;
+					return rawReq;
+				};
 			}
 		}
 
@@ -325,21 +209,9 @@ namespace ServiceStack.ServiceHost
 			}
 		}
 
-		public object Execute(object dto)
-		{
-			return Execute(dto, null);
-		}
-
-		public object Execute(object request, IRequestContext requestContext)
+		public object Execute(object request, IRequestContext requestContext = null)
 		{
 			var requestType = request.GetType();
-
-			if (EnableAccessRestrictions)
-			{
-				AssertServiceRestrictions(requestType,
-					requestContext != null ? requestContext.EndpointAttributes : EndpointAttributes.None);
-			}
-
 			var handlerFn = GetService(requestType);
 			return handlerFn(requestContext, request);
 		}
@@ -354,49 +226,6 @@ namespace ServiceStack.ServiceHost
 			}
 
 			return handlerFn;
-		}
-
-		public object ExecuteText(string requestXml, Type requestType, IRequestContext requestContext)
-		{
-			var request = DataContractDeserializer.Instance.Parse(requestXml, requestType);
-			var response = Execute(request, requestContext);
-			var responseXml = DataContractSerializer.Instance.Parse(response);
-			return responseXml;
-		}
-
-		public void AssertServiceRestrictions(Type requestType, EndpointAttributes actualAttributes)
-		{
-			ServiceAttribute serviceAttr;
-			var hasNoAccessRestrictions = !requestServiceAttrs.TryGetValue(requestType, out serviceAttr)
-				|| serviceAttr.HasNoAccessRestrictions;
-
-			if (hasNoAccessRestrictions)
-			{
-				return;
-			}
-
-			var failedScenarios = new StringBuilder();
-			foreach (var requiredScenario in serviceAttr.RestrictAccessToScenarios)
-			{
-				var allServiceRestrictionsMet = (requiredScenario & actualAttributes) == actualAttributes;
-				if (allServiceRestrictionsMet)
-				{
-					return;
-				}
-
-				var passed = requiredScenario & actualAttributes;
-				var failed = requiredScenario & ~(passed);
-
-				failedScenarios.AppendFormat("\n -[{0}]", failed);
-			}
-
-			var internalDebugMsg = (EndpointAttributes.InternalNetworkAccess & actualAttributes) != 0
-				? "\n Unauthorized call was made from: " + actualAttributes
-				: "";
-
-			throw new UnauthorizedAccessException(
-				string.Format("Could not execute service '{0}', The following restrictions were not met: '{1}'" + internalDebugMsg,
-					requestType.Name, failedScenarios));
 		}
 	}
 

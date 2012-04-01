@@ -41,10 +41,11 @@ namespace ServiceStack.WebHost.Endpoints
 				return EndpointHost.Config.ServiceController;
 			}
 		}
-		
+
+		private ServiceRoutes routes = new ServiceRoutes();
 		public IServiceRoutes Routes
 		{
-			get { return EndpointHost.Config.ServiceController.Routes; }
+			get { return this.routes; }
 		}
 
 		public Container Container
@@ -77,6 +78,7 @@ namespace ServiceStack.WebHost.Endpoints
 			}
 
 			EndpointHost.AfterInit();
+			EndpointHost.RestController.RegisterRestPaths(this.routes.RestPaths);
 
 			if (serviceManager != null)
 			{
@@ -97,8 +99,6 @@ namespace ServiceStack.WebHost.Endpoints
 
 			if (config.ServiceManager == null)
 				config.ServiceManager = EndpointHostConfig.Instance.ServiceManager;
-
-			config.ServiceManager.ServiceController.EnableAccessRestrictions = config.EnableAccessRestrictions;
 
 			EndpointHost.Config = config;
 		}

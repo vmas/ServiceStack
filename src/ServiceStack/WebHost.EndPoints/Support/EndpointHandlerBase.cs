@@ -192,8 +192,6 @@ namespace ServiceStack.WebHost.Endpoints.Support
 
 		public EndpointAttributes GetEndpointAttributes(System.ServiceModel.OperationContext operationContext)
 		{
-			if (!EndpointHost.Config.EnableAccessRestrictions) return default(EndpointAttributes);
-
 			var portRestrictions = default(EndpointAttributes);
 			var ipAddress = GetIpAddress(operationContext);
 

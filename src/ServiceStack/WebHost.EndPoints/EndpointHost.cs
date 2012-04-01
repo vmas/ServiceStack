@@ -46,6 +46,8 @@ namespace ServiceStack.WebHost.Endpoints
 				new CsvFormat(),
 				new MarkdownFormat(),
 			};
+
+			RestController = new RestController();
 		}
 		
 		// Pre user config
@@ -121,7 +123,7 @@ namespace ServiceStack.WebHost.Endpoints
 			else if (string.IsNullOrEmpty(config.DefaultContentType))
 				config.DefaultContentType = ContentType.Json;
 
-			config.ServiceManager.AfterInit();
+			config.ServiceManager.ReloadServiceOperations();
 			ServiceManager = config.ServiceManager; //reset operations
 		}
 
@@ -151,6 +153,8 @@ namespace ServiceStack.WebHost.Endpoints
 				AllServiceOperations = value.AllServiceOperations;
 			}
 		}
+
+		public static IRestController RestController { get; set; }
 
 		public static class UserConfig
 		{

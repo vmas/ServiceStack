@@ -50,11 +50,11 @@ namespace ServiceStack.WebHost.Endpoints
 			var serviceStackHandler = handler as IServiceStackHttpHandler;
 			if (serviceStackHandler != null)
 			{
-				var restHandler = serviceStackHandler as RestHandler;
-				if (restHandler != null)
-				{
-					httpReq.OperationName = operationName = restHandler.RestPath.RequestType.Name;
-				}
+				//var restHandler = serviceStackHandler as RestHandler;
+				//if (restHandler != null)
+				//{
+				//    httpReq.OperationName = operationName = restHandler.RestPath.RequestType.Name;
+				//}
 				serviceStackHandler.ProcessRequest(httpReq, httpRes, operationName);
 				httpRes.Close();
 				return;

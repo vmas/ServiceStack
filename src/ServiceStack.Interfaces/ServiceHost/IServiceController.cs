@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ServiceStack.Configuration;
 
 namespace ServiceStack.ServiceHost
 {
@@ -9,6 +10,13 @@ namespace ServiceStack.ServiceHost
 	/// <value>The operation types.</value>
 	public interface IServiceController
 	{
+		Dictionary<Type, Type> RequestServiceTypeMap { get; set; }
+		Dictionary<Type, Type> ResponseServiceTypeMap { get; set; }
+
+		Dictionary<Type, Func<IHttpRequest, object>> RequestTypeFactoryMap { get; set; }
+
+		HashSet<Type> ServiceTypes { get; }
+
 		/// <summary>
 		/// Returns a list of operation types available in this service
 		/// </summary>
@@ -22,24 +30,17 @@ namespace ServiceStack.ServiceHost
 		IList<Type> AllOperationTypes { get; }
 
 		/// <summary>
-		/// Returns the first matching RestPath
-		/// </summary>
-		/// <param name="httpMethod"></param>
-		/// <param name="pathInfo"></param>
-		/// <returns></returns>
-		IRestPath GetRestPathForRequest(string httpMethod, string pathInfo);
-
-		/// <summary>
-		/// Allow the registration of custom routes
-		/// </summary>
-		IServiceRoutes Routes { get; }
-
-		/// <summary>
 		/// Executes the DTO request under the supplied requestContext.
 		/// </summary>
 		/// <param name="request"></param>
 		/// <param name="requestContext"></param>
 		/// <returns></returns>
-		object Execute(object request, IRequestContext requestContext);
+		object Execute(object request, IRequestContext requestContext = null);
+
+		void RegisterServices(ITypeFactory serviceFactory, IEnumerable<Type> serviceTypes);
+		void RegisterService<TReq>(Func<IService<TReq>> serviceFactoryFn);
+		void RegisterService(ITypeFactory serviceFactory, Type serviceType);
+
+		Func<IRequestContext, object, object> GetService(Type requestType);
 	}
 }

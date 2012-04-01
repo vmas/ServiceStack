@@ -6,6 +6,21 @@ using ServiceStack.ServiceHost.Tests.Support;
 
 namespace ServiceStack.ServiceHost.Tests
 {
+	public class TypeFactoryWrapper : ITypeFactory
+	{
+		private readonly Func<Type, object> typeCreator;
+
+		public TypeFactoryWrapper(Func<Type, object> typeCreator)
+		{
+			this.typeCreator = typeCreator;
+		}
+
+		public object CreateInstance(Type type)
+		{
+			return typeCreator(type);
+		}
+	}
+
 	[Ignore("Perf Test Only")]
 	[TestFixture]
 	public class PerfTests
@@ -16,7 +31,7 @@ namespace ServiceStack.ServiceHost.Tests
 		[SetUp]
 		public void OnBeforeEachTest()
 		{
-			serviceController = new ServiceController(null);
+			serviceController = new ServiceController();
 		}
 
 		[Test]
@@ -54,7 +69,7 @@ namespace ServiceStack.ServiceHost.Tests
 		[Test]
 		public void With_ServiceStackFunq()
 		{
-			serviceController.Register(() => new BasicService());
+			serviceController.RegisterService(typeof(BasicRequest), typeof(BasicService), new TypeFactoryWrapper(t => new BasicService()));
 			var request = new BasicRequest();
 
 			Console.WriteLine("With_TypedArguments(): {0}", Measure(() => serviceController.Execute(request), Times));
@@ -63,7 +78,7 @@ namespace ServiceStack.ServiceHost.Tests
 		[Test]
 		public void With_TypedArguments()
 		{
-			serviceController.Register(() => new BasicService());
+			serviceController.RegisterService(() => new BasicService());
 			var request = new BasicRequest();
 
 			Console.WriteLine("With_TypedArguments(): {0}", Measure(() => serviceController.Execute(request), Times));
@@ -74,7 +89,7 @@ namespace ServiceStack.ServiceHost.Tests
 		{
 			var requestType = typeof(BasicRequest);
 
-			serviceController.Register(requestType, typeof(BasicService));
+			serviceController.RegisterService(requestType, typeof(BasicService), new TypeFactoryWrapper(t => new BasicService()));
 			var request = new BasicRequest();
 
 			Console.WriteLine("With_Expressions(): {0}", Measure(() => serviceController.Execute(request), Times));
@@ -85,7 +100,7 @@ namespace ServiceStack.ServiceHost.Tests
 		{
 			var requestType = typeof(BasicRequest);
 
-			serviceController.Register(requestType, typeof(BasicService), type => new BasicService());
+			serviceController.RegisterService(requestType, typeof(BasicService), new TypeFactoryWrapper(type => new BasicService()));
 
 			var request = new BasicRequest();
 
@@ -104,7 +119,7 @@ namespace ServiceStack.ServiceHost.Tests
 		public void With_TypeFactory()
 		{
 			var requestType = typeof(BasicRequest);
-			serviceController.Register(requestType, typeof(BasicService), new BasicServiceTypeFactory());
+			serviceController.RegisterService(requestType, typeof(BasicService), new TypeFactoryWrapper(type => new BasicServiceTypeFactory()));
 
 			var request = new BasicRequest();
 

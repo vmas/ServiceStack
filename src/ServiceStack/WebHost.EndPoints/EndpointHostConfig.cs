@@ -55,7 +55,6 @@ namespace ServiceStack.WebHost.Endpoints
         <li><a href=""{0}/UsingRestAndXml.cs"">Using Rest and XML</a></li>
     </ul>".Fmt(DefaultUsageExamplesBaseUri),
 						LogFactory = new NullLogFactory(),
-						EnableAccessRestrictions = true,
 						WsdlServiceNamespace = "http://schemas.servicestack.net/types",
 						WebHostPhysicalPath = "~".MapServerPath(),
 						ServiceStackHandlerFactoryPath = ServiceStackPath,
@@ -125,10 +124,8 @@ namespace ServiceStack.WebHost.Endpoints
 			//Get a copy of the singleton already partially configured
 			this.MetadataPageBodyHtml = instance.MetadataPageBodyHtml;
 			this.MetadataOperationPageBodyHtml = instance.MetadataOperationPageBodyHtml;
-			this.EnableAccessRestrictions = instance.EnableAccessRestrictions;
 			this.ServiceEndpointsMetadataConfig = instance.ServiceEndpointsMetadataConfig;
 			this.LogFactory = instance.LogFactory;
-			this.EnableAccessRestrictions = instance.EnableAccessRestrictions;
 			this.WsdlServiceNamespace = instance.WsdlServiceNamespace;
 			this.WebHostUrl = instance.WebHostUrl;
 			this.WebHostPhysicalPath = instance.WebHostPhysicalPath;
@@ -276,7 +273,6 @@ namespace ServiceStack.WebHost.Endpoints
 		public string WsdlServiceNamespace { get; set; }
 		public ServiceEndpointsMetadataConfig ServiceEndpointsMetadataConfig { get; set; }
 		public ILogFactory LogFactory { get; set; }
-		public bool EnableAccessRestrictions { get; set; }
 		public bool UseBclJsonSerializers { get; set; }
 		public Dictionary<string, string> GlobalResponseHeaders { get; set; }
 		public Feature EnableFeatures { get; set; }

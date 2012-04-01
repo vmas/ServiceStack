@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual C# Express 2010
+# Visual Studio 2010
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{4EBD29DD-21A1-47B5-80DB-F9D58C91BED5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.Common.Tests", "..\tests\ServiceStack.Common.Tests\ServiceStack.Common.Tests.csproj", "{3FA9197A-462D-44CC-9AB3-61AF414D0B45}"
@@ -42,7 +42,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.FluentValidati
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.Plugins.ProtoBuf", "ServiceStack.Plugins.ProtoBuf\ServiceStack.Plugins.ProtoBuf.csproj", "{EF36A253-C53F-4BF3-B0EC-4D29211FA67D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.Plugins.Tasks", "ServiceStack.Plugins.Tasks\ServiceStack.Plugins.Tasks.csproj", "{02DD1DA3-19A9-44FC-8B15-D99A1FB33B1B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.Plugins.Tasks", "ServiceStack.Plugins.Tasks\ServiceStack.Plugins.Tasks.csproj", "{77A5BE62-9BA1-4704-ABDA-1CBA41041ABF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.Tests", "..\tests\ServiceStack.Tests\ServiceStack.Tests.csproj", "{DF2111C9-C5A1-46B8-87A2-3D67456D4DAD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -135,12 +137,18 @@ Global
 		{EF36A253-C53F-4BF3-B0EC-4D29211FA67D}.MonoTouch|Any CPU.Build.0 = Release|Any CPU
 		{EF36A253-C53F-4BF3-B0EC-4D29211FA67D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EF36A253-C53F-4BF3-B0EC-4D29211FA67D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{02DD1DA3-19A9-44FC-8B15-D99A1FB33B1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{02DD1DA3-19A9-44FC-8B15-D99A1FB33B1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{02DD1DA3-19A9-44FC-8B15-D99A1FB33B1B}.MonoTouch|Any CPU.ActiveCfg = Release|Any CPU
-		{02DD1DA3-19A9-44FC-8B15-D99A1FB33B1B}.MonoTouch|Any CPU.Build.0 = Release|Any CPU
-		{02DD1DA3-19A9-44FC-8B15-D99A1FB33B1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{02DD1DA3-19A9-44FC-8B15-D99A1FB33B1B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77A5BE62-9BA1-4704-ABDA-1CBA41041ABF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77A5BE62-9BA1-4704-ABDA-1CBA41041ABF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77A5BE62-9BA1-4704-ABDA-1CBA41041ABF}.MonoTouch|Any CPU.ActiveCfg = Release|Any CPU
+		{77A5BE62-9BA1-4704-ABDA-1CBA41041ABF}.MonoTouch|Any CPU.Build.0 = Release|Any CPU
+		{77A5BE62-9BA1-4704-ABDA-1CBA41041ABF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77A5BE62-9BA1-4704-ABDA-1CBA41041ABF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF2111C9-C5A1-46B8-87A2-3D67456D4DAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF2111C9-C5A1-46B8-87A2-3D67456D4DAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF2111C9-C5A1-46B8-87A2-3D67456D4DAD}.MonoTouch|Any CPU.ActiveCfg = Release|Any CPU
+		{DF2111C9-C5A1-46B8-87A2-3D67456D4DAD}.MonoTouch|Any CPU.Build.0 = Release|Any CPU
+		{DF2111C9-C5A1-46B8-87A2-3D67456D4DAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF2111C9-C5A1-46B8-87A2-3D67456D4DAD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

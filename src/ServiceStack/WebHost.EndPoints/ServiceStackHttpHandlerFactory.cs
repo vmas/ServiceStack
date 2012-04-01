@@ -326,9 +326,8 @@ namespace ServiceStack.WebHost.Endpoints
 				return ShouldAllow(requestPath) ? StaticFileHandler : ForbiddenHttpHandler;
 			}
 
-			var restPath = RestHandler.FindMatchingRestPath(httpMethod, pathInfo);
+			var restPath = EndpointHost.RestController.GetRestPathForRequest(httpMethod, pathInfo);
 			if (restPath != null)
-				//return new RestHandler { RestPath = restPath, RequestName = restPath.RequestType.Name };
 				return new AsyncRestHandler(restPath) { RequestName = restPath.RequestType.Name };
 
 			return GetCatchAllHandlerIfAny(httpMethod, pathInfo, filePath);

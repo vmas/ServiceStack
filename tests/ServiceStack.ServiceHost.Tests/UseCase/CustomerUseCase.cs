@@ -34,7 +34,7 @@ namespace ServiceStack.ServiceHost.Tests.UseCase
 		[SetUp]
 		public void OnBeforeEachTest()
 		{
-			serviceController = new ServiceController(null);
+			serviceController = new ServiceController();
 		}
 
 		[Test]
@@ -123,8 +123,8 @@ namespace ServiceStack.ServiceHost.Tests.UseCase
 
 		private static void RegisterServices(ServiceController serviceController, ITypeFactory typeFactory)
 		{
-			serviceController.Register(typeof(StoreCustomers), typeof(StoreCustomersService), typeFactory);
-			serviceController.Register(typeof(GetCustomer), typeof(GetCustomerService), typeFactory);
+			serviceController.RegisterService(typeof(StoreCustomers), typeof(StoreCustomersService), typeFactory);
+			serviceController.RegisterService(typeof(GetCustomer), typeof(GetCustomerService), typeFactory);
 		}
 
 		public static ITypeFactory GetNativeFunqTypeFactory()
