@@ -29,9 +29,9 @@ namespace ServiceStack.WebHost.Endpoints.Support.Tests
 		{
 			var handler = new TestHandler();
 			var request = new Mock<IHttpRequest>();
-			request.Expect(req => req.UserHostAddress).Returns(format);
-			request.Expect(req => req.IsSecureConnection).Returns(false);
-			request.Expect(req => req.HttpMethod).Returns("GET");
+			request.Setup(req => req.UserHostAddress).Returns(format);
+			request.Setup(req => req.IsSecureConnection).Returns(false);
+			request.Setup(req => req.HttpMethod).Returns("GET");
 
 			Assert.AreEqual(expected | EndpointAttributes.HttpGet | EndpointAttributes.InSecure, EndpointHandlerBase.GetEndpointAttributes(request.Object));
 		}

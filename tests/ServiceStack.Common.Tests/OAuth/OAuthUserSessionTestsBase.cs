@@ -136,9 +136,9 @@ namespace ServiceStack.Common.Tests.OAuth
 			}).Register(null);
 
 			mockService = new Mock<IServiceBase>();
-			mockService.Expect(x => x.TryResolve<IUserAuthRepository>()).Returns(userAuthRepository);
+			mockService.Setup(x => x.TryResolve<IUserAuthRepository>()).Returns(userAuthRepository);
 			requestContext = new MockRequestContext();
-			mockService.Expect(x => x.RequestContext).Returns(requestContext);
+			mockService.Setup(x => x.RequestContext).Returns(requestContext);
 			service = mockService.Object;
 
 			registrationDto = new Registration {
