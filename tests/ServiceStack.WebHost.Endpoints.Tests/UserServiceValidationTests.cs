@@ -105,7 +105,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 
         protected static IServiceClient UnitTestServiceClient()
         {
-            EndpointHandlerBase.ServiceManager = new ServiceManager(true, typeof(SecureService).Assembly);
+            EndpointHandlerBase.ServiceManager = new ServiceManager(typeof(SecureService).Assembly);
             return new DirectServiceClient(EndpointHandlerBase.ServiceManager);
         }
 

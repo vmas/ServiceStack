@@ -290,7 +290,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 		{
 			protected override IServiceClient CreateNewServiceClient()
 			{
-				EndpointHandlerBase.ServiceManager = new ServiceManager(true, typeof(SecureService).Assembly);
+				EndpointHandlerBase.ServiceManager = new ServiceManager(typeof(SecureService).Assembly);
 				return new DirectServiceClient(EndpointHandlerBase.ServiceManager);
 			}
 

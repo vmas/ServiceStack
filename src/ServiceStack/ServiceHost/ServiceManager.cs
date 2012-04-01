@@ -20,27 +20,41 @@ namespace ServiceStack.ServiceHost
 		public ServiceOperations ServiceOperations { get; set; }
 		public ServiceOperations AllServiceOperations { get; set; }
 
-		private Assembly[] assembliesWithServices;
+		private ContainerResolveCache typeFactory;
+
+		public ServiceManager()
+		{
+			this.Container = new Container();
+			this.ServiceController = new ServiceController();
+			this.typeFactory = new ContainerResolveCache(this.Container);
+		}
 
 		public ServiceManager(params Assembly[] assembliesWithServices)
+			: this()
 		{
 			if (assembliesWithServices == null || assembliesWithServices.Length == 0)
 				throw new ArgumentException(
 					"No Assemblies provided in your AppHost's base constructor.\n"
 					+ "To register your services, please provide the assemblies where your web services are defined.");
 
-			this.assembliesWithServices = assembliesWithServices;
-			this.Container = new Container();
-			this.ServiceController = new ServiceController();
+			var serviceTypes = this.GetAssemblyTypes(assembliesWithServices);
+			this.ServiceController.RegisterServices(typeFactory, serviceTypes);
+			this.Container.RegisterAutoWiredTypes(serviceTypes);
+
+			ReloadServiceOperations();
 		}
 
-		public ServiceManager(bool autoInitialize, params Assembly[] assembliesWithServices)
-			: this(assembliesWithServices)
+		/// <summary>
+		/// Inject alternative container and strategy for resolving Service Types
+		/// </summary>
+		public ServiceManager(Container container, IServiceController serviceController)
 		{
-			if (autoInitialize)
-			{
-				this.Init();
-			}
+			if (serviceController == null)
+				throw new ArgumentNullException("serviceController");
+
+			this.Container = container ?? new Container();
+			this.ServiceController = serviceController;
+			this.typeFactory = new ContainerResolveCache(this.Container);
 		}
 
 		private List<Type> GetAssemblyTypes(Assembly[] assembliesWithServices)
@@ -68,34 +82,6 @@ namespace ServiceStack.ServiceHost
 				Log.Error(msg, ex);
 				throw new Exception(msg, ex);
 			}
-		}
-
-		/// <summary>
-		/// Inject alternative container and strategy for resolving Service Types
-		/// </summary>
-		public ServiceManager(Container container, IServiceController serviceController)
-		{
-			if (serviceController == null)
-				throw new ArgumentNullException("serviceController");
-
-			this.Container = container ?? new Container();
-			this.ServiceController = serviceController;
-		}
-
-		private ContainerResolveCache typeFactory;
-
-		public void Init()
-		{
-			typeFactory = new ContainerResolveCache(this.Container);
-			if (assembliesWithServices != null)
-			{
-				var serviceTypes = this.GetAssemblyTypes(assembliesWithServices);
-				this.ServiceController.RegisterServices(typeFactory, serviceTypes);
-			}
-
-			ReloadServiceOperations();
-
-			this.Container.RegisterAutoWiredTypes(this.ServiceController.ServiceTypes);
 		}
 
 		public void ReloadServiceOperations()

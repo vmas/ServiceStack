@@ -26,7 +26,7 @@ namespace ServiceStack.ServiceInterface.Testing
 
 			this.Config = EndpointHost.Config = new EndpointHostConfig(
 				GetType().Name,
-				new ServiceManager(true, serviceAssemblies));
+				new ServiceManager(serviceAssemblies));
 
 			this.ContentTypeFilters = new HttpResponseFilter();
 			this.RequestFilters = new List<Action<IHttpRequest, IHttpResponse, object>>();

@@ -135,7 +135,6 @@
     <Compile Include="IoCTests.cs" />
     <Compile Include="PerfTests.cs" />
     <Compile Include="RequestContextExtensionsTest.cs" />
-    <Compile Include="RestPathTests.cs" />
     <Compile Include="Routes\SimpleRestServices.cs" />
     <Compile Include="Routes\ServiceRoutesTests.cs" />
     <Compile Include="ServiceControllerPerfTests.cs" />

@@ -69,7 +69,6 @@ namespace ServiceStack.WebHost.Endpoints.Support
 			var serviceManager = EndpointHost.Config.ServiceManager;
 			if (serviceManager != null)
 			{
-				serviceManager.Init();
 				Configure(EndpointHost.Config.ServiceManager.Container);
 			}
 			else

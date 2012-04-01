@@ -10,7 +10,6 @@ namespace ServiceStack.ServiceHost.Tests
 		public void Can_register_all_services_in_an_assembly()
 		{
 			var serviceManager = new ServiceManager(typeof(BasicService).Assembly);
-			serviceManager.Init();
 
 			var container = serviceManager.Container;
 			container.Register<IFoo>(c => new Foo());
@@ -29,7 +28,6 @@ namespace ServiceStack.ServiceHost.Tests
 		public void Can_override_service_creation_with_custom_implementation()
 		{
 			var serviceManager = new ServiceManager(typeof(BasicService).Assembly);
-			serviceManager.Init();
 
 			var container = serviceManager.Container;
 			container.Register<IFoo>(c => new Foo());
@@ -61,7 +59,6 @@ namespace ServiceStack.ServiceHost.Tests
 		public void Can_inject_RequestContext_for_IRequiresRequestContext_services()
 		{
 			var serviceManager = new ServiceManager(typeof(RequiresContextService).Assembly);
-			serviceManager.Init();
 
 			var serviceController = serviceManager.ServiceController;
 
@@ -76,7 +73,6 @@ namespace ServiceStack.ServiceHost.Tests
         public void Generic_Service_should_not_get_registered_with_generic_parameter()
         {
             var serviceManager = new ServiceManager(typeof(GenericService<>).Assembly);
-            serviceManager.Init();
 
             // We should definately *not* be able to call the generic service with a "T" request object :)
             var serviceController = serviceManager.ServiceController;
@@ -93,7 +89,6 @@ namespace ServiceStack.ServiceHost.Tests
             var serviceManager = new ServiceManager(null, new ServiceController());
 			serviceManager.RegisterService(typeof(GenericService<>).MakeGenericType(new[] { typeof(Generic3<>) }));
 
-            serviceManager.Init();
 
             var serviceController = serviceManager.ServiceController;
             var exception = Assert.Throws<System.NotImplementedException>(() => serviceController.GetService(typeof(Generic3<>)));
@@ -112,7 +107,6 @@ namespace ServiceStack.ServiceHost.Tests
 			// GenericService<Generic3<double>> created through reflection
 			serviceManager.RegisterService(typeof(GenericService<>).MakeGenericType(new[] { typeof(Generic3<>).MakeGenericType(new[] { typeof(double) }) }));
 
-            serviceManager.Init();
             var serviceController = serviceManager.ServiceController;
 
             Assert.AreEqual(typeof(Generic1).FullName, ((Generic1Response)serviceController.Execute(new Generic1())).Data);
