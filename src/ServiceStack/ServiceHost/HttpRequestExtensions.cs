@@ -200,28 +200,33 @@ namespace ServiceStack.ServiceHost
 			return httpReq == null ? null : httpReq.QueryString["callback"];
 		}
 
-		public static object GetRequestDto(this IHttpRequest httpReq, Type requestType, string contentType = null, ServiceManager serviceManager = null)
+		public static object GetRequestDto(this IHttpRequest httpReq, Type requestType, string contentType = null, Func<object, object> populateRequestDtoFn = null)
 		{
 			try
 			{
 				if (contentType == null)
 					contentType = httpReq.ContentType;
 
+				//Use custom request binder if registered
 				Func<IHttpRequest, object> requestFactoryFn;
-				(serviceManager ?? EndpointHost.ServiceManager).ServiceController.RequestTypeFactoryMap.TryGetValue(requestType, out requestFactoryFn);
+				EndpointHost.ServiceManager.ServiceController.RequestTypeFactoryMap.TryGetValue(requestType, out requestFactoryFn);
 				if (requestFactoryFn != null)
-				{
 					return requestFactoryFn(httpReq);
-				}
 
+				object requestDto = null;
 				if (!string.IsNullOrEmpty(contentType) && httpReq.ContentLength > 0)
 				{
+					//Get deserializer for content tpye (eg JSON)
 					var deserializer = EndpointHost.AppHost.ContentTypeFilters.GetStreamDeserializer(contentType);
 					if (deserializer != null)
-					{
-						return deserializer(requestType, httpReq.InputStream);
-					}
+						requestDto = deserializer(requestType, httpReq.InputStream);
 				}
+
+				//Enable custom deserialization logic for specific endpoints (eg REST) 
+				if (populateRequestDtoFn != null)
+					return populateRequestDtoFn(requestDto);
+
+				return requestDto;
 			}
 			catch (Exception ex)
 			{
@@ -229,7 +234,6 @@ namespace ServiceStack.ServiceHost
 					.Fmt(contentType, requestType, ex);
 				throw new SerializationException(msg);
 			}
-			return null;
 		}
 
 

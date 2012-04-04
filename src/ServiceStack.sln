@@ -44,6 +44,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.Plugins.Tasks"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.Tests", "..\tests\ServiceStack.Tests\ServiceStack.Tests.csproj", "{DF2111C9-C5A1-46B8-87A2-3D67456D4DAD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.Plugins.Tasks.Tests", "..\tests\ServiceStack.Plugins.Tasks.Tests\ServiceStack.Plugins.Tasks.Tests.csproj", "{3058BE7A-62FF-4E83-9A9A-B49D78BF9C17}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -141,6 +143,12 @@ Global
 		{DF2111C9-C5A1-46B8-87A2-3D67456D4DAD}.MonoTouch|Any CPU.Build.0 = Release|Any CPU
 		{DF2111C9-C5A1-46B8-87A2-3D67456D4DAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DF2111C9-C5A1-46B8-87A2-3D67456D4DAD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3058BE7A-62FF-4E83-9A9A-B49D78BF9C17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3058BE7A-62FF-4E83-9A9A-B49D78BF9C17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3058BE7A-62FF-4E83-9A9A-B49D78BF9C17}.MonoTouch|Any CPU.ActiveCfg = Release|Any CPU
+		{3058BE7A-62FF-4E83-9A9A-B49D78BF9C17}.MonoTouch|Any CPU.Build.0 = Release|Any CPU
+		{3058BE7A-62FF-4E83-9A9A-B49D78BF9C17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3058BE7A-62FF-4E83-9A9A-B49D78BF9C17}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

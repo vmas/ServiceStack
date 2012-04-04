@@ -24,11 +24,15 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 
 		private object GetRequestDto(IHttpRequest httpReq, IRestPath restPath)
 		{
+			var requestType = restPath.RequestType;
 			using (Profiler.Current.Step("Deserialize Request"))
 			{
 				var requestParams = httpReq.GetRequestParams();
-				var requestDto = httpReq.GetRequestDto(restPath.RequestType, httpReq.ContentType);
-				return restPath.CreateRequest(httpReq.PathInfo, requestParams, requestDto);
+				return httpReq.GetRequestDto(
+					restPath.RequestType, 
+					httpReq.ContentType,
+					dto => restPath.CreateRequest(httpReq.PathInfo, requestParams, dto) //Custom deserialization logic for REST endpoint
+				);
 			}
 		}
 

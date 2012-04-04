@@ -39,7 +39,7 @@ namespace ServiceStack.ServiceHost
 
 			var serviceTypes = this.GetAssemblyTypes(assembliesWithServices);
 			this.ServiceController.RegisterServices(typeFactory, serviceTypes);
-			this.Container.RegisterAutoWiredTypes(serviceTypes);
+			this.Container.RegisterAutoWiredTypes(this.ServiceController.ServiceTypes);
 
 			ReloadServiceOperations();
 		}
