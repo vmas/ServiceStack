@@ -8,6 +8,7 @@ using ServiceStack.Logging;
 using ServiceStack.ServiceModel.Serialization;
 using ServiceStack.Text;
 using ServiceStack.WebHost.Endpoints;
+using ServiceStack.WebHost.Endpoints.Support;
 
 namespace ServiceStack.ServiceHost
 {
@@ -24,6 +25,7 @@ namespace ServiceStack.ServiceHost
 			this.AllOperationTypes = new List<Type>();
 			this.OperationTypes = new List<Type>();
 			this.RequestTypeFactoryMap = new Dictionary<Type, Func<IHttpRequest, object>>();
+			this.ResponseFactories = new List<Func<object, Action<IServiceResult>, IServiceResult>>();
 			this.ServiceTypes = new HashSet<Type>();
 		}
 
@@ -42,6 +44,8 @@ namespace ServiceStack.ServiceHost
 		public IList<Type> OperationTypes { get; protected set; }
 
 		public Dictionary<Type, Func<IHttpRequest, object>> RequestTypeFactoryMap { get; set; }
+
+		public List<Func<object, Action<IServiceResult>, IServiceResult>> ResponseFactories { get; set; }
 
 		public HashSet<Type> ServiceTypes { get; protected set; }
 
@@ -211,9 +215,29 @@ namespace ServiceStack.ServiceHost
 
 		public object Execute(object request, IRequestContext requestContext = null)
 		{
+			var serviceResult = this.ExecuteAsync(request, r => { }, requestContext);
+			return serviceResult.Result; //Blocking call
+		}
+
+		public IServiceResult ExecuteAsync(object request, Action<IServiceResult> callback, IRequestContext requestContext = null)
+		{
 			var requestType = request.GetType();
 			var handlerFn = GetService(requestType);
-			return handlerFn(requestContext, request);
+			var responseDto = handlerFn(requestContext, request);
+
+			if (responseDto != null)
+			{
+				foreach (var responseFactory in this.ResponseFactories)
+				{
+					var result = responseFactory(responseDto, callback);
+					if (result != null)
+						return result;
+				}
+			}
+
+			var serviceResult = new SyncServiceResult(responseDto);
+			callback(serviceResult);
+			return serviceResult;
 		}
 
 		public Func<IRequestContext, object, object> GetService(Type requestType)

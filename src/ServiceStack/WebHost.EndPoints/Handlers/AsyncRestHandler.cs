@@ -36,17 +36,6 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 			}
 		}
 
-		public IServiceResult ApplyResponseBinders(IHttpRequest req, IHttpResponse res, object responseDto, Action<IServiceResult> callback)
-		{
-			foreach (var converter in EndpointHost.ResponseBinders)
-			{
-				var result = converter.Convert(req, res, responseDto, callback);
-				if (result != null)
-					return result;
-			}
-			return null;
-		}
-
 		public override IServiceResult BeginProcessRequest(IHttpRequest req, IHttpResponse res, Action<IServiceResult> callback)
 		{
 			var responseContentType = EndpointHost.Config.DefaultContentType;
@@ -59,14 +48,7 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 				var requestDto = this.GetRequestDto(req, this.RestPath);
 				if (EndpointHost.ApplyRequestFilters(req, res, requestDto)) return this.CancelRequestProcessing(callback);
 
-				var responseDto = this.GetResponseDto(req, res, requestDto);
-
-				var convertedResponseDto = this.ApplyResponseBinders(req, res, responseDto, callback);
-				if (convertedResponseDto != null) return convertedResponseDto;
-
-				var serviceResult = new SyncServiceResult(responseDto);
-				callback(serviceResult);
-				return serviceResult;
+				return this.GetServiceResult(req, res, requestDto, callback);
 			}
 			catch (Exception ex)
 			{
@@ -82,12 +64,13 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 			return emptyServiceResult;
 		}
 
-		public object GetResponseDto(IHttpRequest httpReq, IHttpResponse httpRes, object request)
+		public IServiceResult GetServiceResult(IHttpRequest httpReq, IHttpResponse httpRes, object request, Action<IServiceResult> callback)
 		{
 			var requestContentType = ContentType.GetEndpointAttributes(httpReq.ResponseContentType);
 
 			var endpointAttributes = HandlerAttributes | requestContentType | EndpointHandlerBase.GetEndpointAttributes(httpReq);
-			return EndpointHost.ExecuteService(request, endpointAttributes, httpReq, httpRes);
+			var requestContext = new HttpRequestContext(httpReq, httpRes, request, endpointAttributes);
+			return EndpointHost.ServiceManager.ServiceController.ExecuteAsync(request, callback, requestContext);
 		}
 
 		public override void EndProcessRequest(IHttpRequest req, IHttpResponse res, IServiceResult result)

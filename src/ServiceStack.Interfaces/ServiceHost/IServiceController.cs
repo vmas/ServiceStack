@@ -15,6 +15,8 @@ namespace ServiceStack.ServiceHost
 
 		Dictionary<Type, Func<IHttpRequest, object>> RequestTypeFactoryMap { get; set; }
 
+		List<Func<object, Action<IServiceResult>, IServiceResult>> ResponseFactories { get; set; }
+
 		HashSet<Type> ServiceTypes { get; }
 
 		/// <summary>
@@ -36,6 +38,8 @@ namespace ServiceStack.ServiceHost
 		/// <param name="requestContext"></param>
 		/// <returns></returns>
 		object Execute(object request, IRequestContext requestContext = null);
+
+		IServiceResult ExecuteAsync(object request, Action<IServiceResult> callback, IRequestContext requestContext = null);
 
 		void RegisterServices(ITypeFactory serviceFactory, IEnumerable<Type> serviceTypes);
 		void RegisterService<TReq>(Func<IService<TReq>> serviceFactoryFn);
