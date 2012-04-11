@@ -50,6 +50,8 @@ namespace ServiceStack.ServiceClient.Web
                 StreamSerializer = SerializeToStream,
                 StreamDeserializer = StreamDeserializer,
                 CookieContainer = this.CookieContainer,
+                UserName = this.UserName,
+                Password = this.Password
             };
             this.StoreCookies = true; //leave
 
@@ -67,6 +69,25 @@ namespace ServiceStack.ServiceClient.Web
             this.AsyncOneWayBaseUri = asyncOneWayBaseUri;
         }
 
+        /// <summary>
+        /// Sets all baseUri properties, using the Format property for the SyncReplyBaseUri and AsyncOneWayBaseUri
+        /// </summary>
+        /// <param name="baseUri">Base URI of the service</param>
+        public void SetBaseUri(string baseUri)
+        {
+            this.BaseUri = baseUri;
+            this.asyncClient.BaseUri = baseUri;
+            this.SyncReplyBaseUri = baseUri.WithTrailingSlash() + Format + "/syncreply/";
+            this.AsyncOneWayBaseUri = baseUri.WithTrailingSlash() + Format + "/asynconeway/";
+        }
+
+        /// <summary>
+        /// Sets all baseUri properties allowing for a temporary override of the Format property
+        /// </summary>
+        /// <param name="baseUri">Base URI of the service</param>
+        /// <param name="format">Override of the Format property for the service</param>
+        //Marked obsolete on 4/11/2012
+        [Obsolete("Please call the SetBaseUri(string baseUri) method, which uses the specific implementation's Format property.")]
         public void SetBaseUri(string baseUri, string format)
         {
             this.BaseUri = baseUri;
@@ -75,15 +96,29 @@ namespace ServiceStack.ServiceClient.Web
             this.AsyncOneWayBaseUri = baseUri.WithTrailingSlash() + format + "/asynconeway/";
         }
 
+        private string _username;
         /// <summary>
         /// The user name for basic authentication
         /// </summary>
-        public string UserName { get; set; }
+        public string UserName {
+            get { return _username; } 
+            set { 
+                _username = value;
+                asyncClient.UserName = value;
+            } 
+        }
 
+        private string _password;
         /// <summary>
         /// The password for basic authentication
         /// </summary>
-        public string Password { get; set; }
+        public string Password {
+            get { return _password; } 
+            set { 
+                _password = value;
+                asyncClient.Password = value;
+            } 
+        }
 
         /// <summary>
         /// Sets the username and the password for basic authentication.
@@ -95,6 +130,8 @@ namespace ServiceStack.ServiceClient.Web
         }
 
         public string BaseUri { get; set; }
+
+        public abstract string Format { get;}
 
         public string SyncReplyBaseUri { get; set; }
 

@@ -4,6 +4,7 @@ using System.Net;
 using Funq;
 using ServiceStack.ServiceHost;
 using ServiceStack.ServiceInterface.Auth;
+using ServiceStack.WebHost.Endpoints;
 
 namespace ServiceStack.ServiceInterface.Testing
 {
@@ -17,7 +18,9 @@ namespace ServiceStack.ServiceInterface.Testing
             var httpReq = new MockHttpRequest { Container = this.Container };
             httpReq.AddSessionCookies();
             this.Container.Register<IHttpRequest>(httpReq);
-            this.Container.Register<IHttpResponse>(new MockHttpResponse());
+        	var httpRes = new MockHttpResponse();
+        	this.Container.Register<IHttpResponse>(httpRes);
+			httpReq.Container = this.Container;
         }
 
         public T Get<T>() where T : class
@@ -58,6 +61,11 @@ namespace ServiceStack.ServiceInterface.Testing
 
         public void Dispose()
         {
+        }
+
+        public IAppHost CreateAppHost()
+        {
+            return new TestAppHost(this.Container);
         }
     }
 }
