@@ -103,6 +103,7 @@ namespace ServiceStack.Plugins.Tasks.Tests
             try
             {
                 client.Get<UserResponse>("/users");
+                Assert.Fail("Should not get here");
             }
             catch (WebServiceException ex)
             {
@@ -118,6 +119,7 @@ namespace ServiceStack.Plugins.Tasks.Tests
             try
             {
                 client.Post<UserResponse>("/users", new User());
+                Assert.Fail("Should not get here");
             }
             catch (WebServiceException ex)
             {
@@ -133,6 +135,7 @@ namespace ServiceStack.Plugins.Tasks.Tests
             try
             {
                 client.Put<UserResponse>("/users", new User());
+                Assert.Fail("Should not get here");
             }
             catch (WebServiceException ex)
             {
