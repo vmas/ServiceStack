@@ -24,10 +24,10 @@ namespace ServiceStack.Common.Tests.OAuth
 		{
 			userAuthMock = new Mock<IUserAuthRepository>();
 
-			userAuthMock.Expect(x => x.GetUserAuthByUserName(It.IsAny<string>()))
+			userAuthMock.Setup(x => x.GetUserAuthByUserName(It.IsAny<string>()))
 				.Returns((UserAuth)null);
 
-			userAuthMock.Expect(x => x.CreateUserAuth(It.IsAny<UserAuth>(), It.IsAny<string>()))
+			userAuthMock.Setup(x => x.CreateUserAuth(It.IsAny<UserAuth>(), It.IsAny<string>()))
 				.Returns(new UserAuth { Id = 1 });
 		}
 
@@ -43,7 +43,7 @@ namespace ServiceStack.Common.Tests.OAuth
 		public void Does_validate_RequiredRoles_with_UserAuthRepo_When_Role_not_in_Session()
 		{
 			var userWithAdminRole = new UserAuth { Id = 1, Roles = new[] { RoleNames.Admin }.ToList() };
-			userAuthMock.Expect(x => x.GetUserAuth(It.IsAny<IAuthSession>(), It.IsAny<IOAuthTokens>()))
+			userAuthMock.Setup(x => x.GetUserAuth(It.IsAny<IAuthSession>(), It.IsAny<IOAuthTokens>()))
 				.Returns(userWithAdminRole);
 
 			var registrationService = GetRegistrationService();
@@ -66,7 +66,7 @@ namespace ServiceStack.Common.Tests.OAuth
 		public void Does_validate_AssertRequiredRoles_with_UserAuthRepo_When_Role_not_in_Session()
 		{
 			var userWithAdminRole = new UserAuth { Id = 1, Roles = new[] { RoleNames.Admin }.ToList() };
-			userAuthMock.Expect(x => x.GetUserAuth(It.IsAny<IAuthSession>(), It.IsAny<IOAuthTokens>()))
+			userAuthMock.Setup(x => x.GetUserAuth(It.IsAny<IAuthSession>(), It.IsAny<IOAuthTokens>()))
 				.Returns(userWithAdminRole);
 
 			var registrationService = GetRegistrationService();
