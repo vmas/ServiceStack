@@ -347,6 +347,8 @@ A big thanks to GitHub and all of ServiceStack's contributors:
  - [justinpihony](https://github.com/JustinPihony) (Justin Pihony) 
  - [bokmadsen](https://github.com/bokmadsen) (Bo Kingo Damgaard)
  - [dragan](https://github.com/dragan) (Dale Ragan)
+ - [sneal](https://github.com/sneal) (Shawn Neal)
+ - [johnsheehan](https://github.com/johnsheehan) (John Sheehan)
 
 ***
 

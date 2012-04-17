@@ -87,7 +87,7 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 				var doJsonp = EndpointHost.Config.AllowJsonpRequests
 							  && !string.IsNullOrEmpty(callback);
 
-				if (doJsonp)
+                if (doJsonp && !(responseDto is CompressedResult))
 					res.WriteToResponse(req, responseDto, (callback + "(").ToUtf8Bytes(), ")".ToUtf8Bytes());
 				else
 					res.WriteToResponse(req, responseDto);
