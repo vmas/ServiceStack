@@ -67,6 +67,7 @@ namespace ServiceStack.Plugins.Tasks.Tests
 
             public override void Configure(Container container)
             {
+                this.LoadPlugin(new TaskSupport());
             }
         }
 

@@ -205,7 +205,7 @@ namespace ServiceStack.ServiceInterface
             }
         }
 
-        protected virtual object HandleException(TRequest request, Exception ex)
+        public virtual object HandleException(TRequest request, Exception ex)
         {
             if (ex.InnerException != null && !(ex is IHttpError))
                 ex = ex.InnerException;

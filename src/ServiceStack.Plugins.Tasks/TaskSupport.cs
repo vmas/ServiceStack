@@ -5,6 +5,7 @@ using System.Text;
 using ServiceStack.WebHost.Endpoints;
 using ServiceStack.ServiceHost;
 using System.Threading.Tasks;
+using System.Reflection;
 
 namespace ServiceStack.Plugins.Tasks
 {
@@ -12,7 +13,7 @@ namespace ServiceStack.Plugins.Tasks
 	{
 		public void Register(IAppHost appHost)
 		{
-			EndpointHost.ServiceManager.ServiceController.ResponseFactories.Add(this.Convert);
+			EndpointHost.ServiceManager.ServiceController.ResponseConverters.Add(this.Convert);
 		}
 
 		private class TaskWrapper : IServiceResult
@@ -52,17 +53,32 @@ namespace ServiceStack.Plugins.Tasks
 			}
 		}
 
-		public IServiceResult Convert(object responseDto, Action<IServiceResult> callback)
+		public IServiceResult Convert(object service, object request, object response, Action<IServiceResult> callback)
 		{
-			var task = responseDto as Task;
+			var task = response as Task;
 			if (task != null)
 			{
 				//TODO: Cache reflection logic
-				var responseType = responseDto.GetType();
+				var responseType = response.GetType();
 				var resultProperty = responseType.GetProperty("Result");
 				if (resultProperty != null)
 				{
-					Func<object> getResultFn = () => resultProperty.GetValue(responseDto, new object[] { });
+					Func<object> getResultFn = () => {
+						try
+						{
+							return resultProperty.GetValue(response, new object[] { });
+						}
+						catch (TargetInvocationException ex)
+						{
+							var aggregateException = ex.InnerException;
+							var serviceType = service.GetType();
+							var handleExceptionFn = serviceType.GetMethod("HandleException");
+							if(handleExceptionFn != null)
+								return handleExceptionFn.Invoke(service, new object[] { request, aggregateException.InnerException });
+
+							throw; //if no handle exception method exists re-throw the exception
+						}
+					};
 
 					var taskWrapper = new TaskWrapper(task, getResultFn);
 

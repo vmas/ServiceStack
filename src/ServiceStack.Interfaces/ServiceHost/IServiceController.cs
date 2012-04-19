@@ -15,7 +15,7 @@ namespace ServiceStack.ServiceHost
 
 		Dictionary<Type, Func<IHttpRequest, object>> RequestTypeFactoryMap { get; set; }
 
-		List<Func<object, Action<IServiceResult>, IServiceResult>> ResponseFactories { get; set; }
+		List<Func<object, object, object, Action<IServiceResult>, IServiceResult>> ResponseConverters { get; set; }
 
 		HashSet<Type> ServiceTypes { get; }
 
@@ -45,6 +45,6 @@ namespace ServiceStack.ServiceHost
 		void RegisterService<TReq>(Func<IService<TReq>> serviceFactoryFn);
 		void RegisterService(ITypeFactory serviceFactory, Type serviceType);
 
-		Func<IRequestContext, object, object> GetService(Type requestType);
+		Func<IRequestContext, object, Action<IServiceResult>, IServiceResult> GetService(Type requestType);
 	}
 }

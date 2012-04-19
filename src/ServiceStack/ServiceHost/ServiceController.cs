@@ -25,12 +25,12 @@ namespace ServiceStack.ServiceHost
 			this.AllOperationTypes = new List<Type>();
 			this.OperationTypes = new List<Type>();
 			this.RequestTypeFactoryMap = new Dictionary<Type, Func<IHttpRequest, object>>();
-			this.ResponseFactories = new List<Func<object, Action<IServiceResult>, IServiceResult>>();
+			this.ResponseConverters = new List<Func<object, object, object, Action<IServiceResult>, IServiceResult>>();
 			this.ServiceTypes = new HashSet<Type>();
 		}
 
-		readonly Dictionary<Type, Func<IRequestContext, object, object>> requestExecMap
-			= new Dictionary<Type, Func<IRequestContext, object, object>>();
+		readonly Dictionary<Type, Func<IRequestContext, object, Action<IServiceResult>, IServiceResult>> requestExecMap
+			= new Dictionary<Type, Func<IRequestContext, object,  Action<IServiceResult>, IServiceResult>>();
 
 		readonly Dictionary<Type, ServiceAttribute> requestServiceAttrs
 			= new Dictionary<Type, ServiceAttribute>();
@@ -45,7 +45,7 @@ namespace ServiceStack.ServiceHost
 
 		public Dictionary<Type, Func<IHttpRequest, object>> RequestTypeFactoryMap { get; set; }
 
-		public List<Func<object, Action<IServiceResult>, IServiceResult>> ResponseFactories { get; set; }
+		public List<Func<object, object, object, Action<IServiceResult>, IServiceResult>> ResponseConverters { get; set; }
 
 		public HashSet<Type> ServiceTypes { get; protected set; }
 
@@ -54,15 +54,23 @@ namespace ServiceStack.ServiceHost
 		public void RegisterService<TReq>(Func<IService<TReq>> serviceFactoryFn)
 		{
 			var requestType = typeof(TReq);
-			Func<IRequestContext, object, object> handlerFn = (requestContext, dto) =>
+			Func<IRequestContext, object, Action<IServiceResult>, IServiceResult> handlerFn = (requestContext, request, callback) =>
 			{
 				var service = serviceFactoryFn();
 
 				InjectRequestContext(service, requestContext);
 
-				return ServiceExec<TReq>.Execute(
-					service, (TReq)dto,
+				var response = ServiceExec<TReq>.Execute(
+					service, (TReq)request,
 					requestContext != null ? requestContext.EndpointAttributes : EndpointAttributes.None);
+
+				var convertedResponse = this.ExecuteResponseConverters(service, request, response, callback);
+				if (convertedResponse != null)
+					return convertedResponse;
+
+				var serviceResult = new SyncServiceResult(response);
+				callback(serviceResult);
+				return serviceResult;
 			};
 
 			this.RegisterService(requestType, typeof(IService<TReq>), handlerFn);
@@ -81,7 +89,7 @@ namespace ServiceStack.ServiceHost
 			foreach (var service in serviceType.GetInterfaces())
 			{
 				if (!service.IsGenericType
-				    || service.GetGenericTypeDefinition() != typeof (IService<>)
+					|| service.GetGenericTypeDefinition() != typeof (IService<>)
 				) continue;
 
 				var requestType = service.GetGenericArguments()[0];
@@ -93,37 +101,50 @@ namespace ServiceStack.ServiceHost
 		{
 			var typeFactoryFn = CallServiceExecuteGeneric(requestType, serviceType);
 
-			Func<IRequestContext, object, object> handlerFn = (requestContext, dto) =>
+			Func<IRequestContext, object, Action<IServiceResult>, IServiceResult> handlerFn = (requestContext, request, callback) =>
 			{
 				var service = serviceFactory.CreateInstance(serviceType);
-                using (service as IDisposable) // using is happy if this expression evals to null
-                {
-                    InjectRequestContext(service, requestContext);
+				using (service as IDisposable) // using is happy if this expression evals to null
+				{
+					InjectRequestContext(service, requestContext);
 
-                    var endpointAttrs = requestContext != null
-                        ? requestContext.EndpointAttributes
-                        : EndpointAttributes.None;
+					var endpointAttrs = requestContext != null
+						? requestContext.EndpointAttributes
+						: EndpointAttributes.None;
 
-                    try
-                    {
-                        //Executes the service and returns the result
-                        var response = typeFactoryFn(dto, service, endpointAttrs);
-						if (EndpointHost.AppHost != null) //tests
-							EndpointHost.AppHost.Release(service);
-                    	return response;
-                    }
-                    catch (TargetInvocationException tex)
-                    {
-                        //Mono invokes using reflection
-                        throw tex.InnerException ?? tex;
-                    }
-                }
+					//Executes the service and returns the result
+					var response = typeFactoryFn(request, service, endpointAttrs);
+					if (EndpointHost.AppHost != null) //tests
+						EndpointHost.AppHost.Release(service);
+
+					var convertedResponse = this.ExecuteResponseConverters(service, request, response, callback);
+					if (convertedResponse != null)
+						return convertedResponse;
+
+					var serviceResult = new SyncServiceResult(response);
+					callback(serviceResult);
+					return serviceResult;
+				}
 			};
 
 			this.RegisterService(requestType, serviceType, handlerFn);
 		}
 
-		private void RegisterService(Type requestType, Type serviceType, Func<IRequestContext, object, object> handlerFn)
+		private IServiceResult ExecuteResponseConverters(object service, object request, object response, Action<IServiceResult> callback)
+		{
+			if (response != null)
+			{
+				foreach (var responseFactory in this.ResponseConverters)
+				{
+					var result = responseFactory(service, request, response, callback);
+					if (result != null)
+						return result;
+				}
+			}
+			return null;
+		}
+
+		private void RegisterService(Type requestType, Type serviceType, Func<IRequestContext, object, Action<IServiceResult>, IServiceResult> handlerFn)
 		{
 			try
 			{
@@ -223,26 +244,12 @@ namespace ServiceStack.ServiceHost
 		{
 			var requestType = request.GetType();
 			var handlerFn = GetService(requestType);
-			var responseDto = handlerFn(requestContext, request);
-
-			if (responseDto != null)
-			{
-				foreach (var responseFactory in this.ResponseFactories)
-				{
-					var result = responseFactory(responseDto, callback);
-					if (result != null)
-						return result;
-				}
-			}
-
-			var serviceResult = new SyncServiceResult(responseDto);
-			callback(serviceResult);
-			return serviceResult;
+			return handlerFn(requestContext, request, callback);
 		}
 
-		public Func<IRequestContext, object, object> GetService(Type requestType)
+		public Func<IRequestContext, object, Action<IServiceResult>, IServiceResult> GetService(Type requestType)
 		{
-			Func<IRequestContext, object, object> handlerFn;
+			Func<IRequestContext, object, Action<IServiceResult>, IServiceResult> handlerFn;
 			if (!requestExecMap.TryGetValue(requestType, out handlerFn))
 			{
 				throw new NotImplementedException(
