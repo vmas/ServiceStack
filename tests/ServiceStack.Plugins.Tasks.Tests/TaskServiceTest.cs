@@ -79,7 +79,7 @@ namespace ServiceStack.Plugins.Tasks.Tests
 		}
 
 		[Test, TestCaseSource("ServiceClients")]
-		public void Can_retireve_data_with_default_endpoint(IServiceClient client)
+		public void Can_retrieve_data_with_default_endpoint(IServiceClient client)
 		{
 			var response = client.Send<AsyncResponse>(new Async());
 			Assert.That(response.Message, Is.EqualTo("This was async!"));

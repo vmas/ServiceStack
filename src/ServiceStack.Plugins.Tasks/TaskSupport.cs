@@ -64,7 +64,7 @@ namespace ServiceStack.Plugins.Tasks
 		public IServiceResult Convert(object service, object request, object response, Action<IServiceResult> callback)
 		{
 			var responseType = response.GetType();
-			if (responseType.GetGenericTypeDefinition() == typeof(Task<>))
+			if (responseType.IsGenericType && responseType.GetGenericTypeDefinition() == typeof(Task<>))
 			{
 				var serviceType = service.GetType();
 				var requestType = request.GetType();

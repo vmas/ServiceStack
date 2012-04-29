@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="ExceptionHandlingTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SyncProcessingTest.cs" />
     <Compile Include="TaskServiceTest.cs" />
   </ItemGroup>
   <ItemGroup>
