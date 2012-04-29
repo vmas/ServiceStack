@@ -11,6 +11,9 @@ using System.Linq.Expressions;
 
 namespace ServiceStack.Plugins.Tasks
 {
+	public delegate object HandleTaskException(object service, object request, Exception ex);
+	public delegate object GetTaskResult(object service, object request, object response);
+
 	public class TaskSupport : IPlugin
 	{
 		public void Register(IAppHost appHost)
@@ -55,21 +58,23 @@ namespace ServiceStack.Plugins.Tasks
 			}
 		}
 
-		private static ConcurrentDictionary<Tuple<Type, Type, Type>, Func<object, object, object, object>> converterCache 
-			= new ConcurrentDictionary<Tuple<Type, Type, Type>, Func<object, object, object, object>>();
+		private static ConcurrentDictionary<Tuple<Type, Type, Type>, GetTaskResult> converterCache 
+			= new ConcurrentDictionary<Tuple<Type, Type, Type>, GetTaskResult>();
 
 		public IServiceResult Convert(object service, object request, object response, Action<IServiceResult> callback)
 		{
 			var responseType = response.GetType();
 			if (responseType.GetGenericTypeDefinition() == typeof(Task<>))
 			{
+				var serviceType = service.GetType();
+				var requestType = request.GetType();
 				var task = response as Task;
 
-				var key = new Tuple<Type, Type, Type>(service.GetType(), request.GetType(), responseType);
-				Func<object, object, object, object> getResultFn = null;
+				var key = new Tuple<Type, Type, Type>(serviceType, requestType, responseType);
+				GetTaskResult getResultFn = null;
 				if (!converterCache.TryGetValue(key, out getResultFn))
 				{
-					getResultFn = this.GenerateGetResultFn(service.GetType(), request.GetType(), responseType);
+					getResultFn = this.GenerateGetResultFn(serviceType, requestType, responseType);
 					converterCache.TryAdd(key, getResultFn);
 				}
 
@@ -82,7 +87,7 @@ namespace ServiceStack.Plugins.Tasks
 			return null;
 		}
 
-		private Func<object, object, object, object> GenerateGetResultFn(Type serviceType, Type requestType, Type responseType)
+		private GetTaskResult GenerateGetResultFn(Type serviceType, Type requestType, Type responseType)
 		{
 			var responseParameter = Expression.Parameter(typeof(object), "response");
 			var resultProperty = responseType.GetProperty("Result");
@@ -100,7 +105,7 @@ namespace ServiceStack.Plugins.Tasks
 			if (handleExceptionMethod == null) //Don't add exception handling logic if HandleException() doesn't exist
 				return (service, request, response) => getResultFn(response);
 
-			var handleExceptionFn = Expression.Lambda<Func<object, object, Exception, object>>(
+			var handleExceptionFn = Expression.Lambda<HandleTaskException>(
 				Expression.Call(
 					Expression.Convert(serviceParameter, serviceType), 
 					handleExceptionMethod, 
@@ -110,7 +115,7 @@ namespace ServiceStack.Plugins.Tasks
 				serviceParameter, requestParameter, exceptionParameter
 			).Compile();
 
-			Func<object, object, object, object> tryGetResultFn = (service, request, response) =>
+			GetTaskResult tryGetResultFn = (service, request, response) =>
 			{
 				try
 				{
