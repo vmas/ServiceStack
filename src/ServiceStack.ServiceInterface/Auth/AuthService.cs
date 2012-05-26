@@ -32,13 +32,14 @@ namespace ServiceStack.ServiceInterface.Auth
 		public string UserName { get; set; }
 		public string Password { get; set; }
 		public bool? RememberMe { get; set; }
-        // Thise are used for digest auth
-        public string nonce { get; set; }
-        public string uri { get; set; }
-        public string response { get; set; }
-        public string qop { get; set; }
-        public string nc { get; set; }
-        public string cnonce { get; set; }
+		public string Continue { get; set; }
+		// Thise are used for digest auth
+		public string nonce { get; set; }
+		public string uri { get; set; }
+		public string response { get; set; }
+		public string qop { get; set; }
+		public string nc { get; set; }
+		public string cnonce { get; set; }
 	}
 
 	public class AuthResponse
@@ -62,7 +63,7 @@ namespace ServiceStack.ServiceInterface.Auth
 		public const string BasicProvider = "basic";
 		public const string CredentialsProvider = "credentials";
 		public const string LogoutAction = "logout";
-        public const string DigestProvider = "digest";
+		public const string DigestProvider = "digest";
 
 		public static Func<IAuthSession> CurrentSessionFactory { get; set; }
 		public static ValidateFn ValidateFn { get; set; }
@@ -122,8 +123,8 @@ namespace ServiceStack.ServiceInterface.Auth
 
 			if (ValidateFn != null)
 			{
-				var response = ValidateFn(this, HttpMethods.Get, request);
-				if (response != null) return response;
+				var validationResponse = ValidateFn(this, HttpMethods.Get, request);
+				if (validationResponse != null) return validationResponse;
 			}
 
 			if (request.RememberMe.HasValue)
@@ -144,25 +145,40 @@ namespace ServiceStack.ServiceInterface.Auth
 			if (request.provider == LogoutAction)
 				return oAuthConfig.Logout(this, request);
 
+			object response = null;
 			var session = this.GetSession();
 			if (!oAuthConfig.IsAuthorized(session, session.GetOAuthTokens(provider), request))
 			{
-				return oAuthConfig.Authenticate(this, session, request);
+				response = oAuthConfig.Authenticate(this, session, request);
 			}
 
-			var referrerUrl = session.ReferrerUrl
+			var referrerUrl = request.Continue
+				?? session.ReferrerUrl
 				?? this.RequestContext.GetHeader("Referer")
 				?? oAuthConfig.CallbackUrl;
 
-			//Already Authenticated
-			if (base.RequestContext.ResponseContentType == ContentType.Html)
-				return this.Redirect(referrerUrl.AddHashParam("s", "0"));
-
-			return new AuthResponse {
+			var alreadyAuthenticated = response == null;
+			response = response ?? new AuthResponse {
 				UserName = session.UserName,
 				SessionId = session.Id,
 				ReferrerUrl = referrerUrl,
 			};
+
+			var isHtml = base.RequestContext.ResponseContentType == ContentType.Html;
+			if (isHtml)
+			{
+				if (alreadyAuthenticated)
+					return this.Redirect(referrerUrl.AddHashParam("s", "0"));
+
+				if (!(response is IHttpResult))
+				{
+					return new HttpResult(response) {
+						Location = referrerUrl
+					};
+				}
+			}
+
+			return response;
 		}
 
 		public override object OnDelete(Auth request)

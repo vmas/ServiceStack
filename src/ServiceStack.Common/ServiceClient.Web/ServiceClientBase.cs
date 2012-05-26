@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Web;
+using ServiceStack.Common;
 using ServiceStack.Logging;
 using ServiceStack.Service;
 using ServiceStack.ServiceHost;
@@ -27,11 +29,14 @@ namespace ServiceStack.ServiceClient.Web
         /// This request filter is executed globally.
         /// </summary>
         private static Action<HttpWebRequest> httpWebRequestFilter;
-        public static Action<HttpWebRequest> HttpWebRequestFilter {
-            get {
+        public static Action<HttpWebRequest> HttpWebRequestFilter
+        {
+            get
+            {
                 return httpWebRequestFilter;
             }
-            set {
+            set
+            {
                 httpWebRequestFilter = value;
                 AsyncServiceClient.HttpWebRequestFilter = value;
             }
@@ -119,28 +124,46 @@ namespace ServiceStack.ServiceClient.Web
             this.AsyncOneWayBaseUri = baseUri.WithTrailingSlash() + format + "/asynconeway/";
         }
 
+        private bool _disableAutoCompression;
+        /// <summary>
+        /// Whether to Accept Gzip,Deflate Content-Encoding and to auto decompress responses
+        /// </summary>
+        public bool DisableAutoCompression
+        {
+            get { return _disableAutoCompression; }
+            set
+            {
+                _disableAutoCompression = value;
+                asyncClient.DisableAutoCompression = value;
+            }
+        }
+
         private string _username;
         /// <summary>
         /// The user name for basic authentication
         /// </summary>
-        public string UserName {
-            get { return _username; } 
-            set { 
+        public string UserName
+        {
+            get { return _username; }
+            set
+            {
                 _username = value;
                 asyncClient.UserName = value;
-            } 
+            }
         }
 
         private string _password;
         /// <summary>
         /// The password for basic authentication
         /// </summary>
-        public string Password {
-            get { return _password; } 
-            set { 
+        public string Password
+        {
+            get { return _password; }
+            set
+            {
                 _password = value;
                 asyncClient.Password = value;
-            } 
+            }
         }
 
         /// <summary>
@@ -154,7 +177,7 @@ namespace ServiceStack.ServiceClient.Web
 
         public string BaseUri { get; set; }
 
-        public abstract string Format { get;}
+        public abstract string Format { get; }
 
         public string SyncReplyBaseUri { get; set; }
 
@@ -242,11 +265,14 @@ namespace ServiceStack.ServiceClient.Web
         /// Called before request resend, when the initial request required authentication
         /// </summary>
         private Action<WebRequest> onAuthenticationRequired { get; set; }
-        public Action<WebRequest> OnAuthenticationRequired {
-            get {
+        public Action<WebRequest> OnAuthenticationRequired
+        {
+            get
+            {
                 return onAuthenticationRequired;
             }
-            set {
+            set
+            {
                 onAuthenticationRequired = value;
                 asyncClient.OnAuthenticationRequired = value;
             }
@@ -256,8 +282,9 @@ namespace ServiceStack.ServiceClient.Web
         /// The request filter is called before any request.
         /// This request filter only works with the instance where it was set (not global).
         /// </summary>
-        private Action<HttpWebRequest> localHttpWebRequestFilter { get; set;}
-        public Action<HttpWebRequest> LocalHttpWebRequestFilter {
+        private Action<HttpWebRequest> localHttpWebRequestFilter { get; set; }
+        public Action<HttpWebRequest> LocalHttpWebRequestFilter
+        {
             get
             {
                 return localHttpWebRequestFilter;
@@ -333,7 +360,7 @@ namespace ServiceStack.ServiceClient.Web
                     client.AddBasicAuth(this.UserName, this.Password);
                     if (OnAuthenticationRequired != null)
                     {
-                        OnAuthenticationRequired(client);                        
+                        OnAuthenticationRequired(client);
                     }
 
                     try
@@ -443,6 +470,12 @@ namespace ServiceStack.ServiceClient.Web
                 if (this.Timeout.HasValue) client.Timeout = (int)this.Timeout.Value.TotalMilliseconds;
                 if (this.credentials != null) client.Credentials = this.credentials;
                 if (this.AlwaysSendBasicAuthHeader) client.AddBasicAuth(this.UserName, this.Password);
+
+                if (!DisableAutoCompression)
+                {
+                    client.Headers.Add(HttpRequestHeader.AcceptEncoding, "gzip,deflate");
+                    client.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+                }
 
                 if (StoreCookies)
                 {
@@ -554,7 +587,7 @@ namespace ServiceStack.ServiceClient.Web
             return relativeOrAbsoluteUrl.StartsWith("http:")
                 || relativeOrAbsoluteUrl.StartsWith("https:")
                      ? relativeOrAbsoluteUrl
-                     : this.BaseUri + relativeOrAbsoluteUrl;
+					 : this.BaseUri.CombineWith(relativeOrAbsoluteUrl);
         }
 
 #if !SILVERLIGHT
@@ -672,6 +705,63 @@ namespace ServiceStack.ServiceClient.Web
         public virtual TResponse Put<TResponse>(string relativeOrAbsoluteUrl, object request)
         {
             return Send<TResponse>(Web.HttpMethod.Put, relativeOrAbsoluteUrl, request);
+        }
+
+        public virtual TResponse PostFileWithRequest<TResponse>(string relativeOrAbsoluteUrl, FileInfo fileToUpload, object request)
+        {
+            return PostFileWithRequest<TResponse>(relativeOrAbsoluteUrl, fileToUpload.OpenRead(), fileToUpload.Name, request);
+        }
+
+        public virtual TResponse PostFileWithRequest<TResponse>(string relativeOrAbsoluteUrl, Stream fileToUpload, string fileName, object request)
+        {
+            var requestUri = GetUrl(relativeOrAbsoluteUrl);
+            var webRequest = (HttpWebRequest)WebRequest.Create(requestUri);
+            webRequest.Method = Web.HttpMethod.Post;
+            webRequest.Accept = ContentType;
+            if (Proxy != null) webRequest.Proxy = Proxy;
+
+            try
+            {
+                ApplyWebRequestFilters(webRequest);
+
+                var queryString = QueryStringSerializer.SerializeToString(request);
+                var nameValueCollection = HttpUtility.ParseQueryString(queryString);
+                var boundary = DateTime.Now.Ticks.ToString();
+                webRequest.ContentType = "multipart/form-data; boundary=" + boundary;
+                boundary = "--" + boundary;
+                var newLine = Environment.NewLine;
+                using (var outputStream = webRequest.GetRequestStream())
+                {
+                    foreach (var key in nameValueCollection.AllKeys)
+                    {
+                        outputStream.Write(boundary + newLine);
+                        outputStream.Write("Content-Disposition: form-data;name=\"{0}\"{1}{2}".FormatWith(key, newLine, newLine));
+                        outputStream.Write(nameValueCollection[key] + newLine);
+                    }
+                    outputStream.Write(boundary + newLine);
+                    outputStream.Write("Content-Disposition: form-data;name=\"{0}\";filename=\"{1}\"{2}{3}".FormatWith("upload", fileName, newLine, newLine));
+                    var buffer = new byte[4096];
+                    int byteCount;
+                    while ((byteCount = fileToUpload.Read(buffer, 0, 4096)) > 0)
+                    {
+                        outputStream.Write(buffer, 0, byteCount);
+                    }
+                    outputStream.Write(newLine);
+                    outputStream.Write(boundary + "--");
+                }
+                var webResponse = webRequest.GetResponse();
+                ApplyWebResponseFilters(webResponse);
+                using (var responseStream = webResponse.GetResponseStream())
+                {
+                    var response = DeserializeFromStream<TResponse>(responseStream);
+                    return response;
+                }
+            }
+            catch (Exception ex)
+            {
+                HandleResponseException<TResponse>(ex, requestUri);
+                throw;
+            }
         }
 
         public virtual TResponse PostFile<TResponse>(string relativeOrAbsoluteUrl, FileInfo fileToUpload, string mimeType)
