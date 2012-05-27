@@ -19,13 +19,12 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 	{
 		private static readonly ILog Log = LogManager.GetLogger(typeof(AsyncHandlerBase));
 
-		public string RequestName { get; set; }
 		public IHttpRequest HttpRequest { get; set; }
 		public IHttpResponse HttpResponse { get; set; }
 
-		public IAsyncResult BeginProcessRequest(HttpContext context, AsyncCallback cb, object extraData)
+		public virtual IAsyncResult BeginProcessRequest(HttpContext context, AsyncCallback cb, object extraData)
 		{
-			var operationName = this.RequestName ?? context.Request.GetOperationName();
+			var operationName = context.Request.GetOperationName();
 			this.HttpRequest = new HttpRequestWrapper(operationName, context.Request);
 			this.HttpResponse = new HttpResponseWrapper(context.Response);
 			Action<IServiceResult> callback = result => cb(result);
@@ -50,14 +49,6 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 
 		protected virtual void HandleException(IHttpRequest httpReq, IHttpResponse httpRes, Exception ex)
 		{
-			var responseStatus = new { ResponseStatus = new ResponseStatus()
-				{
-					ErrorCode = ex.GetType().Name, 
-					Message = ex.Message,
-					StackTrace = ex.StackTrace
-				}
-			};
-
 			var errorMessage = string.Format("Error occured while Processing Request: {0}", ex.Message);
 			Log.Error(errorMessage, ex);
 
@@ -68,7 +59,7 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 				//if there is a problem writing to response, by now it will be closed
 				if (!httpRes.IsClosed)
 				{
-					httpRes.WriteToResponse(httpReq, responseStatus);
+                    httpRes.WriteErrorToResponse(httpReq.ResponseContentType, httpReq.OperationName, errorMessage, ex, statusCode);
 				}
 			}
 			catch (Exception writeErrorEx)

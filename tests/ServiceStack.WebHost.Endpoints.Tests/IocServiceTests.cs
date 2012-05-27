@@ -38,6 +38,9 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 		[Test]
 		public void Can_resolve_all_dependencies()
 		{
+            IocService.DisposedCount = 0;
+            IocService.ThrowErrors = false;
+
 			var restClient = new JsonServiceClient(ListeningOn);
 			try
 			{

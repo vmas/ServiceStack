@@ -327,8 +327,8 @@ namespace ServiceStack.WebHost.Endpoints
 			}
 
 			var restPath = EndpointHost.RestController.GetRestPathForRequest(httpMethod, pathInfo);
-			if (restPath != null)
-				return new AsyncRestHandler(restPath) { RequestName = restPath.RequestType.Name };
+            if (restPath != null)
+                return new AsyncRestHandler(restPath); //{ RequestName = restPath.RequestType.Name };
 
 			return GetCatchAllHandlerIfAny(httpMethod, pathInfo, filePath);
 		}

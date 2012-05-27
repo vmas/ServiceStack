@@ -36,6 +36,16 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 			}
 		}
 
+        public override IAsyncResult BeginProcessRequest(System.Web.HttpContext context, AsyncCallback cb, object extraData)
+        {
+            var operationName = this.RestPath.RequestType.Name;
+            this.HttpRequest = new HttpRequestWrapper(operationName, context.Request);
+            this.HttpResponse = new HttpResponseWrapper(context.Response);
+            Action<IServiceResult> callback = result => cb(result);
+
+            return this.BeginProcessRequest(this.HttpRequest, this.HttpResponse, callback);
+        }
+
 		public override IServiceResult BeginProcessRequest(IHttpRequest req, IHttpResponse res, Action<IServiceResult> callback)
 		{
 			var responseContentType = EndpointHost.Config.DefaultContentType;

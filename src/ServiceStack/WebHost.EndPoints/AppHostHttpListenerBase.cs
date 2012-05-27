@@ -5,6 +5,7 @@ using ServiceStack.Common.Utils;
 using ServiceStack.WebHost.Endpoints.Extensions;
 using ServiceStack.WebHost.Endpoints.Support;
 using ServiceStack.ServiceHost;
+using ServiceStack.WebHost.Endpoints.Handlers;
 
 namespace ServiceStack.WebHost.Endpoints
 {
@@ -50,11 +51,6 @@ namespace ServiceStack.WebHost.Endpoints
 			var serviceStackHandler = handler as IServiceStackHttpHandler;
 			if (serviceStackHandler != null)
 			{
-				//var restHandler = serviceStackHandler as RestHandler;
-				//if (restHandler != null)
-				//{
-				//    httpReq.OperationName = operationName = restHandler.RestPath.RequestType.Name;
-				//}
 				serviceStackHandler.ProcessRequest(httpReq, httpRes, operationName);
 				httpRes.Close();
 				return;
@@ -63,6 +59,10 @@ namespace ServiceStack.WebHost.Endpoints
 			var serviceStackAsyncHandler = handler as IServiceStackHttpAsyncHandler;
 			if (serviceStackAsyncHandler != null)
 			{
+                var restHandler = serviceStackAsyncHandler as AsyncRestHandler;
+                if (restHandler != null)
+                    httpReq.OperationName = restHandler.RestPath.RequestType.Name;
+
 				Action<IServiceResult> callback = result =>
 				{
 					serviceStackAsyncHandler.EndProcessRequest(httpReq, httpRes, result);
