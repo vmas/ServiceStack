@@ -29,13 +29,17 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 		public void ShouldAllowAccessWhen<TRequestDto>(EndpointAttributes withScenario)
 			where TRequestDto : new()
 		{
-			ShouldNotThrow<UnauthorizedAccessException>(() => appHost.ExecuteService(new TRequestDto(), withScenario));
+            var dto = new TRequestDto();
+            var requestContext = new HttpRequestContext(dto, withScenario);
+			ShouldNotThrow<UnauthorizedAccessException>(() => appHost.Config.ServiceController.Execute(new TRequestDto(), requestContext));
 		}
 
 		public void ShouldDenyAccessWhen<TRequestDto>(EndpointAttributes withScenario)
 			where TRequestDto : new()
 		{
-			ShouldThrow<UnauthorizedAccessException>(() => appHost.ExecuteService(new TRequestDto(), withScenario));
+            var dto = new TRequestDto();
+            var requestContext = new HttpRequestContext(dto, withScenario);
+            ShouldThrow<UnauthorizedAccessException>(() => appHost.Config.ServiceController.Execute(new TRequestDto(), requestContext));
 		}
 
 		public void ShouldDenyAccessForAllOtherScenarios<TRequestDto>(params EndpointAttributes[] notIncluding)
@@ -65,9 +69,10 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 			var requestDto = new TRequestDto();
 			foreach (var otherScenario in otherScenarios)
 			{
+                var requestContext = new HttpRequestContext(requestDto, otherScenario);
 				try
 				{
-					ShouldThrow<UnauthorizedAccessException>(() => appHost.ExecuteService(requestDto, otherScenario));
+                    ShouldThrow<UnauthorizedAccessException>(() => appHost.Config.ServiceController.Execute(requestDto, requestContext));
 				}
 				catch (Exception ex)
 				{
@@ -169,8 +174,8 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 		{
 			ShouldAllowAccessWhen<InSecureDevEnvironmentRestriction>(EndpointAttributes.Localhost | EndpointAttributes.InSecure | EndpointAttributes.HttpPost);
 			ShouldAllowAccessWhen<InSecureDevEnvironmentRestriction>(EndpointAttributes.LocalSubnet | EndpointAttributes.InSecure | EndpointAttributes.HttpPost);
-			ShouldAllowAccessWhen<InSecureDevEnvironmentRestriction>(EndpointAttributes.LocalSubnet | EndpointAttributes.InSecure | EndpointAttributes.HttpPost | EndpointAttributes.SyncReply);
-			ShouldAllowAccessWhen<InSecureDevEnvironmentRestriction>(EndpointAttributes.LocalSubnet | EndpointAttributes.InSecure | EndpointAttributes.HttpPost | EndpointAttributes.AsyncOneWay);
+			ShouldAllowAccessWhen<InSecureDevEnvironmentRestriction>(EndpointAttributes.LocalSubnet | EndpointAttributes.InSecure | EndpointAttributes.HttpPost);
+			ShouldAllowAccessWhen<InSecureDevEnvironmentRestriction>(EndpointAttributes.LocalSubnet | EndpointAttributes.InSecure | EndpointAttributes.HttpPost);
 		}
 
 		[Test]
@@ -178,24 +183,24 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 		{
 			ShouldAllowAccessWhen<SecureDevEnvironmentRestriction>(EndpointAttributes.Localhost | EndpointAttributes.Secure | EndpointAttributes.HttpPost);
 			ShouldAllowAccessWhen<SecureDevEnvironmentRestriction>(EndpointAttributes.LocalSubnet | EndpointAttributes.Secure | EndpointAttributes.HttpPost);
-			ShouldAllowAccessWhen<SecureDevEnvironmentRestriction>(EndpointAttributes.LocalSubnet | EndpointAttributes.Secure | EndpointAttributes.HttpPost | EndpointAttributes.SyncReply);
-			ShouldAllowAccessWhen<SecureDevEnvironmentRestriction>(EndpointAttributes.LocalSubnet | EndpointAttributes.Secure | EndpointAttributes.HttpPost | EndpointAttributes.AsyncOneWay);
+			ShouldAllowAccessWhen<SecureDevEnvironmentRestriction>(EndpointAttributes.LocalSubnet | EndpointAttributes.Secure | EndpointAttributes.HttpPost);
+			ShouldAllowAccessWhen<SecureDevEnvironmentRestriction>(EndpointAttributes.LocalSubnet | EndpointAttributes.Secure | EndpointAttributes.HttpPost);
 		}
 
 		[Test]
 		public void Can_access_from_insecure_live_environment()
 		{
 			ShouldAllowAccessWhen<InSecureLiveEnvironmentRestriction>(EndpointAttributes.External | EndpointAttributes.InSecure | EndpointAttributes.HttpPost);
-			ShouldAllowAccessWhen<InSecureLiveEnvironmentRestriction>(EndpointAttributes.External | EndpointAttributes.InSecure | EndpointAttributes.HttpPost | EndpointAttributes.SyncReply);
-			ShouldAllowAccessWhen<InSecureLiveEnvironmentRestriction>(EndpointAttributes.External | EndpointAttributes.InSecure | EndpointAttributes.HttpPost | EndpointAttributes.AsyncOneWay);
+			ShouldAllowAccessWhen<InSecureLiveEnvironmentRestriction>(EndpointAttributes.External | EndpointAttributes.InSecure | EndpointAttributes.HttpPost);
+			ShouldAllowAccessWhen<InSecureLiveEnvironmentRestriction>(EndpointAttributes.External | EndpointAttributes.InSecure | EndpointAttributes.HttpPost);
 		}
 
 		[Test]
 		public void Can_access_from_secure_live_environment()
 		{
 			ShouldAllowAccessWhen<SecureLiveEnvironmentRestriction>(EndpointAttributes.External | EndpointAttributes.Secure | EndpointAttributes.HttpPost);
-			ShouldAllowAccessWhen<SecureLiveEnvironmentRestriction>(EndpointAttributes.External | EndpointAttributes.Secure | EndpointAttributes.HttpPost | EndpointAttributes.SyncReply);
-			ShouldAllowAccessWhen<SecureLiveEnvironmentRestriction>(EndpointAttributes.External | EndpointAttributes.Secure | EndpointAttributes.HttpPost | EndpointAttributes.AsyncOneWay);
+			ShouldAllowAccessWhen<SecureLiveEnvironmentRestriction>(EndpointAttributes.External | EndpointAttributes.Secure | EndpointAttributes.HttpPost);
+			ShouldAllowAccessWhen<SecureLiveEnvironmentRestriction>(EndpointAttributes.External | EndpointAttributes.Secure | EndpointAttributes.HttpPost);
 		}
 
 

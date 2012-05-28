@@ -24,14 +24,14 @@ namespace ServiceStack.WebHost.Endpoints.Support
 
 		public void SendOneWay(Message requestMsg)
 		{
-			var endpointAttributes = EndpointAttributes.AsyncOneWay | this.HandlerAttributes;
+			var endpointAttributes = this.HandlerAttributes;
 
 			ExecuteMessage(requestMsg, endpointAttributes);
 		}
 
 		public Message Send(Message requestMsg)
 		{
-			var endpointAttributes = EndpointAttributes.SyncReply | this.HandlerAttributes;
+			var endpointAttributes = this.HandlerAttributes;
 
 			return ExecuteMessage(requestMsg, endpointAttributes);
 		}

@@ -1,5 +1,6 @@
 using System.Runtime.Serialization;
 using ServiceStack.ServiceInterface;
+using ServiceStack.ServiceHost;
 
 namespace ServiceStack.Messaging.Tests.Services
 {
@@ -18,18 +19,17 @@ namespace ServiceStack.Messaging.Tests.Services
 	}
 
 	public class GreetService
-		: AsyncServiceBase<Greet>
+		: IOneWayService<Greet>
 	{
 		public int TimesCalled { get; set; }
 		public string Result { get; set; }
 
-		protected override object Run(Greet request)
-		{
-			this.TimesCalled++;
+        public void ExecuteOneWay(Greet request)
+        {
+            this.TimesCalled++;
 
-			Result = "Hello, " + request.Name;
-			return new GreetResponse { Result = Result };
-		}
-	}
+            Result = "Hello, " + request.Name;
+        }
+    }
 
 }

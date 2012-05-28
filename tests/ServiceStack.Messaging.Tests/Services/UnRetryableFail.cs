@@ -20,19 +20,19 @@ namespace ServiceStack.Messaging.Tests.Services
 	}
 
 	public class UnRetryableFailService
-		: AsyncServiceBase<UnRetryableFail>
+		: IOneWayService<UnRetryableFail>
 	{
 		public int TimesCalled { get; set; }
 		public string Result { get; set; }
 
-		protected override object Run(UnRetryableFail request)
-		{
-			this.TimesCalled++;
+        public void ExecuteOneWay(UnRetryableFail request)
+        {
+            this.TimesCalled++;
 
-			throw new UnRetryableMessagingException(
-				"This request should not get retried",
-				new NotSupportedException("This service always fails"));
-		}
-	}
+            throw new UnRetryableMessagingException(
+                "This request should not get retried",
+                new NotSupportedException("This service always fails"));
+        }
+    }
 
 }

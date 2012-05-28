@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ServiceStack.Common.Web;
 
 namespace ServiceStack.ServiceHost
 {
@@ -13,24 +14,33 @@ namespace ServiceStack.ServiceHost
 			get { return this.restPathMap; }
 		}
 
+        public void RegisterDefaultPaths(IEnumerable<Type> requestTypes)
+        {
+            foreach (var requestType in requestTypes)
+            {
+                this.RegisterRestPath(new RestPath(requestType, "/xml/requestreply/" + requestType.Name, "*", ContentType.Xml, ContentType.Xml, false));
+                this.RegisterRestPath(new RestPath(requestType, "/xml/oneway/" + requestType.Name, "*", ContentType.Xml, ContentType.Xml, true));
+
+                this.RegisterRestPath(new RestPath(requestType, "/json/requestreply/" + requestType.Name, "*", ContentType.Json, ContentType.Json, false));
+                this.RegisterRestPath(new RestPath(requestType, "/json/oneway/" + requestType.Name, "*", ContentType.Json, ContentType.Json, true));
+
+                this.RegisterRestPath(new RestPath(requestType, "/html/requestreply/" + requestType.Name, "*", ContentType.Html, ContentType.Html, false));
+                this.RegisterRestPath(new RestPath(requestType, "/html/oneway/" + requestType.Name, "*", ContentType.Html, ContentType.Html, true));
+
+                this.RegisterRestPath(new RestPath(requestType, "/jsv/requestreply/" + requestType.Name, "*", ContentType.Jsv, ContentType.Jsv, false));
+                this.RegisterRestPath(new RestPath(requestType, "/jsv/oneway/" + requestType.Name, "*", ContentType.Jsv, ContentType.Jsv, true));
+
+                this.RegisterRestPath(new RestPath(requestType, "/csv/requestreply/" + requestType.Name, "*", ContentType.Csv, ContentType.Csv, false));
+                this.RegisterRestPath(new RestPath(requestType, "/csv/oneway/" + requestType.Name, "*", ContentType.Csv, ContentType.Csv, true));
+            }
+        }
+
 		public void RegisterRestPaths(Type requestType)
 		{
 			var attrs = requestType.GetCustomAttributes(typeof(RouteAttribute), true);
 			foreach (RouteAttribute attr in attrs)
 			{
-                var pathAttributes = EndpointAttributes.SyncReply;
-
-                //Check if attributes contain call style
-                if ((EndpointAttributes.AllCallStyles & attr.PathAttributes) != 0)
-                {
-                    pathAttributes = attr.PathAttributes;
-                }
-                else
-                {
-                    pathAttributes |= attr.PathAttributes;
-                }
-
-				var restPath = new RestPath(requestType, attr.Path, attr.Verbs, attr.DefaultContentType, pathAttributes);
+				var restPath = new RestPath(requestType, attr.Path, attr.Verbs, attr.DefaultContentType, null, attr.IsOneWay);
 				if (!restPath.IsValid)
 					throw new NotSupportedException(string.Format(
 						"RestPath '{0}' on Type '{1}' is not Valid", attr.Path, requestType.Name));

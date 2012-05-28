@@ -370,28 +370,16 @@ namespace ServiceStack.WebHost.Endpoints
 			switch (pathController)
 			{
 				case "json":
-					if (pathAction == "syncreply")
-						return new JsonSyncReplyHandler { RequestName = requestName };
-					if (pathAction == "asynconeway")
-						return new JsonAsyncOneWayHandler { RequestName = requestName };
 					if (pathAction == "metadata")
 						return new JsonMetadataHandler();
 					break;
 
 				case "xml":
-					if (pathAction == "syncreply")
-						return new XmlSyncReplyHandler { RequestName = requestName };
-					if (pathAction == "asynconeway")
-						return new XmlAsyncOneWayHandler { RequestName = requestName };
 					if (pathAction == "metadata")
 						return new XmlMetadataHandler();
 					break;
 
 				case "jsv":
-					if (pathAction == "syncreply")
-						return new JsvSyncReplyHandler { RequestName = requestName };
-					if (pathAction == "asynconeway")
-						return new JsvAsyncOneWayHandler { RequestName = requestName };
 					if (pathAction == "metadata")
 						return new JsvMetadataHandler();
 					break;
@@ -412,29 +400,6 @@ namespace ServiceStack.WebHost.Endpoints
 
 				case RequestInfoHandler.RestPath:
 					return new RequestInfoHandler();
-
-				default:
-
-					string contentType;
-					if (EndpointHost.ContentTypeFilter
-						.ContentTypeFormats.TryGetValue(pathController, out contentType))
-					{
-						var feature = Common.Web.ContentType.GetFeature(contentType);
-						if (feature == Feature.None) feature = Feature.CustomFormat;
-
-						var format = Common.Web.ContentType.GetContentFormat(contentType);
-						if (pathAction == "syncreply")
-							return new GenericHandler(contentType, EndpointAttributes.SyncReply, feature) {
-								RequestName = requestName
-							};
-						if (pathAction == "asynconeway")
-							return new GenericHandler(contentType, EndpointAttributes.AsyncOneWay, feature) {
-								RequestName = requestName
-							};
-						if (pathAction == "metadata")
-							return new CustomMetadataHandler(contentType, format);
-					}
-					break;
 			}
 
 			return null;

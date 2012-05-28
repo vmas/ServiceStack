@@ -31,12 +31,7 @@ namespace ServiceStack.ServiceHost
 	{
 		public static object Execute(IService<TReq> service, TReq request, EndpointAttributes attrs)
 		{
-			if ((attrs & EndpointAttributes.AsyncOneWay) == EndpointAttributes.AsyncOneWay)
-			{
-				var asyncService = service as IAsyncService<TReq>;
-				if (asyncService != null) return asyncService.ExecuteAsync(request);
-			}
-			else if ((attrs & EndpointAttributes.HttpGet) == EndpointAttributes.HttpGet)
+            if ((attrs & EndpointAttributes.HttpGet) == EndpointAttributes.HttpGet)
 			{
 				var restService = service as IRestGetService<TReq>;
 				if (restService != null) return restService.Get(request);

@@ -88,7 +88,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 		[Test]
 		public void Can_call_jsv_debug_on_GetFactorial_WebService()
 		{
-			const string url = ListeningOn + "jsv/syncreply/GetFactorial?ForNumber=3&debug=true";
+			const string url = ListeningOn + "jsv/requestreply/GetFactorial?ForNumber=3&debug=true";
 			var contents = new StreamReader(WebRequest.Create(url).GetResponse().GetResponseStream()).ReadToEnd();
 			
 			Console.WriteLine("JSV DEBUG: " + contents);

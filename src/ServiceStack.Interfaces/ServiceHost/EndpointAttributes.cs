@@ -7,11 +7,10 @@ namespace ServiceStack.ServiceHost
 	{
 		None = 0,
 
-		All = AllNetworkAccessTypes | AllSecurityModes | AllHttpMethods | AllCallStyles | AllEndpointTypes,
+		All = AllNetworkAccessTypes | AllSecurityModes | AllHttpMethods | AllEndpointTypes,
 		AllNetworkAccessTypes = External | Localhost | LocalSubnet,
 		AllSecurityModes = Secure | InSecure,
 		AllHttpMethods = HttpHead | HttpGet | HttpPost | HttpPut | HttpDelete,
-		AllCallStyles = AsyncOneWay | SyncReply,
 		AllEndpointTypes = Soap11 | Soap12 | Xml | Json | Jsv | ProtoBuf | Csv,
 		
 		InternalNetworkAccess = Localhost | LocalSubnet,
@@ -33,10 +32,6 @@ namespace ServiceStack.ServiceHost
 		HttpDelete = 1 << 9,
 		HttpPatch = 1 << 10,
 		//Future 11,12
-
-		//Call Styles
-		AsyncOneWay = 1 << 13,
-		SyncReply = 1 << 14,
 
 		//Different endpoints
 		Soap11 = 1 << 15,

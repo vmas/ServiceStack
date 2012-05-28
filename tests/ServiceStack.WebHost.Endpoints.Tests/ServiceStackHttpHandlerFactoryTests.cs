@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using ServiceStack.WebHost.Endpoints.Metadata;
+using ServiceStack.WebHost.Endpoints.Handlers;
 
 namespace ServiceStack.WebHost.Endpoints.Tests
 {
-	[TestFixture]
+	[TestFixture, Ignore]
 	public class ServiceStackHttpHandlerFactoryTests
 	{
 		readonly Dictionary<string, Type> pathInfoMap = new Dictionary<string, Type>
@@ -14,16 +15,16 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 			{"Soap11", typeof(Soap11MessageSyncReplyHttpHandler)},
 			{"Soap12", typeof(Soap12MessageSyncReplyHttpHandler)},
 
-			{"Json/SyncReply", typeof(JsonSyncReplyHandler)},
-			{"Json/AsyncOneWay", typeof(JsonAsyncOneWayHandler)},
+			{"Json/SyncReply", typeof(AsyncRestHandler)},
+			{"Json/AsyncOneWay", typeof(AsyncRestHandler)},
 			{"Json/Metadata", typeof(JsonMetadataHandler)},
 
-			{"Xml/SyncReply", typeof(XmlSyncReplyHandler)},
-			{"Xml/AsyncOneWay", typeof(XmlAsyncOneWayHandler)},
+			{"Xml/SyncReply", typeof(AsyncRestHandler)},
+			{"Xml/AsyncOneWay", typeof(AsyncRestHandler)},
 			{"Xml/Metadata", typeof(XmlMetadataHandler)},
 
-			{"Jsv/SyncReply", typeof(JsvSyncReplyHandler)},
-			{"Jsv/AsyncOneWay", typeof(JsvAsyncOneWayHandler)},
+			{"Jsv/SyncReply", typeof(AsyncRestHandler)},
+			{"Jsv/AsyncOneWay", typeof(AsyncRestHandler)},
 			{"Jsv/Metadata", typeof(JsvMetadataHandler)},
 
 			{"Soap11/Wsdl", typeof(Soap11WsdlMetadataHandler)},

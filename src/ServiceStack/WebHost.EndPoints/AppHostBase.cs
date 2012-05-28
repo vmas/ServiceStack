@@ -79,13 +79,13 @@ namespace ServiceStack.WebHost.Endpoints
 			EndpointHost.AfterInit();
 			EndpointHost.RestController.RegisterRestPaths(this.routes.RestPaths);
 
+            if (EndpointHost.Config.EnableDefaultRoutes)
+                EndpointHost.RestController.RegisterDefaultPaths(EndpointHost.ServiceManager.ServiceController.RequestTypes);
+
 			if (serviceManager != null)
 			{
 				//Required for adhoc services added in Configure()
-				EndpointHost.SetOperationTypes(
-					serviceManager.ServiceOperations,
-					serviceManager.AllServiceOperations
-				);
+				EndpointHost.SetOperationTypes(serviceManager.ServiceOperations);
 			}
 		}
 
@@ -184,17 +184,6 @@ namespace ServiceStack.WebHost.Endpoints
 					log.Warn("Error loading plugin " + plugin.GetType().Name, ex);
 				}
 			}
-		}
-
-		public virtual object ExecuteService(object requestDto)
-		{
-			return ExecuteService(requestDto, EndpointAttributes.None);
-		}
-
-		public object ExecuteService(object requestDto, EndpointAttributes endpointAttributes)
-		{
-			return EndpointHost.Config.ServiceController.Execute(requestDto,
-				new HttpRequestContext(requestDto, endpointAttributes));
 		}
 
 		public void RegisterService(Type serviceType, params string[] atRestPaths)

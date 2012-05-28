@@ -78,7 +78,7 @@ namespace ServiceStack.ServiceHost.Tests
 		[Test]
 		public void With_TypedArguments()
 		{
-			serviceController.RegisterService(() => new BasicService());
+			serviceController.RegisterService(new TypeFactoryWrapper(t => new BasicService()), typeof(BasicService));
 			var request = new BasicRequest();
 
 			Console.WriteLine("With_TypedArguments(): {0}", Measure(() => serviceController.Execute(request), Times));

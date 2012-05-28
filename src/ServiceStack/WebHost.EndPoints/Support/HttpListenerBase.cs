@@ -79,14 +79,14 @@ namespace ServiceStack.WebHost.Endpoints.Support
 			{
 				//Required for adhoc services added in Configure()
 				serviceManager.ReloadServiceOperations();
-				EndpointHost.SetOperationTypes(
-					serviceManager.ServiceOperations,
-					serviceManager.AllServiceOperations
-				);
+				EndpointHost.SetOperationTypes(serviceManager.ServiceOperations);
 			}
 
 			EndpointHost.AfterInit();
 			EndpointHost.RestController.RegisterRestPaths(this.routes.RestPaths);
+
+            if (EndpointHost.Config.EnableDefaultRoutes)
+                EndpointHost.RestController.RegisterDefaultPaths(EndpointHost.ServiceManager.ServiceController.RequestTypes);
 
 			var elapsed = DateTime.Now - this.startTime;
 			Log.InfoFormat("Initializing Application took {0}ms", elapsed.TotalMilliseconds);

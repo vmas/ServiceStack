@@ -61,6 +61,7 @@ namespace ServiceStack.WebHost.Endpoints
 						MetadataRedirectPath = null,
 						DefaultContentType = null,
 						AllowJsonpRequests = true,
+                        EnableDefaultRoutes = true,
 						DebugMode = false,
 						DefaultDocuments = new List<string> {
 							"default.htm",
@@ -256,6 +257,8 @@ namespace ServiceStack.WebHost.Endpoints
 
 		public ServiceManager ServiceManager { get; internal set; }
 		public IServiceController ServiceController { get { return ServiceManager.ServiceController; } }
+
+        public bool EnableDefaultRoutes { get; set; }
 
 		public string MetadataPageBodyHtml { get; set; }
 		public string MetadataOperationPageBodyHtml { get; set; }

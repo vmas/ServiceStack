@@ -5,6 +5,7 @@ using ServiceStack.ServiceHost.Tests.Support;
 using ServiceStack.ServiceHost.Tests.TypeFactory;
 using ServiceStack.Text;
 using ServiceStack.Text.Common;
+using ServiceStack.Configuration;
 
 namespace ServiceStack.ServiceHost.Tests
 {
@@ -12,6 +13,21 @@ namespace ServiceStack.ServiceHost.Tests
 	public class ServiceHostTests
 	{
 		private ServiceController serviceController;
+
+        class ServiceFactoryWrapper : ITypeFactory
+        {
+            Func<object> getServiceFn;
+
+            public ServiceFactoryWrapper(Func<object> getServiceFn)
+            {
+                this.getServiceFn = getServiceFn;
+            }
+
+            public object CreateInstance(Type type)
+            {
+                return getServiceFn();
+            }
+        }
 
 		[SetUp]
 		public void OnBeforeEachTest()
@@ -22,7 +38,9 @@ namespace ServiceStack.ServiceHost.Tests
 		[Test]
 		public void Can_execute_BasicService()
 		{
-			serviceController.RegisterService(() => new BasicService());
+            var factory = new ServiceFactoryWrapper(() => new BasicService());
+
+			serviceController.RegisterService(factory, typeof(BasicService));
 			var result = serviceController.Execute(new BasicRequest()) as BasicRequestResponse;
 
 			Assert.That(result, Is.Not.Null);
@@ -80,7 +98,7 @@ namespace ServiceStack.ServiceHost.Tests
 		[Test]
 		public void Can_execute_RestTestService()
 		{
-			serviceController.RegisterService(() => new RestTestService());
+			serviceController.RegisterService(new ServiceFactoryWrapper(() => new RestTestService()), typeof(RestTestService));
 			var result = serviceController.Execute(new RestTest()) as RestTestResponse;
 
 			Assert.That(result, Is.Not.Null);
@@ -90,7 +108,7 @@ namespace ServiceStack.ServiceHost.Tests
 		[Test]
 		public void Can_RestTestService_GET()
 		{
-			serviceController.RegisterService(() => new RestTestService());
+			serviceController.RegisterService(new ServiceFactoryWrapper(() => new RestTestService()), typeof(RestTestService));
 			var result = serviceController.Execute(new RestTest(),
 				new HttpRequestContext((object)null, EndpointAttributes.HttpGet)) as RestTestResponse;
 
@@ -101,7 +119,7 @@ namespace ServiceStack.ServiceHost.Tests
 		[Test]
 		public void Can_RestTestService_PUT()
 		{
-			serviceController.RegisterService(() => new RestTestService());
+			serviceController.RegisterService(new ServiceFactoryWrapper(() => new RestTestService()), typeof(RestTestService));
 			var result = serviceController.Execute(new RestTest(),
 				new HttpRequestContext((object)null, EndpointAttributes.HttpPut)) as RestTestResponse;
 
@@ -112,7 +130,7 @@ namespace ServiceStack.ServiceHost.Tests
 		[Test]
 		public void Can_RestTestService_POST()
 		{
-			serviceController.RegisterService(() => new RestTestService());
+			serviceController.RegisterService(new ServiceFactoryWrapper(() => new RestTestService()), typeof(RestTestService));
 			var result = serviceController.Execute(new RestTest(),
 				new HttpRequestContext((object)null, EndpointAttributes.HttpPost)) as RestTestResponse;
 
@@ -123,7 +141,7 @@ namespace ServiceStack.ServiceHost.Tests
 		[Test]
 		public void Can_RestTestService_DELETE()
 		{
-			serviceController.RegisterService(() => new RestTestService());
+			serviceController.RegisterService(new ServiceFactoryWrapper(() => new RestTestService()), typeof(RestTestService));
 			var result = serviceController.Execute(new RestTest(),
 				new HttpRequestContext((object)null, EndpointAttributes.HttpDelete)) as RestTestResponse;
 

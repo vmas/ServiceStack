@@ -20,7 +20,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 		ExampleAppHostHttpListener appHost;
 		readonly JsonServiceClient client = new JsonServiceClient(ListeningOn);
 		private string customUrl = ListeningOn.CombineWith("customrequestbinder");
-		private string predefinedUrl = ListeningOn.CombineWith("json/syncreply/customrequestbinder");
+		private string predefinedUrl = ListeningOn.CombineWith("json/requestreply/customrequestbinder");
 
 		[TestFixtureSetUp]
 		public void OnTestFixtureSetUp()
@@ -40,7 +40,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 		/// first-name=tom&item-0=blah&item-1-delete=1
 		/// </summary>
 		[TestCase("http://localhost:82/customformdata?format=json")] //REST route
-        [TestCase("http://localhost:82/json/syncreply/customformdata")] //Default route
+        [TestCase("http://localhost:82/json/requestreply/customformdata")] //Default route
 		public void Can_parse_custom_form_data(string url)
 		{
 			var webReq = (HttpWebRequest)WebRequest.Create(url);

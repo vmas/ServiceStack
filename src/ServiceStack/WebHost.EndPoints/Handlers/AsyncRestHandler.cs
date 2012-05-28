@@ -23,12 +23,13 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 		private object GetRequestDto(IHttpRequest httpReq, IRestPath restPath)
 		{
 			var requestType = restPath.RequestType;
+            var contentType = !string.IsNullOrEmpty(this.RestPath.OnlyContentType) ? this.RestPath.OnlyContentType : httpReq.ContentType;
 			using (Profiler.Current.Step("Deserialize Request"))
 			{
 				var requestParams = httpReq.GetRequestParams();
 				return httpReq.GetRequestDto(
 					restPath.RequestType, 
-					httpReq.ContentType,
+					contentType,
 					dto => restPath.CreateRequest(httpReq.PathInfo, requestParams, dto) //Custom deserialization logic for REST endpoint
 				);
 			}
@@ -54,10 +55,23 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 					responseContentType = req.ResponseContentType;
 				EndpointHost.Config.AssertContentType(responseContentType);
 
-				var requestDto = this.GetRequestDto(req, this.RestPath);
+                var requestContentType = ContentType.GetEndpointAttributes(req.ResponseContentType);
+                var requestDto = this.GetRequestDto(req, this.RestPath);
+
+                var endpointAttributes = requestContentType | EndpointHandlerBase.GetEndpointAttributes(req);
+                var requestContext = new HttpRequestContext(req, res, requestDto, endpointAttributes);
+
 				if (EndpointHost.ApplyRequestFilters(req, res, requestDto)) return this.CancelRequestProcessing(callback);
 
-				return this.GetServiceResult(req, res, requestDto, callback);
+                if (this.RestPath.IsOneWay)
+                {
+                    EndpointHost.ServiceManager.ServiceController.ExecuteOneWay(requestDto, requestContext);
+                    return this.CancelRequestProcessing(callback);
+                }
+                else
+                {
+                    return EndpointHost.ServiceManager.ServiceController.ExecuteAsync(requestDto, callback, requestContext);
+                }
 			}
 			catch (Exception ex)
 			{
@@ -71,15 +85,6 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 			var emptyServiceResult = new SyncServiceResult();
 			callback(emptyServiceResult);
 			return emptyServiceResult;
-		}
-
-		public IServiceResult GetServiceResult(IHttpRequest httpReq, IHttpResponse httpRes, object request, Action<IServiceResult> callback)
-		{
-			var requestContentType = ContentType.GetEndpointAttributes(httpReq.ResponseContentType);
-
-			var endpointAttributes = this.RestPath.PathAttributes | requestContentType | EndpointHandlerBase.GetEndpointAttributes(httpReq);
-			var requestContext = new HttpRequestContext(httpReq, httpRes, request, endpointAttributes);
-			return EndpointHost.ServiceManager.ServiceController.ExecuteAsync(request, callback, requestContext);
 		}
 
 		public override void EndProcessRequest(IHttpRequest req, IHttpResponse res, IServiceResult result)

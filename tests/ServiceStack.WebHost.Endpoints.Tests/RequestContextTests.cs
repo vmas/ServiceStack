@@ -70,7 +70,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 		static string GetReceivedHeaderValue(string headerName)
 		{
 			var webRequest = (HttpWebRequest)WebRequest.Create(
-				ListeningOn + "json/syncreply/Headers?Name=" + headerName.UrlEncode());
+				ListeningOn + "json/requestreply/Headers?Name=" + headerName.UrlEncode());
 
 			var json = new StreamReader(webRequest.GetResponse().GetResponseStream()).ReadToEnd();
 			Console.WriteLine(json);
@@ -83,7 +83,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 		static Dictionary<string, string> GetResponseHeaders()
 		{
 			var webRequest = (HttpWebRequest)WebRequest.Create(
-				ListeningOn + "json/syncreply/Headers");
+				ListeningOn + "json/requestreply/Headers");
 
 			var webResponse = webRequest.GetResponse();
 
@@ -101,7 +101,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 		public void Can_resolve_CustomHeader()
 		{
 			var webRequest = (HttpWebRequest)WebRequest.Create(
-				ListeningOn + "json/syncreply/Headers?Name=X-CustomHeader");
+				ListeningOn + "json/requestreply/Headers?Name=X-CustomHeader");
 			webRequest.Headers["X-CustomHeader"] = "CustomValue";
 
 			var response = JsonSerializer.DeserializeFromStream<HeadersResponse>(
@@ -124,7 +124,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 			try
 			{
 				var webRequest = (HttpWebRequest)WebRequest.Create(
-					ListeningOn + "json/syncreply/RequestFilter?StatusCode=401");
+					ListeningOn + "json/requestreply/RequestFilter?StatusCode=401");
 
 				webRequest.GetResponse();
 
@@ -143,7 +143,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 			try
 			{
 				var webRequest = (HttpWebRequest)WebRequest.Create(ListeningOn 
-					+ "json/syncreply/RequestFilter?StatusCode=401"
+					+ "json/requestreply/RequestFilter?StatusCode=401"
 					+ "&HeaderName=" + HttpHeaders.WwwAuthenticate
 					+ "&HeaderValue=" + "Basic realm=\"Auth Required\"".UrlEncode());
 

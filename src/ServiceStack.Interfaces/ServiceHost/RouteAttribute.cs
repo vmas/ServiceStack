@@ -72,12 +72,12 @@ namespace ServiceStack.ServiceHost
         /// </param>
         /// <param name="verbs">A comma-delimited list of HTTP verbs supported by the 
         ///		service.  If unspecified, all verbs are assumed to be supported.</param>
-        ///	<param name="pathAttributes">Endpoint attributes associated with this REST route.</param>
-        public RouteAttribute(string path, string verbs, EndpointAttributes pathAttributes)
+        ///	<param name="pathAttributes">Marks the REST route as one way service (request without response).</param>
+        public RouteAttribute(string path, string verbs, bool isOneWay)
         {
             Path = path;
             Verbs = verbs;
-            PathAttributes = pathAttributes;
+            IsOneWay = isOneWay;
         }
 
         /// <summary>
@@ -94,13 +94,13 @@ namespace ServiceStack.ServiceHost
         ///		object returned to the client is formatted, if formatting hints are unspecified
         ///		in the URL. Specify <see langword="null"/> or empty to require formatting
         ///		hints from the client.</param>
-        ///	<param name="pathAttributes">Endpoint attributes associated with this REST route.</param>
-        public RouteAttribute(string path, string verbs, string defaultContentType, EndpointAttributes pathAttributes)
+        ///	<param name="pathAttributes">Marks the REST route as one way service (request without response).</param>
+        public RouteAttribute(string path, string verbs, string defaultContentType, bool isOneWay)
         {
             Path = path;
             Verbs = verbs;
             DefaultContentType = defaultContentType;
-            PathAttributes = pathAttributes;
+            IsOneWay = isOneWay;
         }
 
 		/// <summary>
@@ -176,12 +176,9 @@ namespace ServiceStack.ServiceHost
 		public string DefaultContentType { get; set; }
 
         /// <summary>
-        /// Gets or sets the path attributes. Use EndpointAttributes.AsyncOneWay to change 
-        /// the call style from EndpointAttribues.SyncReply. 
-        /// If the EndpointAttributes.AsyncOneWay call style is used, 
-        /// the ExecuteAsync() method of ServiceBase is called (instead of Execute() ).
-        /// Use IAsyncService instead of IService if you don't inherit from ServiceBase.
+        /// Indicates if the service is executed in one way,
+        /// ie IOneWayService.ExecuteOneWay() instead of IService.Execute() is called
         /// </summary>
-        public EndpointAttributes PathAttributes { get; set; }
+        public bool IsOneWay { get; set; }
     }
 }

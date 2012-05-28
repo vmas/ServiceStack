@@ -18,7 +18,6 @@ namespace ServiceStack.ServiceHost
 		public IServiceController ServiceController { get; private set; }
 
 		public ServiceOperations ServiceOperations { get; set; }
-		public ServiceOperations AllServiceOperations { get; set; }
 
 		private ContainerResolveCache typeFactory;
 
@@ -87,7 +86,6 @@ namespace ServiceStack.ServiceHost
 		public void ReloadServiceOperations()
 		{
 			this.ServiceOperations = new ServiceOperations(this.ServiceController.OperationTypes);
-			this.AllServiceOperations = new ServiceOperations(this.ServiceController.AllOperationTypes);
 		}
 
 		public void RegisterService<T>()

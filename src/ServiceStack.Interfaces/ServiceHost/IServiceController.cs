@@ -20,16 +20,15 @@ namespace ServiceStack.ServiceHost
 		HashSet<Type> ServiceTypes { get; }
 
 		/// <summary>
-		/// Returns a list of operation types available in this service
+		/// Returns a list of operation types (ie request & response types) available in this service
 		/// </summary>
 		/// <value>The operation types.</value>
 		IList<Type> OperationTypes { get; }
 
-		/// <summary>
-		/// Returns a list of ALL operation types available in this service
-		/// </summary>
-		/// <value>The operation types.</value>
-		IList<Type> AllOperationTypes { get; }
+        /// <summary>
+        /// Returns a list of all request types
+        /// </summary>
+        IList<Type> RequestTypes { get; }
 
 		/// <summary>
 		/// Executes the DTO request under the supplied requestContext.
@@ -37,12 +36,14 @@ namespace ServiceStack.ServiceHost
 		/// <param name="request"></param>
 		/// <param name="requestContext"></param>
 		/// <returns></returns>
+        [Obsolete]
 		object Execute(object request, IRequestContext requestContext = null);
 
 		IServiceResult ExecuteAsync(object request, Action<IServiceResult> callback, IRequestContext requestContext = null);
 
+        void ExecuteOneWay(object request, IRequestContext requestContext = null);
+
 		void RegisterServices(ITypeFactory serviceFactory, IEnumerable<Type> serviceTypes);
-		void RegisterService<TReq>(Func<IService<TReq>> serviceFactoryFn);
 		void RegisterService(ITypeFactory serviceFactory, Type serviceType);
 
 		Func<IRequestContext, object, Action<IServiceResult>, IServiceResult> GetService(Type requestType);

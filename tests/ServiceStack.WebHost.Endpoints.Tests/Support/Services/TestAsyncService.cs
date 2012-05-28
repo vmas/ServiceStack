@@ -22,7 +22,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests.Support.Services
 	}
 
 	public class TestAsyncService 
-		: IService<TestAsync>, IAsyncService<TestAsync>
+		: IService<TestAsync>, IOneWayService<TestAsync>
 	{
 		private readonly IFoo foo;
 
@@ -45,9 +45,9 @@ namespace ServiceStack.WebHost.Endpoints.Tests.Support.Services
 			return new TestAsyncResponse { Foo = this.foo, ExecuteTimes = ++ExecuteTimes };
 		}
 
-		public object ExecuteAsync(TestAsync request)
+		public void ExecuteOneWay(TestAsync request)
 		{
-			return new TestAsyncResponse { Foo = this.foo, ExecuteAsyncTimes = ++ExecuteAsyncTimes };
+			new TestAsyncResponse { Foo = this.foo, ExecuteAsyncTimes = ++ExecuteAsyncTimes };
 		}
 	}
 }

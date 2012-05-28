@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
@@ -22,8 +23,8 @@ namespace ServiceStack.ServiceHost
 		{
 			this.RequestServiceTypeMap = new Dictionary<Type, Type>();
 			this.ResponseServiceTypeMap = new Dictionary<Type, Type>();
-			this.AllOperationTypes = new List<Type>();
 			this.OperationTypes = new List<Type>();
+            this.RequestTypes = new List<Type>();
 			this.RequestTypeFactoryMap = new Dictionary<Type, Func<IHttpRequest, object>>();
 			this.ResponseConverters = new List<Func<object, object, object, Action<IServiceResult>, IServiceResult>>();
 			this.ServiceTypes = new HashSet<Type>();
@@ -32,14 +33,14 @@ namespace ServiceStack.ServiceHost
 		readonly Dictionary<Type, Func<IRequestContext, object, Action<IServiceResult>, IServiceResult>> requestExecMap
 			= new Dictionary<Type, Func<IRequestContext, object,  Action<IServiceResult>, IServiceResult>>();
 
-		readonly Dictionary<Type, ServiceAttribute> requestServiceAttrs
-			= new Dictionary<Type, ServiceAttribute>();
+        readonly Dictionary<Type, Action<IRequestContext, object>> requestExecOneWayMap
+            = new Dictionary<Type, Action<IRequestContext, object>>();
 
 		public Dictionary<Type, Type> ResponseServiceTypeMap { get; set; }
 
 		public Dictionary<Type, Type> RequestServiceTypeMap { get; set; }
 
-		public IList<Type> AllOperationTypes { get; protected set; }
+        public IList<Type> RequestTypes { get; protected set; }
 
 		public IList<Type> OperationTypes { get; protected set; }
 
@@ -50,31 +51,6 @@ namespace ServiceStack.ServiceHost
 		public HashSet<Type> ServiceTypes { get; protected set; }
 
 		public string DefaultOperationsNamespace { get; set; }
-
-		public void RegisterService<TReq>(Func<IService<TReq>> serviceFactoryFn)
-		{
-			var requestType = typeof(TReq);
-			Func<IRequestContext, object, Action<IServiceResult>, IServiceResult> handlerFn = (requestContext, request, callback) =>
-			{
-				var service = serviceFactoryFn();
-
-				InjectRequestContext(service, requestContext);
-
-				var response = ServiceExec<TReq>.Execute(
-					service, (TReq)request,
-					requestContext != null ? requestContext.EndpointAttributes : EndpointAttributes.None);
-
-				var convertedResponse = this.ExecuteResponseConverters(service, request, response, callback);
-				if (convertedResponse != null)
-					return convertedResponse;
-
-				var serviceResult = new SyncServiceResult(response);
-				callback(serviceResult);
-				return serviceResult;
-			};
-
-			this.RegisterService(requestType, typeof(IService<TReq>), handlerFn);
-		}
 
 		public void RegisterServices(ITypeFactory serviceFactory, IEnumerable<Type> serviceTypes)
 		{
@@ -99,35 +75,58 @@ namespace ServiceStack.ServiceHost
 
 		public void RegisterService(Type requestType, Type serviceType, ITypeFactory serviceFactory)
 		{
-			var typeFactoryFn = CallServiceExecuteGeneric(requestType, serviceType);
+            Func<IRequestContext, object, Action<IServiceResult>, IServiceResult> handlerFn = null;
+            Action<IRequestContext, object> oneWayHandlerFn = null;
 
-			Func<IRequestContext, object, Action<IServiceResult>, IServiceResult> handlerFn = (requestContext, request, callback) =>
-			{
-				var service = serviceFactory.CreateInstance(serviceType);
-				using (service as IDisposable) // using is happy if this expression evals to null
-				{
-					InjectRequestContext(service, requestContext);
+            //Check if service is a type of IService<>
+            if (serviceType.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IService<>)))
+            {
+                var callServiceFn = CallServiceExecuteGeneric(requestType, serviceType);
 
-					var endpointAttrs = requestContext != null
-						? requestContext.EndpointAttributes
-						: EndpointAttributes.None;
+                handlerFn = (requestContext, request, callback) =>
+                {
+                    var service = serviceFactory.CreateInstance(serviceType);
+                    using (service as IDisposable) // using is happy if this expression evals to null
+                    {
+                        InjectRequestContext(service, requestContext);
 
-					//Executes the service and returns the result
-					var response = typeFactoryFn(request, service, endpointAttrs);
-					if (EndpointHost.AppHost != null) //tests
-						EndpointHost.AppHost.Release(service);
+                        var endpointAttrs = requestContext != null
+                            ? requestContext.EndpointAttributes
+                            : EndpointAttributes.None;
 
-					var convertedResponse = this.ExecuteResponseConverters(service, request, response, callback);
-					if (convertedResponse != null)
-						return convertedResponse;
+                        //Executes the service and returns the result
+                        var response = callServiceFn(request, service, endpointAttrs);
+                        if (EndpointHost.AppHost != null) //tests
+                            EndpointHost.AppHost.Release(service);
 
-					var serviceResult = new SyncServiceResult(response);
-					callback(serviceResult);
-					return serviceResult;
-				}
-			};
+                        var convertedResponse = this.ExecuteResponseConverters(service, request, response, callback);
+                        if (convertedResponse != null)
+                            return convertedResponse;
 
-			this.RegisterService(requestType, serviceType, handlerFn);
+                        var serviceResult = new SyncServiceResult(response);
+                        callback(serviceResult);
+                        return serviceResult;
+                    }
+                };
+            }
+
+            //Check if this service is an one-way service
+            if (serviceType.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IOneWayService<>)))
+            {
+                var callOneWayServiceFn = GetCallOneWayServiceFn(requestType);
+
+                oneWayHandlerFn = (requestContext, request) =>
+                {
+                    var service = serviceFactory.CreateInstance(serviceType);
+                    using (service as IDisposable)
+                    {
+                        InjectRequestContext(service, requestContext);
+                        callOneWayServiceFn(service, request);
+                    }
+                };
+            }
+
+            this.RegisterService(requestType, serviceType, handlerFn, oneWayHandlerFn);
 		}
 
 		private IServiceResult ExecuteResponseConverters(object service, object request, object response, Action<IServiceResult> callback)
@@ -144,11 +143,16 @@ namespace ServiceStack.ServiceHost
 			return null;
 		}
 
-		private void RegisterService(Type requestType, Type serviceType, Func<IRequestContext, object, Action<IServiceResult>, IServiceResult> handlerFn)
+		private void RegisterService(Type requestType, Type serviceType, Func<IRequestContext, object, Action<IServiceResult>, IServiceResult> handlerFn, 
+            Action<IRequestContext, object> oneWayHandlerFn)
 		{
 			try
 			{
-				requestExecMap.Add(requestType, handlerFn);
+                if(handlerFn != null)
+                    requestExecMap.Add(requestType, handlerFn);
+
+                if(oneWayHandlerFn != null)
+                    requestExecOneWayMap.Add(requestType, oneWayHandlerFn);
 			}
 			catch (ArgumentException)
 			{
@@ -161,7 +165,7 @@ namespace ServiceStack.ServiceHost
 			this.ServiceTypes.Add(serviceType);
 
 			this.RequestServiceTypeMap[requestType] = serviceType;
-			this.AllOperationTypes.Add(requestType);
+            this.RequestTypes.Add(requestType);
 			this.OperationTypes.Add(requestType);
 
 			var responseTypeName = requestType.FullName + ResponseDtoSuffix;
@@ -169,7 +173,6 @@ namespace ServiceStack.ServiceHost
 			if (responseType != null)
 			{
 				this.ResponseServiceTypeMap[responseType] = serviceType;
-				this.AllOperationTypes.Add(responseType);
 				this.OperationTypes.Add(responseType);
 			}
 
@@ -234,6 +237,22 @@ namespace ServiceStack.ServiceHost
 			}
 		}
 
+        private static Action<object, object> GetCallOneWayServiceFn(Type requestType)
+        {
+            var requestDtoParam = Expression.Parameter(typeof(object), "requestDto");
+            var requestDtoStrong = Expression.Convert(requestDtoParam, requestType);
+
+            var serviceParam = Expression.Parameter(typeof(object), "serviceObj");
+
+            var oneWayServiceType = typeof(IOneWayService<>).MakeGenericType(requestType);
+            var serviceStrong = Expression.Convert(serviceParam, oneWayServiceType);
+
+            var executeOneWayMethod = oneWayServiceType.GetMethod("ExecuteOneWay");
+            var executeExpression = Expression.Call(serviceStrong, executeOneWayMethod, requestDtoStrong);
+
+            return Expression.Lambda<Action<object, object>>(executeExpression, serviceParam, requestDtoParam).Compile(); ;
+        }
+
 		public object Execute(object request, IRequestContext requestContext = null)
 		{
 			var serviceResult = this.ExecuteAsync(request, r => { }, requestContext);
@@ -246,6 +265,17 @@ namespace ServiceStack.ServiceHost
 			var handlerFn = GetService(requestType);
 			return handlerFn(requestContext, request, callback);
 		}
+
+        public void ExecuteOneWay(object request, IRequestContext requestContext = null)
+        {
+            var requestType = request.GetType();
+
+            Action<IRequestContext, object> oneWayHandlerFn;
+            if (!requestExecOneWayMap.TryGetValue(requestType, out oneWayHandlerFn))
+                throw new NotImplementedException(string.Format("Unable to resolve '{0}' IOneWayService", requestType.Name));
+
+            oneWayHandlerFn(requestContext, request);
+        }
 
 		public Func<IRequestContext, object, Action<IServiceResult>, IServiceResult> GetService(Type requestType)
 		{

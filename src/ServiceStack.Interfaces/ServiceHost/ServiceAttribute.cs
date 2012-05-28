@@ -85,15 +85,6 @@ namespace ServiceStack.ServiceHost
 					restrictAccessTo |= (restrictAccessToScenario & EndpointAttributes.AllHttpMethods);
 				}
 
-				//Call style
-				if (!HasAnyRestrictionsOf(restrictAccessToScenario, EndpointAttributes.AllCallStyles))
-				{
-					restrictAccessTo |= EndpointAttributes.AllCallStyles;
-				}
-				else
-				{
-					restrictAccessTo |= (restrictAccessToScenario & EndpointAttributes.AllCallStyles);
-				}
 
 				//Endpoint
 				if (!HasAnyRestrictionsOf(restrictAccessToScenario, EndpointAttributes.AllEndpointTypes))

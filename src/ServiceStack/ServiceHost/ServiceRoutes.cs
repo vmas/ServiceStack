@@ -15,37 +15,25 @@ namespace ServiceStack.ServiceHost
 
 		public IServiceRoutes Add<TRequest>(string restPath, string verbs)
 		{
-			RestPaths.Add(new RestPath(typeof(TRequest), restPath, verbs, null, EndpointAttributes.SyncReply));
+			RestPaths.Add(new RestPath(typeof(TRequest), restPath, verbs, null, null, false));
 			return this;
 		}
 
 		public IServiceRoutes Add<TRequest>(string restPath, string verbs, string defaultContentType)
 		{
-			RestPaths.Add(new RestPath(typeof(TRequest), restPath, verbs, defaultContentType, EndpointAttributes.SyncReply));
+			RestPaths.Add(new RestPath(typeof(TRequest), restPath, verbs, defaultContentType, null, false));
 			return this;
 		}
 
-        public IServiceRoutes Add<TRequest>(string restPath, string verbs, string defaultContentType, EndpointAttributes pathAttributes)
+        public IServiceRoutes Add<TRequest>(string restPath, string verbs, string defaultContentType, bool isOneWay)
         {
-            var allPathAttributes = EndpointAttributes.SyncReply;
-
-            //Check if attributes contain call style
-            if ((EndpointAttributes.AllCallStyles & pathAttributes) != 0)
-            {
-                allPathAttributes = pathAttributes;
-            }
-            else
-            {
-                allPathAttributes |= pathAttributes;
-            }
-
-            RestPaths.Add(new RestPath(typeof(TRequest), restPath, verbs, defaultContentType, allPathAttributes));
+            RestPaths.Add(new RestPath(typeof(TRequest), restPath, verbs, defaultContentType, null, isOneWay));
             return this;
         }
 
         public IServiceRoutes Add(Type requestType, string restPath, string verbs, string defaultContentType)
         {
-            RestPaths.Add(new RestPath(requestType, restPath, verbs, defaultContentType, EndpointAttributes.SyncReply));
+            RestPaths.Add(new RestPath(requestType, restPath, verbs, defaultContentType, null, false));
             return this;
         }
 	}

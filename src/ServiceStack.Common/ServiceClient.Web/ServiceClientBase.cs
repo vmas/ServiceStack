@@ -105,8 +105,8 @@ namespace ServiceStack.ServiceClient.Web
         {
             this.BaseUri = baseUri;
             this.asyncClient.BaseUri = baseUri;
-            this.SyncReplyBaseUri = baseUri.WithTrailingSlash() + Format + "/syncreply/";
-            this.AsyncOneWayBaseUri = baseUri.WithTrailingSlash() + Format + "/asynconeway/";
+            this.SyncReplyBaseUri = baseUri.WithTrailingSlash() + Format + "/requestreply/";
+            this.AsyncOneWayBaseUri = baseUri.WithTrailingSlash() + Format + "/oneway/";
         }
 
         /// <summary>
@@ -120,8 +120,8 @@ namespace ServiceStack.ServiceClient.Web
         {
             this.BaseUri = baseUri;
             this.asyncClient.BaseUri = baseUri;
-            this.SyncReplyBaseUri = baseUri.WithTrailingSlash() + format + "/syncreply/";
-            this.AsyncOneWayBaseUri = baseUri.WithTrailingSlash() + format + "/asynconeway/";
+            this.SyncReplyBaseUri = baseUri.WithTrailingSlash() + format + "/requestreply/";
+            this.AsyncOneWayBaseUri = baseUri.WithTrailingSlash() + format + "/oneway/";
         }
 
         private bool _disableAutoCompression;

@@ -10,7 +10,7 @@ using ServiceStack.ServiceClient.Web;
 
 namespace ServiceStack.WebHost.Endpoints.Tests
 {
-    [Route("/queue", "GET", EndpointAttributes.AsyncOneWay)]
+    [Route("/queue", "GET", IsOneWay = true)]
     public class Queue
     {
     }
@@ -77,7 +77,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
         }
 
         [TestCase("/queue")]
-        [TestCase("/json/asynconeway/queue")]
+        [TestCase("/json/oneway/queue")]
         public void Does_add_message_to_queue_on_async_one_way_request(string url)
         {
             called = 0;

@@ -105,13 +105,8 @@ namespace ServiceStack.ServiceHost
         ///		Specify <see langword="null"/> or empty to require formatting hints from
         ///		the client.
         /// </param>
-        /// <param name="pathAttributes">
-        ///     EndpointAttributes with this REST route. 
-        ///     Use this parameter to set the call style from EndpointAttributes.SyncReply to EndpointAttributes.AsyncOneWay 
-        ///     for example.
-        /// </param>
         /// <returns>The same <see cref="IServiceRoutes"/> instance;
         ///		never <see langword="null"/>.</returns>
-        IServiceRoutes Add<TRequest>(string restPath, string verbs, string defaultContentType, EndpointAttributes pathAttributes);
+        IServiceRoutes Add<TRequest>(string restPath, string verbs, string defaultContentType, bool isOneWay);
 	}
 }

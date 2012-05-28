@@ -20,17 +20,17 @@ namespace ServiceStack.Messaging.Tests.Services
 	}
 
 	public class AlwaysFailService
-		: AsyncServiceBase<AlwaysFail>
+		: IOneWayService<AlwaysFail>
 	{
 		public int TimesCalled { get; set; }
 		public string Result { get; set; }
 
-		protected override object Run(AlwaysFail request)
-		{
-			this.TimesCalled++;
+        public void ExecuteOneWay(AlwaysFail request)
+        {
+            this.TimesCalled++;
 
-			throw new NotSupportedException("This service always fails");
-		}
-	}
+            throw new NotSupportedException("This service always fails");
+        }
+    }
 
 }

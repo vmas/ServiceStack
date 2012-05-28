@@ -103,7 +103,6 @@
   <ItemGroup>
     <Compile Include="Admin\RequestLogsFeature.cs" />
     <Compile Include="ApplyTo.cs" />
-    <Compile Include="AsyncServiceBase.cs" />
     <Compile Include="AuthenticateAttribute.cs" />
     <Compile Include="AuthFeature.cs" />
     <Compile Include="Auth\AssignRolesService.cs" />

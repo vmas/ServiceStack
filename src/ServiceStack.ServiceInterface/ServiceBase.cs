@@ -24,7 +24,7 @@ namespace ServiceStack.ServiceInterface
     /// </summary>
     /// <typeparam name="TRequest"></typeparam>
     public abstract class ServiceBase<TRequest>
-		: IService<TRequest>, IRequiresRequestContext, IServiceBase, IAsyncService<TRequest>
+		: IService<TRequest>, IRequiresRequestContext, IServiceBase, IOneWayService<TRequest>
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(ServiceBase<>));
 
@@ -292,12 +292,10 @@ namespace ServiceStack.ServiceInterface
 		/// EndpointAttributes.AsyncOneWay requests
 		/// </summary>
 		/// <param name="request"></param>
-		public virtual object ExecuteAsync(TRequest request)
+		public virtual void ExecuteOneWay(TRequest request)
 		{
 			if (MessageFactory == null)
-			{
-				return Execute(request);
-			}
+				Execute(request);
 
 			BeforeEachRequest(request);
 
@@ -307,8 +305,6 @@ namespace ServiceStack.ServiceInterface
 			{
 				producer.Publish(request);
 			}
-
-			return ServiceUtils.CreateResponseDto(request);
 		}
 
 	}

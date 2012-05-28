@@ -13,7 +13,6 @@ namespace ServiceStack.WebHost.Endpoints
 	public class EndpointHost
 	{
 		public static ServiceOperations ServiceOperations { get; private set; }
-		public static ServiceOperations AllServiceOperations { get; private set; }
 
 		public static IAppHost AppHost { get; internal set; }
 
@@ -147,7 +146,6 @@ namespace ServiceStack.WebHost.Endpoints
 			{
 				config.ServiceManager = value;
 				ServiceOperations = value.ServiceOperations;
-				AllServiceOperations = value.AllServiceOperations;
 			}
 		}
 
@@ -286,10 +284,9 @@ namespace ServiceStack.WebHost.Endpoints
 			}
 		}
 
-		public static void SetOperationTypes(ServiceOperations operationTypes, ServiceOperations allOperationTypes)
+		public static void SetOperationTypes(ServiceOperations operationTypes)
 		{
 			ServiceOperations = operationTypes;
-			AllServiceOperations = allOperationTypes;
 		}
 
 		internal static object ExecuteService(object request, EndpointAttributes endpointAttributes, IHttpRequest httpReq, IHttpResponse httpRes)

@@ -21,7 +21,7 @@ namespace ServiceStack.WebHost.Endpoints.Support.Metadata
 			var baseUri = context.Request.GetParentBaseUrl();
 			var optimizeForFlash = context.Request.QueryString["flash"] != null;
 			var includeAllTypesInAssembly = context.Request.QueryString["includeAllTypes"] != null;
-			var operations = includeAllTypesInAssembly ? EndpointHost.AllServiceOperations : EndpointHost.ServiceOperations;
+			var operations = EndpointHost.ServiceOperations;
 
 			try
 			{

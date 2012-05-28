@@ -92,7 +92,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 		}
 
 		[TestCase(ListeningOn + "/fileuploads")] //REST route
-        [TestCase(ListeningOn + "/json/syncreply/fileupload")] //Default route
+        [TestCase(ListeningOn + "/json/requestreply/fileupload")] //Default route
 		public void Can_POST_upload_file(string url)
 		{
 			var uploadFile = new FileInfo("~/TestExistingDir/upload.html".MapProjectPath());
@@ -112,7 +112,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 		}
 
         [TestCase(ListeningOn + "/fileuploads")] //REST route
-        [TestCase(ListeningOn + "/json/syncreply/fileupload")] //Default route
+        [TestCase(ListeningOn + "/json/requestreply/fileupload")] //Default route
 		public void Can_POST_upload_file_using_ServiceClient(string url)
 		{
 			IServiceClient client = new JsonServiceClient(ListeningOn);
@@ -129,7 +129,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 		}
 
         [TestCase(ListeningOn + "/fileuploads")] //REST route
-        [TestCase(ListeningOn + "/json/syncreply/fileupload")] //Default route
+        [TestCase(ListeningOn + "/json/requestreply/fileupload")] //Default route
         public void Can_POST_upload_file_using_ServiceClient_with_request(string url)
         {
             IServiceClient client = new JsonServiceClient(ListeningOn);
@@ -186,7 +186,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 		}
 
         [TestCase(ListeningOn + "/fileuploads")] //REST route
-        [TestCase(ListeningOn + "/json/syncreply/fileupload")] //Default route
+        [TestCase(ListeningOn + "/json/requestreply/fileupload")] //Default route
         public void Can_POST_upload_file_and_apply_filter_using_ServiceClient(string url)
         {
             try
@@ -218,7 +218,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
         }
 
         [TestCase(ListeningOn + "/fileuploads")] //REST route
-        [TestCase(ListeningOn + "/json/syncreply/fileupload")] //Default route
+        [TestCase(ListeningOn + "/json/requestreply/fileupload")] //Default route
         public void Can_POST_upload_stream_using_ServiceClient(string url)
         {
             try

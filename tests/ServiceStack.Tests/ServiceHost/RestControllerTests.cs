@@ -22,18 +22,18 @@ namespace ServiceStack.Tests.ServiceHost
 			var matchingPath = controller.GetRestPathForRequest("GET", "/hello");
 			Assert.That(matchingPath, Is.Not.Null);
 			Assert.That(matchingPath.RequestType, Is.EqualTo(typeof(RequestDto)));
-            Assert.That(matchingPath.PathAttributes, Is.EqualTo(EndpointAttributes.SyncReply));
+            Assert.That(matchingPath.IsOneWay, Is.EqualTo(false));
 		}
 
 		[Test]
 		public void Does_notice_http_method()
 		{
 			IRestController controller = new RestController();
-			controller.RegisterRestPath(new RestPath(typeof(RequestDto), "/hello", "GET", null, EndpointAttributes.SyncReply));
+			controller.RegisterRestPath(new RestPath(typeof(RequestDto), "/hello", "GET", null, true));
 
 			var matchingGetPath = controller.GetRestPathForRequest("GET", "/hello");
 			Assert.That(matchingGetPath, Is.Not.Null);
-            Assert.That(matchingGetPath.PathAttributes, Is.EqualTo(EndpointAttributes.SyncReply));
+            Assert.That(matchingGetPath.IsOneWay, Is.EqualTo(true));
 
 			var matchingPostPath = controller.GetRestPathForRequest("POST", "/hello");
 			Assert.That(matchingPostPath, Is.Null);
@@ -43,15 +43,15 @@ namespace ServiceStack.Tests.ServiceHost
 		public void Does_notice_multiple_http_methods()
 		{
 			IRestController controller = new RestController();
-			controller.RegisterRestPath(new RestPath(typeof(RequestDto), "/hello", "GET, POST", null, EndpointAttributes.AsyncOneWay));
+			controller.RegisterRestPath(new RestPath(typeof(RequestDto), "/hello", "GET, POST", null, true));
 
 			var matchingGetPath = controller.GetRestPathForRequest("GET", "/hello");
 			Assert.That(matchingGetPath, Is.Not.Null);
-            Assert.That(matchingGetPath.PathAttributes, Is.EqualTo(EndpointAttributes.AsyncOneWay));
+            Assert.That(matchingGetPath.IsOneWay, Is.EqualTo(true));
 
 			var matchingPostPath = controller.GetRestPathForRequest("POST", "/hello");
 			Assert.That(matchingPostPath, Is.Not.Null);
-            Assert.That(matchingPostPath.PathAttributes, Is.EqualTo(EndpointAttributes.AsyncOneWay));
+            Assert.That(matchingPostPath.IsOneWay, Is.EqualTo(true));
 
 			var matchingPutPath = controller.GetRestPathForRequest("PUT", "/hello");
 			Assert.That(matchingPutPath, Is.Null);
@@ -94,22 +94,22 @@ namespace ServiceStack.Tests.ServiceHost
 
             var matchingGetPath = controller.GetRestPathForRequest("GET", "/hello");
             Assert.That(matchingGetPath, Is.Not.Null);
-            Assert.That(matchingGetPath.PathAttributes, Is.EqualTo(EndpointAttributes.SyncReply));
+            Assert.That(matchingGetPath.IsOneWay, Is.EqualTo(false));
 
             var matchingPostPath = controller.GetRestPathForRequest("POST", "/hello");
             Assert.That(matchingPostPath, Is.Not.Null);
-            Assert.That(matchingPostPath.PathAttributes, Is.EqualTo(EndpointAttributes.SyncReply));
+            Assert.That(matchingPostPath.IsOneWay, Is.EqualTo(false));
 
             var matchingPutPath = controller.GetRestPathForRequest("PUT", "/hello");
             Assert.That(matchingPutPath, Is.Not.Null);
-            Assert.That(matchingPutPath.PathAttributes, Is.EqualTo(EndpointAttributes.SyncReply));
+            Assert.That(matchingPutPath.IsOneWay, Is.EqualTo(false));
 
             var matchingDeletePath = controller.GetRestPathForRequest("DELETE", "/hello");
             Assert.That(matchingDeletePath, Is.Not.Null);
-            Assert.That(matchingDeletePath.PathAttributes, Is.EqualTo(EndpointAttributes.SyncReply)); 
+            Assert.That(matchingDeletePath.IsOneWay, Is.EqualTo(false)); 
         }
 
-        [Route("/queue", PathAttributes = EndpointAttributes.AsyncOneWay)]
+        [Route("/queue", IsOneWay = true)]
         class Queue
         {
         }
@@ -122,7 +122,7 @@ namespace ServiceStack.Tests.ServiceHost
 
             var matchingGetPath = controller.GetRestPathForRequest("GET", "/queue");
             Assert.That(matchingGetPath, Is.Not.Null);
-            Assert.That(matchingGetPath.PathAttributes, Is.EqualTo(EndpointAttributes.AsyncOneWay)); 
+            Assert.That(matchingGetPath.IsOneWay, Is.EqualTo(true)); 
         }
 
         [Route("/test", Verbs = "GET")]
@@ -138,7 +138,7 @@ namespace ServiceStack.Tests.ServiceHost
 
             var matchingGetPath = controller.GetRestPathForRequest("GET", "/test");
             Assert.That(matchingGetPath, Is.Not.Null);
-            Assert.That(matchingGetPath.PathAttributes, Is.EqualTo(EndpointAttributes.SyncReply));
+            Assert.That(matchingGetPath.IsOneWay, Is.EqualTo(false));
 
             var matchingPostPath = controller.GetRestPathForRequest("POST", "/test");
             Assert.That(matchingPostPath, Is.Null);
