@@ -77,7 +77,7 @@ namespace ServiceStack.ServiceHost
         {
             Path = path;
             Verbs = verbs;
-            PathAttributes = PathAttributes;
+            PathAttributes = pathAttributes;
         }
 
         /// <summary>

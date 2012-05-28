@@ -124,6 +124,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppHostListenerBaseTests.cs" />
+    <Compile Include="AsyncOneWayTests.cs" />
     <Compile Include="AsyncRestClientTests.cs" />
     <Compile Include="AsyncServiceClientTests.cs" />
     <Compile Include="AttributeFiltersTest.cs" />
