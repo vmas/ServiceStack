@@ -39,10 +39,11 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 		/// <summary>
 		/// first-name=tom&item-0=blah&item-1-delete=1
 		/// </summary>
-		[Test]
-		public void Can_parse_custom_form_data()
+		[TestCase("http://localhost:82/customformdata?format=json")] //REST route
+        [TestCase("http://localhost:82/json/syncreply/customformdata")] //Default route
+		public void Can_parse_custom_form_data(string url)
 		{
-			var webReq = (HttpWebRequest)WebRequest.Create("http://localhost:82/customformdata?format=json");
+			var webReq = (HttpWebRequest)WebRequest.Create(url);
 			webReq.Method = HttpMethods.Post;
 			webReq.ContentType = ContentType.FormUrlEncoded;
 

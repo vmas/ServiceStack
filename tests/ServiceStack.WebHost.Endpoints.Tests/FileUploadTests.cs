@@ -91,12 +91,13 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 			Assert.That(response.ContentType.StartsWith(contentType));
 		}
 
-		[Test]
-		public void Can_POST_upload_file()
+		[TestCase(ListeningOn + "/fileuploads")] //REST route
+        [TestCase(ListeningOn + "/json/syncreply/fileupload")] //Default route
+		public void Can_POST_upload_file(string url)
 		{
 			var uploadFile = new FileInfo("~/TestExistingDir/upload.html".MapProjectPath());
 
-			var webRequest = (HttpWebRequest)WebRequest.Create(ListeningOn + "/fileuploads");
+			var webRequest = (HttpWebRequest)WebRequest.Create(url);
 			webRequest.Accept = ContentType.Json;
 			var webResponse = webRequest.UploadFile(uploadFile, MimeTypes.GetMimeType(uploadFile.Name));
 
@@ -110,17 +111,15 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 			});
 		}
 
-		[Test]
-		public void Can_POST_upload_file_using_ServiceClient()
+        [TestCase(ListeningOn + "/fileuploads")] //REST route
+        [TestCase(ListeningOn + "/json/syncreply/fileupload")] //Default route
+		public void Can_POST_upload_file_using_ServiceClient(string url)
 		{
 			IServiceClient client = new JsonServiceClient(ListeningOn);
 
 			var uploadFile = new FileInfo("~/TestExistingDir/upload.html".MapProjectPath());
 
-
-			var response = client.PostFile<FileUploadResponse>(
-				ListeningOn + "/fileuploads", uploadFile, MimeTypes.GetMimeType(uploadFile.Name));
-
+			var response = client.PostFile<FileUploadResponse>(url, uploadFile, MimeTypes.GetMimeType(uploadFile.Name));
 
 			var expectedContents = new StreamReader(uploadFile.OpenRead()).ReadToEnd();
 			Assert.That(response.FileName, Is.EqualTo(uploadFile.Name));
@@ -129,15 +128,16 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 			Assert.That(response.Contents, Is.EqualTo(expectedContents));
 		}
 
-        [Test]
-        public void Can_POST_upload_file_using_ServiceClient_with_request()
+        [TestCase(ListeningOn + "/fileuploads")] //REST route
+        [TestCase(ListeningOn + "/json/syncreply/fileupload")] //Default route
+        public void Can_POST_upload_file_using_ServiceClient_with_request(string url)
         {
             IServiceClient client = new JsonServiceClient(ListeningOn);
 
             var uploadFile = new FileInfo("~/TestExistingDir/upload.html".MapProjectPath());
 
             var request = new FileUpload{CustomerId = 123, CustomerName = "Foo"};
-            var response = client.PostFileWithRequest<FileUploadResponse>(ListeningOn + "/fileuploads", uploadFile, request);
+            var response = client.PostFileWithRequest<FileUploadResponse>(url, uploadFile, request);
 
             var expectedContents = new StreamReader(uploadFile.OpenRead()).ReadToEnd();
             Assert.That(response.FileName, Is.EqualTo(uploadFile.Name));
@@ -185,8 +185,9 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 			Assert.That(actualContents, Is.EqualTo(expectedContents));
 		}
 
-        [Test]
-        public void Can_POST_upload_file_and_apply_filter_using_ServiceClient()
+        [TestCase(ListeningOn + "/fileuploads")] //REST route
+        [TestCase(ListeningOn + "/json/syncreply/fileupload")] //Default route
+        public void Can_POST_upload_file_and_apply_filter_using_ServiceClient(string url)
         {
             try
             {
@@ -200,8 +201,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
                                                                 
                                                              };
 
-                var response = client.PostFile<FileUploadResponse>(
-                    ListeningOn + "/fileuploads", uploadFile, MimeTypes.GetMimeType(uploadFile.Name));
+                var response = client.PostFile<FileUploadResponse>(url, uploadFile, MimeTypes.GetMimeType(uploadFile.Name));
 
 
                 var expectedContents = new StreamReader(uploadFile.OpenRead()).ReadToEnd();
@@ -217,8 +217,9 @@ namespace ServiceStack.WebHost.Endpoints.Tests
             }
         }
 
-        [Test]
-        public void Can_POST_upload_stream_using_ServiceClient()
+        [TestCase(ListeningOn + "/fileuploads")] //REST route
+        [TestCase(ListeningOn + "/json/syncreply/fileupload")] //Default route
+        public void Can_POST_upload_stream_using_ServiceClient(string url)
         {
             try
             {
@@ -234,8 +235,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
                         isFilterCalled = true;
 
                     };
-                    var response = client.PostFile<FileUploadResponse>(
-                        ListeningOn + "/fileuploads", fileStream, fileName, MimeTypes.GetMimeType(fileName));
+                    var response = client.PostFile<FileUploadResponse>(url, fileStream, fileName, MimeTypes.GetMimeType(fileName));
 
                     fileStream.Position = 0;
                     var expectedContents = new StreamReader(fileStream).ReadToEnd();
