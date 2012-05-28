@@ -13,13 +13,11 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 {
 	public class AsyncRestHandler : AsyncHandlerBase
 	{
-		public EndpointAttributes HandlerAttributes { get; set; }
 		public IRestPath RestPath { get; set; }
 
 		public AsyncRestHandler(IRestPath restPath)
 		{
 			this.RestPath = restPath;
-			this.HandlerAttributes = EndpointAttributes.SyncReply;
 		}
 
 		private object GetRequestDto(IHttpRequest httpReq, IRestPath restPath)
@@ -36,6 +34,7 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 			}
 		}
 
+        //Used by ASP.net
         public override IAsyncResult BeginProcessRequest(System.Web.HttpContext context, AsyncCallback cb, object extraData)
         {
             var operationName = this.RestPath.RequestType.Name;
@@ -78,7 +77,7 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 		{
 			var requestContentType = ContentType.GetEndpointAttributes(httpReq.ResponseContentType);
 
-			var endpointAttributes = HandlerAttributes | requestContentType | EndpointHandlerBase.GetEndpointAttributes(httpReq);
+			var endpointAttributes = this.RestPath.PathAttributes | requestContentType | EndpointHandlerBase.GetEndpointAttributes(httpReq);
 			var requestContext = new HttpRequestContext(httpReq, httpRes, request, endpointAttributes);
 			return EndpointHost.ServiceManager.ServiceController.ExecuteAsync(request, callback, requestContext);
 		}

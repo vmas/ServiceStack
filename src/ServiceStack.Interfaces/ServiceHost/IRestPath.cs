@@ -9,6 +9,8 @@ namespace ServiceStack.ServiceHost
 
 		string DefaultContentType { get; }
 
+        EndpointAttributes PathAttributes { get; }
+
 		object CreateRequest(string pathInfo, Dictionary<string, string> queryStringAndFormData, object fromInstance);
 	}
 }

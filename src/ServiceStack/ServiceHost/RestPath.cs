@@ -46,6 +46,8 @@ namespace ServiceStack.ServiceHost
 
 		public Type RequestType { get; private set; }
 
+        public EndpointAttributes PathAttributes { get; private set; }
+
 		public string Path { get { return this.restPath; } }
 
 		public bool AllowsAllVerbs { get { return this.allowsAllVerbs; } }
@@ -86,11 +88,12 @@ namespace ServiceStack.ServiceHost
 			}
 		}
 
-		public RestPath(Type requestType, string path) : this(requestType, path, null, null) { }
+		public RestPath(Type requestType, string path) : this(requestType, path, null, null, EndpointAttributes.SyncReply) { }
 
-		public RestPath(Type requestType, string path, string verbs, string defaultContentType)
+		public RestPath(Type requestType, string path, string verbs, string defaultContentType, EndpointAttributes endpointAttributes)
 		{
 			this.RequestType = requestType;
+            this.PathAttributes = endpointAttributes;
 
 			this.restPath = path;
 			this.DefaultContentType = defaultContentType;

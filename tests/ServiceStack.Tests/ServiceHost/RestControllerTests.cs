@@ -22,16 +22,18 @@ namespace ServiceStack.Tests.ServiceHost
 			var matchingPath = controller.GetRestPathForRequest("GET", "/hello");
 			Assert.That(matchingPath, Is.Not.Null);
 			Assert.That(matchingPath.RequestType, Is.EqualTo(typeof(RequestDto)));
+            Assert.That(matchingPath.PathAttributes, Is.EqualTo(EndpointAttributes.SyncReply));
 		}
 
 		[Test]
 		public void Does_notice_http_method()
 		{
 			IRestController controller = new RestController();
-			controller.RegisterRestPath(new RestPath(typeof(RequestDto), "/hello", "GET", null));
+			controller.RegisterRestPath(new RestPath(typeof(RequestDto), "/hello", "GET", null, EndpointAttributes.SyncReply));
 
 			var matchingGetPath = controller.GetRestPathForRequest("GET", "/hello");
 			Assert.That(matchingGetPath, Is.Not.Null);
+            Assert.That(matchingGetPath.PathAttributes, Is.EqualTo(EndpointAttributes.SyncReply));
 
 			var matchingPostPath = controller.GetRestPathForRequest("POST", "/hello");
 			Assert.That(matchingPostPath, Is.Null);
@@ -41,13 +43,15 @@ namespace ServiceStack.Tests.ServiceHost
 		public void Does_notice_multiple_http_methods()
 		{
 			IRestController controller = new RestController();
-			controller.RegisterRestPath(new RestPath(typeof(RequestDto), "/hello", "GET, POST", null));
+			controller.RegisterRestPath(new RestPath(typeof(RequestDto), "/hello", "GET, POST", null, EndpointAttributes.AsyncOneWay));
 
 			var matchingGetPath = controller.GetRestPathForRequest("GET", "/hello");
 			Assert.That(matchingGetPath, Is.Not.Null);
+            Assert.That(matchingGetPath.PathAttributes, Is.EqualTo(EndpointAttributes.AsyncOneWay));
 
 			var matchingPostPath = controller.GetRestPathForRequest("POST", "/hello");
 			Assert.That(matchingPostPath, Is.Not.Null);
+            Assert.That(matchingPostPath.PathAttributes, Is.EqualTo(EndpointAttributes.AsyncOneWay));
 
 			var matchingPutPath = controller.GetRestPathForRequest("PUT", "/hello");
 			Assert.That(matchingPutPath, Is.Null);
@@ -76,5 +80,68 @@ namespace ServiceStack.Tests.ServiceHost
 			var matchingPath = controller.GetRestPathForRequest("GET", "/hello/Demis/and/Steffen/and/the/world");
 			Assert.That(matchingPath, Is.Not.Null);
 		}
+
+        [Route("/hello")]
+        class Hello
+        {
+        }
+
+        [Test]
+        public void Does_notice_Route_attributes()
+        {
+            IRestController controller = new RestController();
+            controller.RegisterRestPaths(typeof(Hello));
+
+            var matchingGetPath = controller.GetRestPathForRequest("GET", "/hello");
+            Assert.That(matchingGetPath, Is.Not.Null);
+            Assert.That(matchingGetPath.PathAttributes, Is.EqualTo(EndpointAttributes.SyncReply));
+
+            var matchingPostPath = controller.GetRestPathForRequest("POST", "/hello");
+            Assert.That(matchingPostPath, Is.Not.Null);
+            Assert.That(matchingPostPath.PathAttributes, Is.EqualTo(EndpointAttributes.SyncReply));
+
+            var matchingPutPath = controller.GetRestPathForRequest("PUT", "/hello");
+            Assert.That(matchingPutPath, Is.Not.Null);
+            Assert.That(matchingPutPath.PathAttributes, Is.EqualTo(EndpointAttributes.SyncReply));
+
+            var matchingDeletePath = controller.GetRestPathForRequest("DELETE", "/hello");
+            Assert.That(matchingDeletePath, Is.Not.Null);
+            Assert.That(matchingDeletePath.PathAttributes, Is.EqualTo(EndpointAttributes.SyncReply)); 
+        }
+
+        [Route("/queue", PathAttributes = EndpointAttributes.AsyncOneWay)]
+        class Queue
+        {
+        }
+
+        [Test]
+        public void Does_notice_different_call_style()
+        {
+            IRestController controller = new RestController();
+            controller.RegisterRestPaths(typeof(Queue));
+
+            var matchingGetPath = controller.GetRestPathForRequest("GET", "/queue");
+            Assert.That(matchingGetPath, Is.Not.Null);
+            Assert.That(matchingGetPath.PathAttributes, Is.EqualTo(EndpointAttributes.AsyncOneWay)); 
+        }
+
+        [Route("/test", Verbs = "GET")]
+        class Test
+        {
+        }
+
+        [Test]
+        public void Does_notice_verbs_on_Route_attribute()
+        {
+            IRestController controller = new RestController();
+            controller.RegisterRestPaths(typeof(Test));
+
+            var matchingGetPath = controller.GetRestPathForRequest("GET", "/test");
+            Assert.That(matchingGetPath, Is.Not.Null);
+            Assert.That(matchingGetPath.PathAttributes, Is.EqualTo(EndpointAttributes.SyncReply));
+
+            var matchingPostPath = controller.GetRestPathForRequest("POST", "/test");
+            Assert.That(matchingPostPath, Is.Null);
+        }
 	}
 }

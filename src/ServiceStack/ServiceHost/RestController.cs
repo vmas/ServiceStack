@@ -15,10 +15,22 @@ namespace ServiceStack.ServiceHost
 
 		public void RegisterRestPaths(Type requestType)
 		{
-			var attrs = requestType.GetCustomAttributes(typeof(RestServiceAttribute), true);
-			foreach (RestServiceAttribute attr in attrs)
+			var attrs = requestType.GetCustomAttributes(typeof(RouteAttribute), true);
+			foreach (RouteAttribute attr in attrs)
 			{
-				var restPath = new RestPath(requestType, attr.Path, attr.Verbs, attr.DefaultContentType);
+                var pathAttributes = EndpointAttributes.SyncReply;
+
+                //Check if attributes contain call style
+                if ((EndpointAttributes.AllCallStyles & attr.PathAttributes) != 0)
+                {
+                    pathAttributes = attr.PathAttributes;
+                }
+                else
+                {
+                    pathAttributes |= attr.PathAttributes;
+                }
+
+				var restPath = new RestPath(requestType, attr.Path, attr.Verbs, attr.DefaultContentType, pathAttributes);
 				if (!restPath.IsValid)
 					throw new NotSupportedException(string.Format(
 						"RestPath '{0}' on Type '{1}' is not Valid", attr.Path, requestType.Name));
