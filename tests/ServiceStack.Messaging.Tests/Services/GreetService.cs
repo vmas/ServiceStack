@@ -21,6 +21,8 @@ namespace ServiceStack.Messaging.Tests.Services
 	public class GreetService
 		: IOneWayService<Greet>
 	{
+        public IMessageFactory MessageFactory { get; set; }
+
 		public int TimesCalled { get; set; }
 		public string Result { get; set; }
 

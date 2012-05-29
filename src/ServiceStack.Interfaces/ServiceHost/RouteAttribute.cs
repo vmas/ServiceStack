@@ -72,7 +72,7 @@ namespace ServiceStack.ServiceHost
         /// </param>
         /// <param name="verbs">A comma-delimited list of HTTP verbs supported by the 
         ///		service.  If unspecified, all verbs are assumed to be supported.</param>
-        ///	<param name="pathAttributes">Marks the REST route as one way service (request without response).</param>
+        ///	<param name="isOneWay">Marks the REST route as one way service (request without response).</param>
         public RouteAttribute(string path, string verbs, bool isOneWay)
         {
             Path = path;
@@ -94,7 +94,7 @@ namespace ServiceStack.ServiceHost
         ///		object returned to the client is formatted, if formatting hints are unspecified
         ///		in the URL. Specify <see langword="null"/> or empty to require formatting
         ///		hints from the client.</param>
-        ///	<param name="pathAttributes">Marks the REST route as one way service (request without response).</param>
+        ///	<param name="isOneWay">Marks the REST route as a one way service (request without response).</param>
         public RouteAttribute(string path, string verbs, string defaultContentType, bool isOneWay)
         {
             Path = path;
@@ -174,6 +174,12 @@ namespace ServiceStack.ServiceHost
 		///		from the client.
 		/// </value>
 		public string DefaultContentType { get; set; }
+
+        /// <summary>
+        /// Gets or sets a comma-delimited list of allowed content types for this route.
+        /// If this property is empty, all content types are allowed.
+        /// </summary>
+        public string AllowedContentTypes { get; set; }
 
         /// <summary>
         /// Indicates if the service is executed in one way,

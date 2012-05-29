@@ -15,11 +15,6 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 		private const string ListeningOn = "http://localhost:82/";
 		ExampleAppHostHttpListener appHost;
 
-		public RemoteEndDropsConnectionTests()
-		{
-			LogManager.LogFactory = new TestLogFactory();
-		}
-
 		[TestFixtureSetUp]
 		public void OnTestFixtureStartUp()
 		{
@@ -27,9 +22,6 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 			LogManager.LogFactory = new TestLogFactory();
 			appHost.Init();
 			appHost.Start(ListeningOn);
-
-			Console.WriteLine("ExampleAppHost Created at {0}, listening on {1}",
-				DateTime.Now, ListeningOn);
 		}
 
 		[TestFixtureTearDown]
@@ -115,11 +107,11 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 				//Arguably there should be only one Error reported, but we get two. Lets check them both
 
 				//We should get only one log entry: An ERROR from ProcessRequest
-				var errorLogs = TestLogger.GetLogs().Where(o => o.Key == TestLogger.Levels.ERROR).ToList();
+				var errorLogs = TestLogger.GetLogs().Where(x => x.Key == TestLogger.Levels.ERROR).ToList();
 				Assert.AreEqual(2, errorLogs.Count, "Checking if there is only one ERROR entry");
 
 				StringAssert.Contains("Error in HttpListenerResponseWrapper", errorLogs[0].Value, "Checking if the error is from HttpListenerResponseWrapper");
-				StringAssert.Contains("ProcessRequest", errorLogs[1].Value, "Checking if the error is from ProcessRequest");
+                StringAssert.Contains("Error occured while Processing Request", errorLogs[1].Value);
 			}
 			else
 			{

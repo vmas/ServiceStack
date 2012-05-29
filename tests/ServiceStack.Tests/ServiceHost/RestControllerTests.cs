@@ -29,7 +29,7 @@ namespace ServiceStack.Tests.ServiceHost
 		public void Does_notice_http_method()
 		{
 			IRestController controller = new RestController();
-			controller.RegisterRestPath(new RestPath(typeof(RequestDto), "/hello", "GET", null, true));
+			controller.RegisterRestPath(new RestPath(typeof(RequestDto), "/hello", "GET", null, null, true));
 
 			var matchingGetPath = controller.GetRestPathForRequest("GET", "/hello");
 			Assert.That(matchingGetPath, Is.Not.Null);
@@ -43,7 +43,7 @@ namespace ServiceStack.Tests.ServiceHost
 		public void Does_notice_multiple_http_methods()
 		{
 			IRestController controller = new RestController();
-			controller.RegisterRestPath(new RestPath(typeof(RequestDto), "/hello", "GET, POST", null, true));
+			controller.RegisterRestPath(new RestPath(typeof(RequestDto), "/hello", "GET, POST", null, null, true));
 
 			var matchingGetPath = controller.GetRestPathForRequest("GET", "/hello");
 			Assert.That(matchingGetPath, Is.Not.Null);

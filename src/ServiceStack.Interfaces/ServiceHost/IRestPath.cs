@@ -9,7 +9,7 @@ namespace ServiceStack.ServiceHost
 
 		string DefaultContentType { get; }
 
-        string OnlyContentType { get; }
+        string AllowedContentTypes { get; }
 
         bool IsOneWay { get; }
 

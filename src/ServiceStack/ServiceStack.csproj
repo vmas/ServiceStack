@@ -239,10 +239,7 @@
     <Compile Include="WebHost.Endpoints\IAppHost.cs" />
     <Compile Include="WebHost.Endpoints\Metadata\CustomMetadataHandler.cs" />
     <Compile Include="WebHost.Endpoints\Extensions\HttpRequestWrapper.cs" />
-    <Compile Include="WebHost.Endpoints\Ext\AllFilesHandler.cs" />
-    <Compile Include="WebHost.Endpoints\HttpWebRequestConfig.cs" />
     <Compile Include="WebHost.Endpoints\Metadata\JsvMetadataHandler.cs" />
-    <Compile Include="WebHost.Endpoints\Routes.cs" />
     <Compile Include="WebHost.Endpoints\ServiceHostEnvironment.cs" />
     <Compile Include="WebHost.Endpoints\Support\ForbiddenHttpHandler.cs" />
     <Compile Include="WebHost.Endpoints\Support\Mocks\HttpRequestMock.cs" />

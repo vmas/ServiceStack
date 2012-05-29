@@ -22,6 +22,8 @@ namespace ServiceStack.Messaging.Tests.Services
 	public class AlwaysFailService
 		: IOneWayService<AlwaysFail>
 	{
+        public IMessageFactory MessageFactory { get; set; }
+
 		public int TimesCalled { get; set; }
 		public string Result { get; set; }
 

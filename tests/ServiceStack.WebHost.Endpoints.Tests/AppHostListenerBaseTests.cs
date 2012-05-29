@@ -14,13 +14,9 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 	[TestFixture]
 	public class AppHostListenerBaseTests
 	{
-		private const string ListeningOn = "http://localhost:82/";
-		ExampleAppHostHttpListener appHost;
+		private const string ListeningOn = "http://localhost:8020/";
 
-		static AppHostListenerBaseTests()
-		{
-			LogManager.LogFactory = new ConsoleLogFactory();
-		}
+		ExampleAppHostHttpListener appHost;
 
 		[TestFixtureSetUp]
 		public void OnTestFixtureStartUp() 
@@ -28,9 +24,6 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 			appHost = new ExampleAppHostHttpListener();
 			appHost.Init();
 			appHost.Start(ListeningOn);
-
-			System.Console.WriteLine("ExampleAppHost Created at {0}, listening on {1}",
-			                         DateTime.Now, ListeningOn);
 		}
 
 		[TestFixtureTearDown]

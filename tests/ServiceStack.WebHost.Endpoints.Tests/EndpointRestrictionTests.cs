@@ -9,7 +9,7 @@ using ServiceStack.WebHost.Endpoints.Tests.Support.Services;
 
 namespace ServiceStack.WebHost.Endpoints.Tests
 {
-	[TestFixture]
+	[TestFixture, Ignore("This functionality should be implemented in a filter attribute")]
 	public class EndpointRestrictionTests
 		: ServiceHostTestBase
 	{

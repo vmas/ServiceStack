@@ -154,6 +154,7 @@ namespace ServiceStack.WebHost.Endpoints
 			this.RawHttpHandlers = instance.RawHttpHandlers;
 			this.CustomHttpHandlers = instance.CustomHttpHandlers;
 			this.DefaultJsonpCacheExpiration = instance.DefaultJsonpCacheExpiration;
+            this.EnableDefaultRoutes = instance.EnableDefaultRoutes;
 		}
 
 		private static void InferHttpHandlerPath()

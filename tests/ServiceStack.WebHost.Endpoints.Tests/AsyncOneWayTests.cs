@@ -21,9 +21,11 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 
     public class QueueService : ServiceBase<Queue>
     {
+        public static int timesCalled = 0;
+
         protected override object Run(Queue request)
         {
-            var test = base.RequestContext;
+            timesCalled += 1;
             return null;
         }
     }
@@ -49,8 +51,9 @@ namespace ServiceStack.WebHost.Endpoints.Tests
                 {
                     serviceHost.RegisterHandler<Queue>(dto =>
                     {
-                        called += 1;
-                        return new QueueResponse();
+                        var service = Container.Resolve<QueueService>();
+                        service.Execute(dto);
+                        return null;
                     });
 
                     serviceHost.Start();
@@ -80,12 +83,12 @@ namespace ServiceStack.WebHost.Endpoints.Tests
         [TestCase("/json/oneway/queue")]
         public void Does_add_message_to_queue_on_async_one_way_request(string url)
         {
-            called = 0;
+            QueueService.timesCalled = 0;
 
             var client = new JsonServiceClient(ListeningOn);
             client.Get<QueueResponse>(url);
 
-            Assert.That(called, Is.EqualTo(1));
+            Assert.That(QueueService.timesCalled, Is.EqualTo(1));
         }
     }
 }

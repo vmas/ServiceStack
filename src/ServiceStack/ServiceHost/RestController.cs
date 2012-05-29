@@ -32,6 +32,10 @@ namespace ServiceStack.ServiceHost
 
                 this.RegisterRestPath(new RestPath(requestType, "/csv/requestreply/" + requestType.Name, "*", ContentType.Csv, ContentType.Csv, false));
                 this.RegisterRestPath(new RestPath(requestType, "/csv/oneway/" + requestType.Name, "*", ContentType.Csv, ContentType.Csv, true));
+
+                var formContentType = ContentType.FormUrlEncoded + ',' + ContentType.MultiPartFormData;
+                this.RegisterRestPath(new RestPath(requestType, "/form/requestreply/" + requestType.Name, "*", null, formContentType, false));
+                this.RegisterRestPath(new RestPath(requestType, "/form/oneway/" + requestType.Name, "*", null, formContentType, true));
             }
         }
 
@@ -40,7 +44,7 @@ namespace ServiceStack.ServiceHost
 			var attrs = requestType.GetCustomAttributes(typeof(RouteAttribute), true);
 			foreach (RouteAttribute attr in attrs)
 			{
-				var restPath = new RestPath(requestType, attr.Path, attr.Verbs, attr.DefaultContentType, null, attr.IsOneWay);
+				var restPath = new RestPath(requestType, attr.Path, attr.Verbs, attr.DefaultContentType, attr.AllowedContentTypes, attr.IsOneWay);
 				if (!restPath.IsValid)
 					throw new NotSupportedException(string.Format(
 						"RestPath '{0}' on Type '{1}' is not Valid", attr.Path, requestType.Name));

@@ -8,6 +8,7 @@ using ServiceStack.WebHost.Endpoints.Extensions;
 using ServiceStack.Common.Web;
 using ServiceStack.WebHost.Endpoints.Support;
 using ServiceStack.Text;
+using System.Runtime.Serialization;
 
 namespace ServiceStack.WebHost.Endpoints.Handlers
 {
@@ -23,7 +24,25 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 		private object GetRequestDto(IHttpRequest httpReq, IRestPath restPath)
 		{
 			var requestType = restPath.RequestType;
-            var contentType = !string.IsNullOrEmpty(this.RestPath.OnlyContentType) ? this.RestPath.OnlyContentType : httpReq.ContentType;
+
+            string contentType = null;
+
+            if (!string.IsNullOrEmpty(this.RestPath.AllowedContentTypes)) //If AllowedContentTypes is not empty, only specific content types are allowed for this request
+            {
+                var validContentTypes = this.RestPath.AllowedContentTypes.Split(',');
+
+                if (!string.IsNullOrEmpty(httpReq.ContentType))
+                    contentType = validContentTypes.FirstOrDefault(x => httpReq.ContentType.StartsWith(x)); //Select a matching, allowed content type
+
+                if (contentType == null)
+                    contentType = validContentTypes.First(); //If no content type was given from the client, the first allowed one is taken
+                
+            }
+            else
+            {
+                contentType = httpReq.ContentType;
+            }
+
 			using (Profiler.Current.Step("Deserialize Request"))
 			{
 				var requestParams = httpReq.GetRequestParams();
