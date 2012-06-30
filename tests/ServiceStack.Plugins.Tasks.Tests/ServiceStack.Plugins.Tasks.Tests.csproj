@@ -50,6 +50,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AsyncRestServiceBaseTests.cs" />
+    <Compile Include="AsyncServiceBaseTests.cs" />
     <Compile Include="ExceptionHandlingTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SyncProcessingTest.cs" />
