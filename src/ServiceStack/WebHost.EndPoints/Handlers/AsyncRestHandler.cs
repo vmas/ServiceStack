@@ -34,8 +34,9 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
                 if (!string.IsNullOrEmpty(httpReq.ContentType))
                     contentType = validContentTypes.FirstOrDefault(x => httpReq.ContentType.StartsWith(x)); //Select a matching, allowed content type
 
+                //If no allowed content type was given from the client, the first allowed one is taken
                 if (contentType == null)
-                    contentType = validContentTypes.First(); //If no content type was given from the client, the first allowed one is taken
+                    contentType = validContentTypes.First();
                 
             }
             else

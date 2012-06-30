@@ -25,6 +25,12 @@ namespace ServiceStack.ServiceHost
             return this;
         }
 
+        public IServiceRoutes Add<TRequest>(string restPath, string verbs, bool isOneWay)
+        {
+            RestPaths.Add(new RestPath(typeof(TRequest), restPath, verbs, null, null, isOneWay));
+            return this;
+        }
+
         public IServiceRoutes Add<TRequest>(string restPath, string verbs, string defaultContentType, bool isOneWay)
         {
             RestPaths.Add(new RestPath(typeof(TRequest), restPath, verbs, defaultContentType, null, isOneWay));
@@ -36,5 +42,6 @@ namespace ServiceStack.ServiceHost
             RestPaths.Add(new RestPath(requestType, restPath, verbs, defaultContentType, null, false));
             return this;
         }
-	}
+
+    }
 }
