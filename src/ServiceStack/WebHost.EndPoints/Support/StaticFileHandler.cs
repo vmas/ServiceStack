@@ -37,6 +37,7 @@ using ServiceStack.Logging;
 using ServiceStack.ServiceHost;
 using ServiceStack.Text;
 using ServiceStack.WebHost.Endpoints.Extensions;
+using HttpResponseExtensions = ServiceStack.WebHost.Endpoints.Extensions.HttpResponseExtensions;
 
 namespace ServiceStack.WebHost.Endpoints.Support
 {
@@ -76,6 +77,8 @@ namespace ServiceStack.WebHost.Endpoints.Support
 
 		public void ProcessRequest(IHttpRequest request, IHttpResponse response, string operationName)
 		{
+			response.ApplyGlobalResponseHeaders();
+
 			var fileName = request.GetPhysicalPath();
 
 			var fi = new FileInfo(fileName);

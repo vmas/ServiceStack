@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace ServiceStack.ServiceHost
 {
-    public interface IRestPath
-    {
-        Type RequestType { get; }
+	public interface IRestPath
+	{
+		Type RequestType { get; }
 
         string DefaultContentType { get; }
 

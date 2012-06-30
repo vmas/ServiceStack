@@ -297,6 +297,5 @@ namespace ServiceStack.WebHost.Endpoints
 					new HttpRequestContext(httpReq, httpRes, request, endpointAttributes));
 			}
 		}
-
 	}
 }

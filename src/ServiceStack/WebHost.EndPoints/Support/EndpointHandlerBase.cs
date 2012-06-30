@@ -11,6 +11,7 @@ using ServiceStack.ServiceHost;
 using ServiceStack.ServiceModel.Serialization;
 using ServiceStack.Text;
 using ServiceStack.WebHost.Endpoints.Extensions;
+using HttpResponseExtensions = ServiceStack.WebHost.Endpoints.Extensions.HttpResponseExtensions;
 
 namespace ServiceStack.WebHost.Endpoints.Support
 {
@@ -138,10 +139,7 @@ namespace ServiceStack.WebHost.Endpoints.Support
 		{
 			if (context.Request.HttpMethod == HttpMethods.Options)
 			{
-				foreach (var globalResponseHeader in EndpointHost.Config.GlobalResponseHeaders)
-				{
-					context.Response.AddHeader(globalResponseHeader.Key, globalResponseHeader.Value);
-				}
+				context.Response.ApplyGlobalResponseHeaders();
 
 				return true;
 			}

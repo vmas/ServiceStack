@@ -1,6 +1,7 @@
 # Contributors
 
  - [mythz](https://github.com/mythz) (Demis Bellot)
+ - [arxisos](https://github.com/arxisos) (Steffen M)
  - [bman654](https://github.com/bman654) (Brandon Wallace)
  - [Iristyle](https://github.com/Iristyle) (Ethan Brown)
  - [superlogical](https://github.com/superlogical) (Jake Scott)
@@ -19,7 +20,6 @@
  - [letssellsomebananas](https://github.com/letssellsomebananas) (Tymek Majewski)
  - [danbarua](https://github.com/danbarua) (Dan Barua)
  - [JonCanning](https://github.com/JonCanning) (Jon Canning)
- - [arxisos](https://github.com/arxisos) (Steffen M)
  - [paegun](https://github.com/paegun) (James Gorlick)
  - [pvasek](https://github.com/pvasek) (pvasek)
  - [derfsplat](https://github.com/derfsplat) (derfsplat)
@@ -66,3 +66,8 @@
  - [alexandrerocco](https://github.com/alexandrerocco) (Alexandre Rocco)
  - [cbarbara](https://github.com/cbarbara)
  - [assaframan](https://github.com/assaframan) (Assaf Raman)
+ - [csakshaug](https://github.com/csakshaug) (Christian Sakshaug)
+ - [johnman](https://github.com/johnman)
+ - [jarroda](https://github.com/jarroda)
+ - [ssboisen](https://github.com/ssboisen) (Simon Skov Boisen)
+ 

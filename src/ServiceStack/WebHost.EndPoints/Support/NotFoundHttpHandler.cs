@@ -7,6 +7,7 @@ using ServiceStack.ServiceHost;
 using ServiceStack.Text;
 using ServiceStack.WebHost.Endpoints.Extensions;
 using ServiceStack.Logging;
+using HttpResponseExtensions = ServiceStack.WebHost.Endpoints.Extensions.HttpResponseExtensions;
 
 namespace ServiceStack.WebHost.Endpoints.Support
 {
@@ -36,6 +37,7 @@ namespace ServiceStack.WebHost.Endpoints.Support
 			response.ContentType = "text/plain";
 			response.StatusCode = 404;
 			response.Write(text);
+			response.ApplyGlobalResponseHeaders();
 			response.Close();
 		}
 
@@ -102,6 +104,7 @@ namespace ServiceStack.WebHost.Endpoints.Support
 			response.ContentType = "text/plain";
 			response.StatusCode = 404;
 			response.Write(sb.ToString());
+			response.ApplyGlobalResponseHeaders();
 
 			//Apache+mod_mono doesn't like this
 			//response.OutputStream.Flush();
