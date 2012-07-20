@@ -23,10 +23,10 @@ namespace ServiceStack.Plugins.Tasks
 
 		private class TaskWrapper : IServiceResult
 		{
-			private Task task;
+			private IAsyncResult task;
 			private Func<object> getResultFn;
 
-			public TaskWrapper(Task task, Func<object> getResultFn)
+			public TaskWrapper(IAsyncResult task, Func<object> getResultFn)
 			{
 				this.task = task;
 				this.getResultFn = getResultFn;
@@ -44,12 +44,12 @@ namespace ServiceStack.Plugins.Tasks
 
 			public System.Threading.WaitHandle AsyncWaitHandle
 			{
-				get { return null; }
+				get { return task.AsyncWaitHandle; }
 			}
 
 			public bool CompletedSynchronously
 			{
-				get { return false; }
+				get { return task.CompletedSynchronously; }
 			}
 
 			public bool IsCompleted
@@ -64,11 +64,11 @@ namespace ServiceStack.Plugins.Tasks
 		public IServiceResult Convert(object service, object request, object response, Action<IServiceResult> callback)
 		{
 			var responseType = response.GetType();
-			if (responseType.IsGenericType && responseType.GetGenericTypeDefinition() == typeof(Task<>))
+            var task = response as Task;
+			if (task != null)
 			{
 				var serviceType = service.GetType();
 				var requestType = request.GetType();
-				var task = response as Task;
 
 				var key = new Tuple<Type, Type, Type>(serviceType, requestType, responseType);
 				GetTaskResult getResultFn = null;
@@ -89,8 +89,11 @@ namespace ServiceStack.Plugins.Tasks
 
 		private GetTaskResult GenerateGetResultFn(Type serviceType, Type requestType, Type responseType)
 		{
+            var resultProperty = responseType.GetProperty("Result");
+            if (resultProperty == null)
+                return (service, request, response) => null; //This is not a Task with a return value, so just return null
+
 			var responseParameter = Expression.Parameter(typeof(object), "response");
-			var resultProperty = responseType.GetProperty("Result");
 
 			var getResultFn = Expression.Lambda<Func<object, object>>(
 				Expression.Property(Expression.Convert(responseParameter, responseType), resultProperty), 

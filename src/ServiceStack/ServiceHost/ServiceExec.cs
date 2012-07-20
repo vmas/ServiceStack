@@ -29,7 +29,7 @@ namespace ServiceStack.ServiceHost
 
 	public class ServiceExec<TReq>
 	{
-		public static object Execute(IService<TReq> service, TReq request, EndpointAttributes attrs)
+		public static object Execute(object service, TReq request, EndpointAttributes attrs)
 		{
             if ((attrs & EndpointAttributes.HttpGet) == EndpointAttributes.HttpGet)
 			{
@@ -56,7 +56,12 @@ namespace ServiceStack.ServiceHost
 				var restService = service as IRestPatchService<TReq>;
 				if (restService != null) return restService.Patch(request);
 			}
-			return service.Execute(request);
+
+            var normalService = service as IService<TReq>;
+            if(normalService != null)
+			    return normalService.Execute(request);
+
+            throw new NotSupportedException(); //If we end up here, something is wrong
 		}
 	}
 }

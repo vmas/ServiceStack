@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{4EBD29DD-21A1-47B5-80DB-F9D58C91BED5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.Common.Tests", "..\tests\ServiceStack.Common.Tests\ServiceStack.Common.Tests.csproj", "{3FA9197A-462D-44CC-9AB3-61AF414D0B45}"
@@ -25,13 +25,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.Auth.Tests", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{EB65E771-6C97-4D64-8E11-FD88AE48A41A}"
 	ProjectSection(SolutionItems) = preProject
-		..\build\build.bat = ..\build\build.bat
 		..\NuGet\ServiceStack.Common\servicestack.common.nuspec = ..\NuGet\ServiceStack.Common\servicestack.common.nuspec
 		..\NuGet\ServiceStack.Host.AspNet\servicestack.host.aspnet.nuspec = ..\NuGet\ServiceStack.Host.AspNet\servicestack.host.aspnet.nuspec
 		..\NuGet\ServiceStack.Host.Mvc\servicestack.host.mvc.nuspec = ..\NuGet\ServiceStack.Host.Mvc\servicestack.host.mvc.nuspec
 		..\NuGet\ServiceStack.Mvc\servicestack.mvc.nuspec = ..\NuGet\ServiceStack.Mvc\servicestack.mvc.nuspec
-		..\NuGet\ServiceStack\servicestack.nuspec = ..\NuGet\ServiceStack\servicestack.nuspec
 		..\NuGet\ServiceStack.Plugins.ProtoBuf\servicestack.plugins.protobuf.nuspec = ..\NuGet\ServiceStack.Plugins.ProtoBuf\servicestack.plugins.protobuf.nuspec
+		..\NuGet\ServiceStack\servicestack.nuspec = ..\NuGet\ServiceStack\servicestack.nuspec
+		..\build\build.bat = ..\build\build.bat
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack", "ServiceStack\ServiceStack.csproj", "{680A1709-25EB-4D52-A87F-EE03FFD94BAA}"
@@ -67,6 +67,12 @@ Global
 		{1B1151B2-19A6-4F08-9765-5EA6EF06F3FB}.MonoTouch|Any CPU.Build.0 = Release|Any CPU
 		{1B1151B2-19A6-4F08-9765-5EA6EF06F3FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1B1151B2-19A6-4F08-9765-5EA6EF06F3FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3058BE7A-62FF-4E83-9A9A-B49D78BF9C17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3058BE7A-62FF-4E83-9A9A-B49D78BF9C17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3058BE7A-62FF-4E83-9A9A-B49D78BF9C17}.MonoTouch|Any CPU.ActiveCfg = Release|Any CPU
+		{3058BE7A-62FF-4E83-9A9A-B49D78BF9C17}.MonoTouch|Any CPU.Build.0 = Release|Any CPU
+		{3058BE7A-62FF-4E83-9A9A-B49D78BF9C17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3058BE7A-62FF-4E83-9A9A-B49D78BF9C17}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3FA9197A-462D-44CC-9AB3-61AF414D0B45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3FA9197A-462D-44CC-9AB3-61AF414D0B45}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3FA9197A-462D-44CC-9AB3-61AF414D0B45}.MonoTouch|Any CPU.ActiveCfg = MonoTouch|Any CPU
@@ -109,6 +115,12 @@ Global
 		{680A1709-25EB-4D52-A87F-EE03FFD94BAA}.MonoTouch|Any CPU.Build.0 = MONOTOUCH|Any CPU
 		{680A1709-25EB-4D52-A87F-EE03FFD94BAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{680A1709-25EB-4D52-A87F-EE03FFD94BAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77A5BE62-9BA1-4704-ABDA-1CBA41041ABF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77A5BE62-9BA1-4704-ABDA-1CBA41041ABF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77A5BE62-9BA1-4704-ABDA-1CBA41041ABF}.MonoTouch|Any CPU.ActiveCfg = Release|Any CPU
+		{77A5BE62-9BA1-4704-ABDA-1CBA41041ABF}.MonoTouch|Any CPU.Build.0 = Release|Any CPU
+		{77A5BE62-9BA1-4704-ABDA-1CBA41041ABF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77A5BE62-9BA1-4704-ABDA-1CBA41041ABF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{801771CD-2C19-463A-94F8-DF546825DF47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{801771CD-2C19-463A-94F8-DF546825DF47}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{801771CD-2C19-463A-94F8-DF546825DF47}.MonoTouch|Any CPU.ActiveCfg = MONOTOUCH|Any CPU
@@ -157,61 +169,51 @@ Global
 		{CEAB2047-A095-4A96-8B23-325C6BB5690D}.MonoTouch|Any CPU.Build.0 = Release|Any CPU
 		{CEAB2047-A095-4A96-8B23-325C6BB5690D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CEAB2047-A095-4A96-8B23-325C6BB5690D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EF36A253-C53F-4BF3-B0EC-4D29211FA67D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EF36A253-C53F-4BF3-B0EC-4D29211FA67D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EF36A253-C53F-4BF3-B0EC-4D29211FA67D}.MonoTouch|Any CPU.ActiveCfg = Release|Any CPU
-		{EF36A253-C53F-4BF3-B0EC-4D29211FA67D}.MonoTouch|Any CPU.Build.0 = Release|Any CPU
-		{EF36A253-C53F-4BF3-B0EC-4D29211FA67D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EF36A253-C53F-4BF3-B0EC-4D29211FA67D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{77A5BE62-9BA1-4704-ABDA-1CBA41041ABF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{77A5BE62-9BA1-4704-ABDA-1CBA41041ABF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{77A5BE62-9BA1-4704-ABDA-1CBA41041ABF}.MonoTouch|Any CPU.ActiveCfg = Release|Any CPU
-		{77A5BE62-9BA1-4704-ABDA-1CBA41041ABF}.MonoTouch|Any CPU.Build.0 = Release|Any CPU
-		{77A5BE62-9BA1-4704-ABDA-1CBA41041ABF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{77A5BE62-9BA1-4704-ABDA-1CBA41041ABF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DF2111C9-C5A1-46B8-87A2-3D67456D4DAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DF2111C9-C5A1-46B8-87A2-3D67456D4DAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DF2111C9-C5A1-46B8-87A2-3D67456D4DAD}.MonoTouch|Any CPU.ActiveCfg = Release|Any CPU
 		{DF2111C9-C5A1-46B8-87A2-3D67456D4DAD}.MonoTouch|Any CPU.Build.0 = Release|Any CPU
 		{DF2111C9-C5A1-46B8-87A2-3D67456D4DAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DF2111C9-C5A1-46B8-87A2-3D67456D4DAD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3058BE7A-62FF-4E83-9A9A-B49D78BF9C17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3058BE7A-62FF-4E83-9A9A-B49D78BF9C17}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3058BE7A-62FF-4E83-9A9A-B49D78BF9C17}.MonoTouch|Any CPU.ActiveCfg = Release|Any CPU
-		{3058BE7A-62FF-4E83-9A9A-B49D78BF9C17}.MonoTouch|Any CPU.Build.0 = Release|Any CPU
-		{3058BE7A-62FF-4E83-9A9A-B49D78BF9C17}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3058BE7A-62FF-4E83-9A9A-B49D78BF9C17}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{3FA9197A-462D-44CC-9AB3-61AF414D0B45} = {4EBD29DD-21A1-47B5-80DB-F9D58C91BED5}
-		{CA20892F-3FD7-4ACD-8506-B50C30CA4DE1} = {4EBD29DD-21A1-47B5-80DB-F9D58C91BED5}
-		{94A33BC4-AC22-49A3-A38E-2ABFCD997ABA} = {4EBD29DD-21A1-47B5-80DB-F9D58C91BED5}
-		{A5646013-C243-453F-A2B6-3B6870A9637D} = {4EBD29DD-21A1-47B5-80DB-F9D58C91BED5}
-		{55C5C6DA-1834-4BA8-8D2F-19C091B6FC81} = {4EBD29DD-21A1-47B5-80DB-F9D58C91BED5}
-		{801771CD-2C19-463A-94F8-DF546825DF47} = {4EBD29DD-21A1-47B5-80DB-F9D58C91BED5}
-		{CEAB2047-A095-4A96-8B23-325C6BB5690D} = {4EBD29DD-21A1-47B5-80DB-F9D58C91BED5}
-		{1B1151B2-19A6-4F08-9765-5EA6EF06F3FB} = {4EBD29DD-21A1-47B5-80DB-F9D58C91BED5}
-		{BEF0AA4B-54FE-4EFC-988F-F96BD0779A33} = {4EBD29DD-21A1-47B5-80DB-F9D58C91BED5}
-		{B7F650D2-6D7E-48BE-ADCE-19076249B3B7} = {4EBD29DD-21A1-47B5-80DB-F9D58C91BED5}
-	EndGlobalSection
-	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = ..\tests\ServiceStack.Common.Tests\ServiceStack.Common.Tests.csproj
-		Policies = $0
-		$0.DotNetNamingPolicy = $1
-		$1.DirectoryNamespaceAssociation = None
-		$1.ResourceNamePolicy = FileFormatDefault
-		$0.StandardHeader = $2
-		$2.Text = 
-		$2.IncludeInNewFiles = True
-		$0.VersionControlPolicy = $3
-		$3.inheritsSet = Mono
-		$0.ChangeLogPolicy = $4
-		$4.UpdateMode = None
-		$4.MessageStyle = $5
-		$5.LineAlign = 0
-		$4.inheritsSet = Mono
+		{EF36A253-C53F-4BF3-B0EC-4D29211FA67D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF36A253-C53F-4BF3-B0EC-4D29211FA67D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF36A253-C53F-4BF3-B0EC-4D29211FA67D}.MonoTouch|Any CPU.ActiveCfg = Release|Any CPU
+		{EF36A253-C53F-4BF3-B0EC-4D29211FA67D}.MonoTouch|Any CPU.Build.0 = Release|Any CPU
+		{EF36A253-C53F-4BF3-B0EC-4D29211FA67D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF36A253-C53F-4BF3-B0EC-4D29211FA67D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1B1151B2-19A6-4F08-9765-5EA6EF06F3FB} = {4EBD29DD-21A1-47B5-80DB-F9D58C91BED5}
+		{3058BE7A-62FF-4E83-9A9A-B49D78BF9C17} = {4EBD29DD-21A1-47B5-80DB-F9D58C91BED5}
+		{3FA9197A-462D-44CC-9AB3-61AF414D0B45} = {4EBD29DD-21A1-47B5-80DB-F9D58C91BED5}
+		{55C5C6DA-1834-4BA8-8D2F-19C091B6FC81} = {4EBD29DD-21A1-47B5-80DB-F9D58C91BED5}
+		{801771CD-2C19-463A-94F8-DF546825DF47} = {4EBD29DD-21A1-47B5-80DB-F9D58C91BED5}
+		{94A33BC4-AC22-49A3-A38E-2ABFCD997ABA} = {4EBD29DD-21A1-47B5-80DB-F9D58C91BED5}
+		{A5646013-C243-453F-A2B6-3B6870A9637D} = {4EBD29DD-21A1-47B5-80DB-F9D58C91BED5}
+		{B7F650D2-6D7E-48BE-ADCE-19076249B3B7} = {4EBD29DD-21A1-47B5-80DB-F9D58C91BED5}
+		{BEF0AA4B-54FE-4EFC-988F-F96BD0779A33} = {4EBD29DD-21A1-47B5-80DB-F9D58C91BED5}
+		{CA20892F-3FD7-4ACD-8506-B50C30CA4DE1} = {4EBD29DD-21A1-47B5-80DB-F9D58C91BED5}
+		{CEAB2047-A095-4A96-8B23-325C6BB5690D} = {4EBD29DD-21A1-47B5-80DB-F9D58C91BED5}
+		{DF2111C9-C5A1-46B8-87A2-3D67456D4DAD} = {4EBD29DD-21A1-47B5-80DB-F9D58C91BED5}
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		$0.ChangeLogPolicy = $4
+		$0.DotNetNamingPolicy = $1
+		$0.StandardHeader = $2
+		$0.VersionControlPolicy = $3
+		$1.DirectoryNamespaceAssociation = None
+		$1.ResourceNamePolicy = FileFormatDefault
+		$2.IncludeInNewFiles = True
+		$2.Text = 
+		$3.inheritsSet = Mono
+		$4.MessageStyle = $5
+		$4.UpdateMode = None
+		$4.inheritsSet = Mono
+		$5.LineAlign = 0
+		Policies = $0
+		StartupItem = ..\tests\ServiceStack.Common.Tests\ServiceStack.Common.Tests.csproj
 	EndGlobalSection
 EndGlobal
