@@ -133,9 +133,6 @@ namespace ServiceStack.ServiceHost
                         response = convertedResponse;
                     }
 
-                    if (EndpointHost.AppHost != null) //tests
-                        EndpointHost.AppHost.Release(service);
-
                     var serviceResult = new SyncServiceResult(response);
                     cb(serviceResult);
                     return serviceResult;
