@@ -50,6 +50,8 @@ namespace ServiceStack.Redis
 		void SetEntry(string key, string value);
 		void SetEntry(string key, string value, TimeSpan expireIn);
 		bool SetEntryIfNotExists(string key, string value);
+	    void SetAll(IEnumerable<string> keys, IEnumerable<string> values);
+	    void SetAll(Dictionary<string, string> map);
 		string GetValue(string key);
 		string GetAndSetEntry(string key, string value);
 		List<string> GetValues(List<string> keys);
@@ -144,6 +146,7 @@ namespace ServiceStack.Redis
 		List<string> GetAllItemsFromList(string listId);
 		List<string> GetRangeFromList(string listId, int startingFrom, int endingAt);
 		List<string> GetRangeFromSortedList(string listId, int startingFrom, int endingAt);
+		List<string> GetSortedItemsFromList(string listId, SortOptions sortOptions);
 		void AddItemToList(string listId, string value);
 		void AddRangeToList(string listId, List<string> values);
 		void PrependItemToList(string listId, string value);
@@ -152,6 +155,7 @@ namespace ServiceStack.Redis
 		void RemoveAllFromList(string listId);
 		string RemoveStartFromList(string listId);
 		string BlockingRemoveStartFromList(string listId, TimeSpan? timeOut);
+        ItemRef BlockingRemoveStartFromLists(string []listIds, TimeSpan? timeOut);
 		string RemoveEndFromList(string listId);
 		void TrimList(string listId, int keepStartingFrom, int keepEndingAt);
 		int RemoveItemFromList(string listId, string value);
@@ -164,11 +168,13 @@ namespace ServiceStack.Redis
 		void EnqueueItemOnList(string listId, string value);
 		string DequeueItemFromList(string listId);
 		string BlockingDequeueItemFromList(string listId, TimeSpan? timeOut);
+        ItemRef BlockingDequeueItemFromLists(string []listIds, TimeSpan? timeOut);
 
 		//Stack operations
 		void PushItemToList(string listId, string value);
 		string PopItemFromList(string listId);
 		string BlockingPopItemFromList(string listId, TimeSpan? timeOut);
+        ItemRef BlockingPopItemFromLists(string []listIds, TimeSpan? timeOut);
 		string PopAndPushItemBetweenLists(string fromListId, string toListId);
 
 		#endregion

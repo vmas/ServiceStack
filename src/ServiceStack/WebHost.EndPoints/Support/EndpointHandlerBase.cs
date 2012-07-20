@@ -11,7 +11,6 @@ using ServiceStack.ServiceHost;
 using ServiceStack.ServiceModel.Serialization;
 using ServiceStack.Text;
 using ServiceStack.WebHost.Endpoints.Extensions;
-using HttpResponseExtensions = ServiceStack.WebHost.Endpoints.Extensions.HttpResponseExtensions;
 
 namespace ServiceStack.WebHost.Endpoints.Support
 {
@@ -53,7 +52,7 @@ namespace ServiceStack.WebHost.Endpoints.Support
 			throw new NotImplementedException();
 		}
 
-		protected object DeserializeContentType(Type operationType, IHttpRequest httpReq, string contentType)
+	    public static object DeserializeHttpRequest(Type operationType, IHttpRequest httpReq, string contentType)
 		{
 			var httpMethod = httpReq.HttpMethod;
 			var queryString = httpReq.QueryString;
@@ -124,14 +123,9 @@ namespace ServiceStack.WebHost.Endpoints.Support
 		{
 			if (context.Request.HttpMethod == HttpMethods.Options)
 			{
-				foreach (var globalResponseHeader in EndpointHost.Config.GlobalResponseHeaders)
-				{
-					context.Response.AddHeader(globalResponseHeader.Key, globalResponseHeader.Value);
-				}
-
+                context.Response.ApplyGlobalResponseHeaders();
 				return true;
 			}
-
 			return false;
 		}
 
@@ -140,10 +134,8 @@ namespace ServiceStack.WebHost.Endpoints.Support
 			if (context.Request.HttpMethod == HttpMethods.Options)
 			{
 				context.Response.ApplyGlobalResponseHeaders();
-
 				return true;
 			}
-
 			return false;
 		}
 
@@ -301,7 +293,7 @@ namespace ServiceStack.WebHost.Endpoints.Support
 
 			try
 			{
-				var statusCode = ex is SerializationException ? HttpStatusCode.BadRequest : HttpStatusCode.InternalServerError;
+                var statusCode = ex.ToStatusCode();
 				//httpRes.WriteToResponse always calls .Close in it's finally statement so 
 				//if there is a problem writing to response, by now it will be closed
 				if (!httpRes.IsClosed)

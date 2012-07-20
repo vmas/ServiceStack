@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using ServiceStack.Common;
 
 namespace Funq
 {
@@ -14,11 +16,29 @@ namespace Funq
 		/// </summary>
 		public TFunc Factory;
 
-		/// <summary>
-		/// The cached service instance if the scope is <see cref="ReuseScope.Hierarchy"/> or 
-		/// <see cref="ReuseScope.Container"/>.
-		/// </summary>
-		internal TService Instance;
+	    /// <summary>
+	    /// The cached service instance if the scope is <see cref="ReuseScope.Hierarchy"/> or 
+	    /// <see cref="ReuseScope.Container"/>.
+	    /// </summary>
+	    TService instance;
+        internal TService Instance
+	    {
+	        get
+	        {
+                if (Reuse == ReuseScope.Request)
+                    return HostContext.Instance.Items[this] is TService ? (TService) HostContext.Instance.Items[this] : default(TService);
+	            
+                return instance;
+	        }
+            set
+            {
+                if (Reuse == ReuseScope.Request)
+                    HostContext.Instance.Items[this] = value;
+                else 
+                    instance = value;
+            }
+
+	    }
 
 		/// <summary>
 		/// The Func delegate that initializes the object after creation.
@@ -28,8 +48,8 @@ namespace Funq
 		internal void InitializeInstance(TService instance)
 		{
 			// Save instance if Hierarchy or Container Reuse 
-			if (Reuse != ReuseScope.None)
-				Instance = instance;
+            if (Reuse != ReuseScope.None)
+                Instance = instance;
 
 			// Track for disposal if necessary
 			if (Owner == Owner.Container && instance is IDisposable)
@@ -39,6 +59,8 @@ namespace Funq
 			if (Initializer != null)
 				Initializer(Container, instance);
 		}
+
+
 
 		public IReusedOwned InitializedBy(Action<Container, TService> initializer)
 		{
@@ -60,5 +82,28 @@ namespace Funq
 				Initializer = Initializer,
 			};
 		}
+
+	    public IDisposable AquireLockIfNeeded()
+	    {
+            if (Reuse == ReuseScope.None || Reuse == ReuseScope.Request || Instance != null)
+                return null;
+
+	        return new AquiredLock(this);
+	    }
+
+	    internal class AquiredLock : IDisposable
+	    {
+	        private readonly object syncRoot;
+
+	        public AquiredLock(object syncRoot)
+	        {
+                Monitor.Enter(this.syncRoot = syncRoot);
+	        }
+
+	        public void Dispose()
+	        {
+	            Monitor.Exit(syncRoot);
+	        }
+	    }
 	}
 }

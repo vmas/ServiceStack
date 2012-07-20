@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using ServiceStack.Html;
 using ServiceStack.WebHost.Endpoints.Support.Markdown;
 using ServiceStack.WebHost.Endpoints;
 
@@ -129,7 +130,7 @@ namespace ServiceStack.Markdown
 		/// Resolve registered Assemblies
 		/// </summary>
 		/// <returns></returns>
-		public T TryResolve<T>()
+		public T Get<T>()
 		{
 			return this.AppHost.TryResolve<T>();
 		}
