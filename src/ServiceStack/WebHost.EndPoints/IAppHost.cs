@@ -61,9 +61,14 @@ namespace ServiceStack.WebHost.Endpoints
 		List<HttpHandlerResolverDelegate> CatchAllHandlers { get; }
 
 		/// <summary>
-		/// Provide a custom model minder for a specific Request DTO
+		/// Provide a custom model binder for a specific Request DTO
 		/// </summary>
 		Dictionary<Type, Func<IHttpRequest, object>> RequestBinders { get; }
+
+        /// <summary>
+        /// Provide a custom model binder for a specific Response DTO
+        /// </summary>
+        Dictionary<Type, ResponseBinderFn> ResponseBinders { get; }
 
 		/// <summary>
 		/// The AppHost config

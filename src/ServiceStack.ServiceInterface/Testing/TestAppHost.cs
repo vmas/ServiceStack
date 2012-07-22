@@ -80,5 +80,11 @@ namespace ServiceStack.ServiceInterface.Testing
         {
             plugins.ToList().ForEach(x => x.Register(this));
         }
+
+
+        public Dictionary<Type, ResponseBinderFn> ResponseBinders
+        {
+            get { throw new NotImplementedException(); }
+        }
     }
 }

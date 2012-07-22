@@ -26,7 +26,8 @@ namespace ServiceStack.ServiceHost
 			this.OperationTypes = new List<Type>();
             this.RequestTypes = new List<Type>();
 			this.RequestTypeFactoryMap = new Dictionary<Type, Func<IHttpRequest, object>>();
-            this.ResponseConverters = new List<ResponseConverterFn>();
+            this.ResponseBinders = new Dictionary<Type, ResponseBinderFn>();
+            this.AsyncResponseBinders = new List<AsyncResponseBinderFn>();
 			this.ServiceTypes = new HashSet<Type>();
 		}
 
@@ -44,7 +45,9 @@ namespace ServiceStack.ServiceHost
 
 		public Dictionary<Type, Func<IHttpRequest, object>> RequestTypeFactoryMap { get; set; }
 
-		public List<ResponseConverterFn> ResponseConverters { get; set; }
+        public Dictionary<Type, ResponseBinderFn> ResponseBinders { get; set; }
+
+        public List<AsyncResponseBinderFn> AsyncResponseBinders { get; set; }
 
 		public HashSet<Type> ServiceTypes { get; protected set; }
 
@@ -120,6 +123,7 @@ namespace ServiceStack.ServiceHost
 
                     //Executes the service and returns the result
                     var response = callServiceFn(request, service, endpointAttrs);
+                    response = ExecuteResponseBinders(service, request, response);
 
                     //Wrap the original callback into another callback to release the service instance _after_ the service has executed
                     Action<IServiceResult> cb = r =>
@@ -130,19 +134,11 @@ namespace ServiceStack.ServiceHost
                         callback(r);
                     };
 
-                    var convertedResponse = this.ExecuteResponseConverters(service, request, response, cb);
-                    if (convertedResponse != null)
-                    {
-                        //If the response converter returns an IServiceResult, the response converter also executes the callback
-                        var convertedServiceResult = convertedResponse as IServiceResult;
-                        if(convertedServiceResult != null)
-                            return convertedServiceResult;
+                    IServiceResult serviceResult = this.ExecuteAsyncResponseBinders(service, request, response, cb);
+                    if (serviceResult != null)
+                        return serviceResult;
 
-                        //otherwise call the callback here (sync result) 
-                        response = convertedResponse;
-                    }
-
-                    var serviceResult = new SyncServiceResult(response);
+                    serviceResult = new SyncServiceResult(response);
                     cb(serviceResult);
                     return serviceResult;
                 }
@@ -168,19 +164,33 @@ namespace ServiceStack.ServiceHost
             return oneWayHandlerFn;
         }
 
-		private object ExecuteResponseConverters(object service, object request, object response, Action<IServiceResult> callback)
+		private object ExecuteResponseBinders(object service, object request, object response)
 		{
 			if (response != null)
 			{
-				foreach (var responseFactory in this.ResponseConverters)
-				{
-					var result = responseFactory(service, request, response, callback);
-					if (result != null)
-						return result;
-				}
+                var responseType = response.GetType();
+
+                ResponseBinderFn responseBinder;
+                if (ResponseBinders.TryGetValue(responseType, out responseBinder))
+                    return responseBinder(service, request, response);
 			}
-			return null;
+			return response;
 		}
+
+        private IServiceResult ExecuteAsyncResponseBinders(object service, object request, object response, Action<IServiceResult> callback)
+        {
+            if (response != null)
+            {
+                var responseType = response.GetType();
+                foreach (var asyncResponseBinder in AsyncResponseBinders)
+                {
+                    var result = asyncResponseBinder(service, request, response, callback);
+                    if (result != null)
+                        return result;
+                }
+            }
+            return null;
+        }
 
 		private void RegisterService(Type requestType, Type serviceType, ExecuteServiceFn handlerFn, ExecuteOneWayServiceFn oneWayHandlerFn)
 		{

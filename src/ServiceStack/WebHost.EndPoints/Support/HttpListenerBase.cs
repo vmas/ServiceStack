@@ -311,6 +311,11 @@ namespace ServiceStack.WebHost.Endpoints.Support
 			get { return EndpointHost.ServiceManager.ServiceController.RequestTypeFactoryMap; }
 		}
 
+        public Dictionary<Type, ResponseBinderFn> ResponseBinders
+        {
+            get { return EndpointHost.ServiceManager.ServiceController.ResponseBinders; }
+        }
+
 		public IContentTypeFilter ContentTypeFilters
 		{
 			get

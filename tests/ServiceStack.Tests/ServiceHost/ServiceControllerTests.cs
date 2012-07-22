@@ -6,6 +6,7 @@ using Moq;
 using NUnit.Framework;
 using ServiceStack.Configuration;
 using ServiceStack.ServiceHost;
+using ServiceStack.WebHost.Endpoints.Support;
 
 namespace ServiceStack.Tests.ServiceHost
 {
@@ -215,6 +216,52 @@ namespace ServiceStack.Tests.ServiceHost
             Assert.AreEqual(typeof(OneWayService), controller.RequestServiceTypeMap[typeof(RequestDto5)]);
 
             Assert.That(controller.ResponseServiceTypeMap, Is.Empty); //We don't follow the response DTO naming convention
+        }
+
+        class RequestDto6 { }
+        class CustomResponse { }
+        class TestService : IService<RequestDto6>
+        {
+            public object Execute(RequestDto6 request)
+            {
+                return new ResponseDto();
+            }
+        }
+
+
+        [Test]
+        public void Response_binders_are_executed()
+        {
+            var factoryMock = new Mock<ITypeFactory>();
+            factoryMock.Setup(x => x.CreateInstance(typeof(TestService))).Returns(new TestService());
+
+            IServiceController controller = new ServiceController();
+            controller.RegisterService(factoryMock.Object, typeof(TestService));
+            controller.ResponseBinders[typeof(ResponseDto)] = (service, request, response) => new CustomResponse();
+
+            var dto = new RequestDto6();
+            var result = controller.ExecuteAsync(dto, s => { });
+            Assert.That(result.Result, Is.TypeOf<CustomResponse>());
+        }
+
+        [Test]
+        public void Async_Response_binders_are_executed()
+        {
+            var factoryMock = new Mock<ITypeFactory>();
+            factoryMock.Setup(x => x.CreateInstance(typeof(TestService))).Returns(new TestService());
+
+            IServiceController controller = new ServiceController();
+            controller.RegisterService(factoryMock.Object, typeof(TestService));
+            controller.AsyncResponseBinders.Add((service, request, response, callback) =>
+            {
+                var serviceResult = new SyncServiceResult(new CustomResponse());
+                callback(serviceResult);
+                return serviceResult;
+            });
+
+            var dto = new RequestDto6();
+            var result = controller.ExecuteAsync(dto, s => { });
+            Assert.That(result.Result, Is.TypeOf<CustomResponse>());
         }
 	}
 }

@@ -4,20 +4,8 @@ using ServiceStack.Configuration;
 
 namespace ServiceStack.ServiceHost
 {
-    /// <summary>
-    /// Defines a response converter.
-    /// Just return a POCO and ignore the <paramref name="callback"/> parameter 
-    /// if you want to change the response to another object.
-    /// 
-    /// Only use the callback parameter if you are returning a <see cref="IServiceResult"/>, 
-    /// ie you have asynchronous behavior in the response converter.
-    /// </summary>
-    /// <param name="service">The service</param>
-    /// <param name="request">The request DTO</param>
-    /// <param name="response">The response DTO</param>
-    /// <param name="callback">Callback for response converters with asynchronous behavior</param>
-    /// <returns></returns>
-    public delegate object ResponseConverterFn(object service, object request, object response, Action<IServiceResult> callback);
+    public delegate object ResponseBinderFn(object service, object request, object response);
+    public delegate IServiceResult AsyncResponseBinderFn(object service, object request, object response, Action<IServiceResult> callback);
 
     public delegate IServiceResult ExecuteServiceFn(IRequestContext requestContext, object request, Action<IServiceResult> callback);
 
@@ -41,10 +29,13 @@ namespace ServiceStack.ServiceHost
 
         Dictionary<Type, Func<IHttpRequest, object>> RequestTypeFactoryMap { get; set; }
 
+        Dictionary<Type, ResponseBinderFn> ResponseBinders { get; set; }
+
         /// <summary>
-        /// A list of response converters.
+        /// Returns a list of asynchronous response binders.
+        /// The async response binder should return null if the response is not converted.
         /// </summary>
-        List<ResponseConverterFn> ResponseConverters { get; set; }
+        List<AsyncResponseBinderFn> AsyncResponseBinders { get; set; }
 
         HashSet<Type> ServiceTypes { get; }
 

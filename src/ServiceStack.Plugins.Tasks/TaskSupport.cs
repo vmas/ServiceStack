@@ -18,7 +18,7 @@ namespace ServiceStack.Plugins.Tasks
 	{
 		public void Register(IAppHost appHost)
 		{
-			EndpointHost.ServiceManager.ServiceController.ResponseConverters.Add(this.Convert);
+			EndpointHost.ServiceManager.ServiceController.AsyncResponseBinders.Add(this.Convert);
 		}
 
 		private class TaskWrapper : IServiceResult
@@ -71,12 +71,7 @@ namespace ServiceStack.Plugins.Tasks
 				var requestType = request.GetType();
 
 				var key = new Tuple<Type, Type, Type>(serviceType, requestType, responseType);
-				GetTaskResult getResultFn = null;
-				if (!converterCache.TryGetValue(key, out getResultFn))
-				{
-					getResultFn = this.GenerateGetResultFn(serviceType, requestType, responseType);
-					converterCache.TryAdd(key, getResultFn);
-				}
+				GetTaskResult getResultFn = converterCache.GetOrAdd(key, k => this.GenerateGetResultFn(serviceType, requestType, responseType));
 
 				var taskWrapper = new TaskWrapper(task, () => getResultFn(service, request, response));
 

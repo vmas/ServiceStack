@@ -18,8 +18,10 @@ namespace ServiceStack.Plugins.Tasks.Tests
 		public string Message { get; set; }
 	}
 
-	public class AsyncService : IService<Async>
+	public class AsyncService : IService<Async>, IRestPutService<Async>
 	{
+        public static bool putHasExecuted = false;
+
 		public object Execute(Async request)
 		{
 			return Task.Factory.StartNew<AsyncResponse>(() =>
@@ -27,7 +29,15 @@ namespace ServiceStack.Plugins.Tasks.Tests
 				return new AsyncResponse() { Message = "This was async!" };
 			});
 		}
-	}
+
+        public object Put(Async request)
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                putHasExecuted = true;
+            });
+        }
+    }
 
 	[TestFixture]
 	public class TaskServiceTest
@@ -84,5 +94,16 @@ namespace ServiceStack.Plugins.Tasks.Tests
 			var response = client.Send<AsyncResponse>(new Async());
 			Assert.That(response.Message, Is.EqualTo("This was async!"));
 		}
+
+        [Test, TestCaseSource("ServiceClients")]
+        public void Can_execute_Task_without_return_type()
+        {
+            AsyncService.putHasExecuted = false;
+
+            var client = new JsonServiceClient(ListeningOn);
+            var response = client.Put<AsyncResponse>("/async", new Async());
+            Assert.Null(response);
+            Assert.True(AsyncService.putHasExecuted);
+        }
 	}
 }
