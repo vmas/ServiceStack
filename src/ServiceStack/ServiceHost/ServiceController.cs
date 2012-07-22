@@ -58,30 +58,39 @@ namespace ServiceStack.ServiceHost
 		{
 			if (serviceType.IsAbstract || serviceType.ContainsGenericParameters) return;
 
-            List<Type> registeredRequestTypes = new List<Type>();
-			foreach (var service in serviceType.GetInterfaces())
-			{
-                if (service.IsGenericType)
+            var genericInterfaces = serviceType.GetInterfaces()
+                .Where(x => x.IsGenericType);
+
+            var services = genericInterfaces
+                .Where(x => IsValidService(x.GetGenericTypeDefinition()))
+                .GroupBy(x => x.GetGenericArguments()[0]);
+
+            var oneWayServiceRequestTypes = genericInterfaces
+                .Where(x => x.GetGenericTypeDefinition() == typeof(IOneWayService<>))
+                .Select(x => x.GetGenericArguments()[0])
+                .ToList();
+
+            foreach (var service in services)
+            {
+                var requestType = service.Key;
+                var executeServiceFn = GetExecuteServiceFn(requestType, serviceType, serviceFactory);
+
+                ExecuteOneWayServiceFn executeOneWayServiceFn = null;
+                var oneWayService = oneWayServiceRequestTypes.FirstOrDefault(x => x == requestType);
+                if (oneWayService != null)
                 {
-                    var genericDefinition = service.GetGenericTypeDefinition();
-
-                    if (IsValidService(genericDefinition))
-                    {
-                        var requestType = service.GetGenericArguments()[0];
-                        if (!registeredRequestTypes.Contains(requestType))
-                        {
-                            registeredRequestTypes.Add(requestType);
-                            RegisterService(requestType, serviceType, serviceFactory);
-                        }
-                    }
-
-                    if (genericDefinition == typeof(IOneWayService<>))
-                    {
-                        var requestType = service.GetGenericArguments()[0];
-                        RegisterOneWayService(requestType, serviceType, serviceFactory);
-                    }
+                    executeOneWayServiceFn = GetExecuteOneWayServiceFn(requestType, serviceType, serviceFactory);
+                    oneWayServiceRequestTypes.Remove(oneWayService);
                 }
-			}
+
+                RegisterService(requestType, serviceType, executeServiceFn, executeOneWayServiceFn);
+            }
+
+            foreach (var oneWayServiceRequestType in oneWayServiceRequestTypes)
+            {
+                var executeOneWayServiceFn = GetExecuteOneWayServiceFn(oneWayServiceRequestType, serviceType, serviceFactory);
+                RegisterService(oneWayServiceRequestType, serviceType, null, executeOneWayServiceFn); 
+            }
 		}
 
         private static bool IsValidService(Type genericDefinition)
@@ -94,9 +103,9 @@ namespace ServiceStack.ServiceHost
                 || genericDefinition == typeof(IRestPatchService<>);
         }
 
-		private void RegisterService(Type requestType, Type serviceType, ITypeFactory serviceFactory)
+		private ExecuteServiceFn GetExecuteServiceFn(Type requestType, Type serviceType, ITypeFactory serviceFactory)
 		{
-            var callServiceFn = CallServiceExecuteGeneric(requestType, serviceType);
+            var callServiceFn = GetCallServiceFn(requestType, serviceType);
 
             ExecuteServiceFn handlerFn = (requestContext, request, callback) =>
             {
@@ -139,10 +148,10 @@ namespace ServiceStack.ServiceHost
                 }
             };
 
-            this.RegisterService(requestType, serviceType, handlerFn, null);
+            return handlerFn;
 		}
 
-        private void RegisterOneWayService(Type requestType, Type serviceType, ITypeFactory serviceFactory)
+        private ExecuteOneWayServiceFn GetExecuteOneWayServiceFn(Type requestType, Type serviceType, ITypeFactory serviceFactory)
         {
             var callOneWayServiceFn = GetCallOneWayServiceFn(requestType);
 
@@ -156,7 +165,7 @@ namespace ServiceStack.ServiceHost
                 }
             };
 
-            this.RegisterService(requestType, serviceType, null, oneWayHandlerFn);
+            return oneWayHandlerFn;
         }
 
 		private object ExecuteResponseConverters(object service, object request, object response, Action<IServiceResult> callback)
@@ -231,7 +240,7 @@ namespace ServiceStack.ServiceHost
 				servicesRequiresHttpRequest.HttpRequest = requestContext.Get<IHttpRequest>();
 		}
 
-		private static Func<object, object, EndpointAttributes, object> CallServiceExecuteGeneric(
+		private static Func<object, object, EndpointAttributes, object> GetCallServiceFn(
 			Type requestType, Type serviceType)
 		{
 			try

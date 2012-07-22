@@ -61,7 +61,7 @@ namespace ServiceStack.ServiceHost
             if(normalService != null)
 			    return normalService.Execute(request);
 
-            throw new NotSupportedException(); //If we end up here, something is wrong
+            throw new NotImplementedException(); //If we end up here, the requested method does not exist
 		}
 	}
 }

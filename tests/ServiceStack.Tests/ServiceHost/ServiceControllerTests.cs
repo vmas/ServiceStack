@@ -34,6 +34,22 @@ namespace ServiceStack.Tests.ServiceHost
             var dto = new RequestDto();
             var result = controller.ExecuteAsync(dto, r => {}, new HttpRequestContext(dto, EndpointAttributes.HttpGet));
             Assert.That(result.Result, Is.TypeOf<ResponseDto>());
+
+            Assert.Throws<NotImplementedException>(() => controller.ExecuteAsync(dto, r => { }, new HttpRequestContext(dto, EndpointAttributes.HttpPut)));
+
+            Assert.That(controller.OperationTypes.Count, Is.EqualTo(1));
+            Assert.That(controller.OperationTypes, Contains.Item(typeof(RequestDto)));
+
+            Assert.That(controller.ServiceTypes.Count, Is.EqualTo(1));
+            Assert.That(controller.ServiceTypes, Contains.Item(typeof(Service1)));
+
+            Assert.That(controller.RequestTypes.Count, Is.EqualTo(1));
+            Assert.That(controller.RequestTypes, Contains.Item(typeof(RequestDto)));
+
+            Assert.That(controller.RequestServiceTypeMap.Count, Is.EqualTo(1));
+            Assert.AreEqual(typeof(Service1), controller.RequestServiceTypeMap[typeof(RequestDto)]);
+
+            Assert.That(controller.ResponseServiceTypeMap, Is.Empty); //We don't follow the response DTO naming convention
         }
 
         class RequestDto1 { }
@@ -75,6 +91,23 @@ namespace ServiceStack.Tests.ServiceHost
 
             var result3 = controller.ExecuteAsync(dto, r => { });
             Assert.That(result3.Result, Is.TypeOf<ResponseDto>());
+
+            Assert.That(controller.OperationTypes.Count, Is.EqualTo(2));
+            Assert.That(controller.OperationTypes, Contains.Item(typeof(RequestDto1)));
+            Assert.That(controller.OperationTypes, Contains.Item(typeof(RequestDto2)));
+
+            Assert.That(controller.ServiceTypes.Count, Is.EqualTo(1));
+            Assert.That(controller.ServiceTypes, Contains.Item(typeof(RestService)));
+
+            Assert.That(controller.RequestTypes.Count, Is.EqualTo(2));
+            Assert.That(controller.RequestTypes, Contains.Item(typeof(RequestDto1)));
+            Assert.That(controller.RequestTypes, Contains.Item(typeof(RequestDto2)));
+
+            Assert.That(controller.RequestServiceTypeMap.Count, Is.EqualTo(2));
+            Assert.AreEqual(typeof(RestService), controller.RequestServiceTypeMap[typeof(RequestDto1)]);
+            Assert.AreEqual(typeof(RestService), controller.RequestServiceTypeMap[typeof(RequestDto2)]);
+
+            Assert.That(controller.ResponseServiceTypeMap, Is.Empty); //We don't follow the response DTO naming convention
         }
 
         class RequestDto3 { }
@@ -108,6 +141,80 @@ namespace ServiceStack.Tests.ServiceHost
             var dto2 = new RequestDto4();
             var result2 = controller.ExecuteAsync(dto, r => { }, new HttpRequestContext(dto, EndpointAttributes.HttpGet));
             Assert.That(result2.Result, Is.TypeOf<ResponseDto>());
+
+            Assert.That(controller.OperationTypes.Count, Is.EqualTo(2));
+            Assert.That(controller.OperationTypes, Contains.Item(typeof(RequestDto3)));
+            Assert.That(controller.OperationTypes, Contains.Item(typeof(RequestDto4)));
+
+            Assert.That(controller.ServiceTypes.Count, Is.EqualTo(1));
+            Assert.That(controller.ServiceTypes, Contains.Item(typeof(GetService)));
+
+            Assert.That(controller.RequestTypes.Count, Is.EqualTo(2));
+            Assert.That(controller.RequestTypes, Contains.Item(typeof(RequestDto3)));
+            Assert.That(controller.RequestTypes, Contains.Item(typeof(RequestDto4)));
+
+            Assert.That(controller.RequestServiceTypeMap.Count, Is.EqualTo(2));
+            Assert.AreEqual(typeof(GetService), controller.RequestServiceTypeMap[typeof(RequestDto3)]);
+            Assert.AreEqual(typeof(GetService), controller.RequestServiceTypeMap[typeof(RequestDto4)]);
+
+            Assert.That(controller.ResponseServiceTypeMap, Is.Empty); //We don't follow the response DTO naming convention
+        }
+
+        class RequestDto5 { }
+        class OneWayService : IService<RequestDto5>, IRestGetService<RequestDto5>, IOneWayService<RequestDto5>
+        {
+            public static bool oneWayWasCalled = false;
+
+            public object Execute(RequestDto5 request)
+            {
+                return new ResponseDto();
+            }
+
+            public void ExecuteOneWay(RequestDto5 request)
+            {
+                oneWayWasCalled = true;
+            }
+
+            public object Get(RequestDto5 request)
+            {
+                return new ResponseDto();
+            }
+        }
+
+        [Test]
+        public void Can_combine_IOneWayService_with_IService()
+        {
+            OneWayService.oneWayWasCalled = false;
+
+            var factoryMock = new Mock<ITypeFactory>();
+            factoryMock.Setup(x => x.CreateInstance(typeof(OneWayService))).Returns(new OneWayService());
+
+            IServiceController controller = new ServiceController();
+            controller.RegisterService(factoryMock.Object, typeof(OneWayService));
+
+            var dto = new RequestDto5();
+            var result = controller.ExecuteAsync(dto, r => { }, new HttpRequestContext(dto, EndpointAttributes.HttpPost));
+            Assert.That(result.Result, Is.TypeOf<ResponseDto>());
+
+            var result2 = controller.ExecuteAsync(dto, r => { }, new HttpRequestContext(dto, EndpointAttributes.HttpGet));
+            Assert.That(result2.Result, Is.TypeOf<ResponseDto>());
+
+            controller.ExecuteOneWay(dto);
+            Assert.True(OneWayService.oneWayWasCalled);
+
+            Assert.That(controller.OperationTypes.Count, Is.EqualTo(1));
+            Assert.That(controller.OperationTypes, Contains.Item(typeof(RequestDto5)));
+
+            Assert.That(controller.ServiceTypes.Count, Is.EqualTo(1));
+            Assert.That(controller.ServiceTypes, Contains.Item(typeof(OneWayService)));
+
+            Assert.That(controller.RequestTypes.Count, Is.EqualTo(1));
+            Assert.That(controller.RequestTypes, Contains.Item(typeof(RequestDto5)));
+
+            Assert.That(controller.RequestServiceTypeMap.Count, Is.EqualTo(1));
+            Assert.AreEqual(typeof(OneWayService), controller.RequestServiceTypeMap[typeof(RequestDto5)]);
+
+            Assert.That(controller.ResponseServiceTypeMap, Is.Empty); //We don't follow the response DTO naming convention
         }
 	}
 }
