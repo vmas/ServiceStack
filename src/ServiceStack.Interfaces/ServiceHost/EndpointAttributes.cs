@@ -7,17 +7,14 @@ namespace ServiceStack.ServiceHost
     {
         None = 0,
 
-        All = AllNetworkAccessTypes | AllSecurityModes | AllHttpMethods | AllEndpointTypes,
-        AllNetworkAccessTypes = External | Localhost | LocalSubnet,
+        All = AllNetworkAccessTypes | AllSecurityModes | AllHttpMethods | Soap,
+        AllNetworkAccessTypes = External | Localhost,
         AllSecurityModes = Secure | InSecure,
         AllHttpMethods = HttpHead | HttpGet | HttpPost | HttpPut | HttpDelete,
-        AllEndpointTypes = Soap11 | Soap12 | Xml | Json | Jsv | ProtoBuf | Csv,
-        
-        InternalNetworkAccess = Localhost | LocalSubnet,
+        Soap = Soap11 | Soap12,
 
         //Whether it came from an Internal or External address
         Localhost = 1 << 0,
-        LocalSubnet = 1 << 1,
         External = 1 << 2,
 
         //Called over a secure or insecure channel
@@ -35,19 +32,6 @@ namespace ServiceStack.ServiceHost
 
         //Different endpoints
         Soap11 = 1 << 15,
-        Soap12 = 1 << 16,
-        //POX
-        Xml = 1 << 17,
-        //Javascript
-        Json = 1 << 18,
-        //Jsv i.e. TypeSerializer
-        Jsv = 1 << 19,
-        //e.g. protobuf-net
-        ProtoBuf = 1 << 20,
-        //e.g. text/csv
-        Csv = 1 << 21,
-
-        Html = 1 << 22,
-        Yaml = 1 << 23,
+        Soap12 = 1 << 16
     }
 }

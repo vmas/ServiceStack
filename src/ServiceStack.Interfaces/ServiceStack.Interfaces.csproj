@@ -564,9 +564,6 @@
     <Compile Include="ServiceHost\RestServiceAttribute.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ServiceHost\ServiceAttribute.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="ServiceInterface.ServiceModel\CollectionTypes.cs">
       <SubType>Code</SubType>
     </Compile>

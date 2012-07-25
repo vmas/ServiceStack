@@ -242,7 +242,6 @@
     <Compile Include="WebHost.Endpoints\Metadata\CustomMetadataHandler.cs" />
     <Compile Include="WebHost.Endpoints\Extensions\HttpRequestWrapper.cs" />
     <Compile Include="WebHost.Endpoints\Metadata\JsvMetadataHandler.cs" />
-    <Compile Include="WebHost.Endpoints\ServiceHostEnvironment.cs" />
     <Compile Include="WebHost.Endpoints\Support\ForbiddenHttpHandler.cs" />
     <Compile Include="WebHost.Endpoints\Support\Mocks\HttpRequestMock.cs" />
     <Compile Include="WebHost.Endpoints\Support\Mocks\HttpResponseMock.cs" />
@@ -255,7 +254,6 @@
     <Compile Include="WebHost.Endpoints\Extensions\HttpResponseWrapper.cs" />
     <Compile Include="WebHost.Endpoints\MetadataConfig.cs" />
     <Compile Include="WebHost.Endpoints\ServiceStackHttpHandlerFactory.cs" />
-    <Compile Include="WebHost.Endpoints\Soap11Handlers.cs" />
     <Compile Include="WebHost.Endpoints\Support\HttpListenerBase.cs" />
     <Compile Include="WebHost.Endpoints\AppHostHttpListenerBase.cs" />
     <Compile Include="WebHost.Endpoints\Support\GzipOptimizationTest.cs" />
@@ -272,13 +270,9 @@
     <Compile Include="WebHost.Endpoints\Metadata\Soap11WsdlMetadataHandler.cs" />
     <Compile Include="WebHost.Endpoints\Support\Templates\Soap11WsdlTemplate.cs" />
     <Compile Include="WebHost.Endpoints\Support\Templates\WsdlTemplateBase.cs" />
-    <Compile Include="WebHost.Endpoints\Soap12Handlers.cs" />
-    <Compile Include="WebHost.Endpoints\Support\EndpointHandlerBase.cs" />
     <Compile Include="WebHost.Endpoints\EndpointHost.cs" />
     <Compile Include="WebHost.Endpoints\EndpointHostConfig.cs" />
-    <Compile Include="WebHost.Endpoints\Support\SoapHandler.cs" />
     <Compile Include="WebHost.Endpoints\Utils\FilterAttributeCache.cs" />
-    <Compile Include="WebHost.Endpoints\WebServerType.cs" />
     <Compile Include="WebHost.Endpoints\Metadata\IndexMetadataHandler.cs" />
     <Compile Include="WebHost.Endpoints\Metadata\Soap11MetadataHandler.cs" />
     <Compile Include="WebHost.Endpoints\Metadata\Soap12MetadataHandler.cs" />

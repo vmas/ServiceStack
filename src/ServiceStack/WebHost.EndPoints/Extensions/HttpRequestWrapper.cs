@@ -185,6 +185,11 @@ namespace ServiceStack.WebHost.Endpoints.Extensions
 			get { return request.IsSecureConnection; }
 		}
 
+        public bool IsLocal
+        {
+            get { return request.IsLocal; }
+        }
+
 		public string[] AcceptTypes
 		{
 			get { return request.AcceptTypes; }

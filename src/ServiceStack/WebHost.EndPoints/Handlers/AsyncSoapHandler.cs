@@ -100,7 +100,7 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 
                 if (EndpointHost.ApplyRequestFilters(req, res, requestDto)) return this.CancelRequestProcessing(callback);
 
-                var endpointAttributes = EndpointHandlerBase.GetEndpointAttributes(req);
+                var endpointAttributes = GetEndpointAttributes(req);
                 if (version == MessageVersion.Soap11)
                     endpointAttributes = endpointAttributes | EndpointAttributes.Soap11;
                 else

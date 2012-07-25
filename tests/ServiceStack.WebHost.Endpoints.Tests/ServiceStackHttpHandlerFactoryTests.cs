@@ -12,8 +12,8 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 		readonly Dictionary<string, Type> pathInfoMap = new Dictionary<string, Type>
 		{
 			{"Metadata", typeof(IndexMetadataHandler)},
-			{"Soap11", typeof(Soap11MessageSyncReplyHttpHandler)},
-			{"Soap12", typeof(Soap12MessageSyncReplyHttpHandler)},
+			{"Soap11", typeof(AsyncSoapHandler)},
+			{"Soap12", typeof(AsyncSoapHandler)},
 
 			{"Json/SyncReply", typeof(AsyncRestHandler)},
 			{"Json/AsyncOneWay", typeof(AsyncRestHandler)},

@@ -261,41 +261,24 @@ namespace ServiceStack.WebHost.Endpoints.Extensions
 				HttpStatusCode.InternalServerError);
 		}
 
-		public static void WriteErrorToResponse(this IHttpResponse response, string contentType,
-			string operationName, string errorMessage, Exception ex, HttpStatusCode statusCode)
-		{
-			switch (contentType)
-			{
-				case ContentType.Xml:
-					WriteXmlErrorToResponse(response, operationName, errorMessage, ex, statusCode);
-					break;
-				case ContentType.Json:
-					WriteJsonErrorToResponse(response, operationName, errorMessage, ex, statusCode);
-					break;
-				case ContentType.Jsv:
-					WriteJsvErrorToResponse(response, operationName, errorMessage, ex, statusCode);
-					break;
-				default:
-					WriteXmlErrorToResponse(response, operationName, errorMessage, ex, statusCode);
-					break;
-			}
-		}
-
 		public static void WriteErrorToResponse(this IHttpResponse response,
-			EndpointAttributes contentType, string operationName, string errorMessage,
+			string contentType, string operationName, string errorMessage,
 			Exception ex, HttpStatusCode statusCode)
 		{
 			switch (contentType)
 			{
-				case EndpointAttributes.Xml:
+				case ContentType.Xml:
+                case ContentType.XmlText:
 					WriteXmlErrorToResponse(response, operationName, errorMessage, ex, statusCode);
 					break;
 
-				case EndpointAttributes.Json:
+                case ContentType.Json:
+                case ContentType.JsonText:
 					WriteJsonErrorToResponse(response, operationName, errorMessage, ex, statusCode);
 					break;
 
-				case EndpointAttributes.Jsv:
+                case ContentType.Jsv:
+                case ContentType.JsvText:
 					WriteJsvErrorToResponse(response, operationName, errorMessage, ex, statusCode);
 					break;
 

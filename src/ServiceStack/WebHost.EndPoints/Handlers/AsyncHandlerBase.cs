@@ -83,5 +83,16 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 		{
 			throw new NotSupportedException();
 		}
+
+        protected EndpointAttributes GetEndpointAttributes(IHttpRequest request)
+        {
+            var endpointAttributes = EndpointAttributes.None;
+
+            endpointAttributes |= HttpMethods.GetEndpointAttribute(request.HttpMethod);
+            endpointAttributes |= request.IsSecureConnection ? EndpointAttributes.Secure : EndpointAttributes.InSecure;
+            endpointAttributes |= request.IsLocal ? EndpointAttributes.Localhost : EndpointAttributes.External;
+            
+            return endpointAttributes;
+        }
 	}
 }

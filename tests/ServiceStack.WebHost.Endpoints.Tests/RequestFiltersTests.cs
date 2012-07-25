@@ -407,8 +407,8 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 		{
 			protected override IServiceClient CreateNewServiceClient()
 			{
-				EndpointHandlerBase.ServiceManager = new ServiceManager(typeof(SecureService).Assembly);
-				return new DirectServiceClient(EndpointHandlerBase.ServiceManager);
+				EndpointHost.ServiceManager = new ServiceManager(typeof(SecureService).Assembly);
+				return new DirectServiceClient(EndpointHost.ServiceManager);
 			}
 
 			protected override IRestClientAsync CreateNewRestClientAsync()

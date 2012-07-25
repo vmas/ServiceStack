@@ -203,38 +203,32 @@ namespace ServiceStack.ServiceHost
 
 		public static object GetRequestDto(this IHttpRequest httpReq, Type requestType, string contentType = null, Func<object, object> populateRequestDtoFn = null)
 		{
-			try
+			if (contentType == null)
+				contentType = httpReq.ContentType;
+
+			//Use custom request binder if registered
+			Func<IHttpRequest, object> requestFactoryFn;
+			EndpointHost.ServiceManager.ServiceController.RequestTypeFactoryMap.TryGetValue(requestType, out requestFactoryFn);
+			if (requestFactoryFn != null)
+				return requestFactoryFn(httpReq);
+
+			object requestDto = null;
+			if (!string.IsNullOrEmpty(contentType) && httpReq.ContentLength > 0)
 			{
-				if (contentType == null)
-					contentType = httpReq.ContentType;
-
-				//Use custom request binder if registered
-				Func<IHttpRequest, object> requestFactoryFn;
-				EndpointHost.ServiceManager.ServiceController.RequestTypeFactoryMap.TryGetValue(requestType, out requestFactoryFn);
-				if (requestFactoryFn != null)
-					return requestFactoryFn(httpReq);
-
-				object requestDto = null;
-				if (!string.IsNullOrEmpty(contentType) && httpReq.ContentLength > 0)
-				{
-					//Get deserializer for content tpye (eg JSON)
-					var deserializer = EndpointHost.AppHost.ContentTypeFilters.GetStreamDeserializer(contentType);
-					if (deserializer != null)
-						requestDto = deserializer(requestType, httpReq.InputStream);
-				}
-
-				//Enable custom deserialization logic for specific endpoints (eg REST) 
-				if (populateRequestDtoFn != null)
-					return populateRequestDtoFn(requestDto);
-
-				return requestDto;
+				//Get deserializer for content tpye (eg JSON)
+				var deserializer = EndpointHost.AppHost.ContentTypeFilters.GetStreamDeserializer(contentType);
+                if(deserializer != null)
+				    requestDto = deserializer(requestType, httpReq.InputStream);
 			}
-			catch (Exception ex)
-			{
-				var msg = "Could not deserialize '{0}' request using {1}'\nError: {2}"
-					.Fmt(contentType, requestType, ex);
-				throw new SerializationException(msg);
-			}
+
+			//Enable custom deserialization logic for specific endpoints (eg REST) 
+			if (populateRequestDtoFn != null)
+				return populateRequestDtoFn(requestDto);
+
+            if (requestDto == null)
+                throw new SerializationException("Content-Type '{0}' not supported.".Fmt(contentType));
+
+			return requestDto;
 		}
 
 

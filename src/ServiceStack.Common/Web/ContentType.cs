@@ -49,46 +49,6 @@ namespace ServiceStack.Common.Web
 
         public const string Binary = "application/octet-stream";
 
-        public static EndpointAttributes GetEndpointAttributes(string contentType)
-        {
-            if (contentType == null)
-                return EndpointAttributes.None;
-
-            var realContentType = contentType.Split(';')[0].Trim();
-            switch (realContentType)
-            {
-                case Json:
-                case JsonText:
-                    return EndpointAttributes.Json;
-
-                case Xml:
-                case XmlText:
-                    return EndpointAttributes.Xml;
-
-                case Html:
-                    return EndpointAttributes.Html;
-
-                case Jsv:
-                case JsvText:
-                    return EndpointAttributes.Jsv;
-
-                case Yaml:
-                case YamlText:
-                    return EndpointAttributes.Yaml;
-
-                case Csv:
-                    return EndpointAttributes.Csv;
-
-                case Soap11:
-                    return EndpointAttributes.Soap11;
-
-                case Soap12:
-                    return EndpointAttributes.Soap12;
-            }
-
-            return EndpointAttributes.None;
-        }
-
         public static Feature GetFeature(string contentType)
         {
             if (contentType == null)

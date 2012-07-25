@@ -107,5 +107,10 @@ namespace ServiceStack.WebHost.Endpoints.Support.Mocks
 		{
 			get { throw new NotImplementedException(); }
 		}
-	}
+
+        public bool IsLocal
+        {
+            get { throw new NotImplementedException(); }
+        }
+    }
 }

@@ -11,10 +11,8 @@ using ServiceStack.WebHost.Endpoints.Tests.Support;
 namespace ServiceStack.WebHost.Endpoints.Tests
 {
 	[TestFixture]
-	public class HtmlResultMetadataTests : TestBase
+	public class HtmlResultMetadataTests
 	{
-		protected override void Configure(Funq.Container container) {}
-
 		public static class Html
 		{
 			public static HttpResult RedirectTo(string url)

@@ -135,6 +135,7 @@
     <Compile Include="ProtoBufServiceTests.cs" />
     <Compile Include="ResponseBindersTest.cs" />
     <Compile Include="Support\Operations\CustomRequestBinder.cs" />
+    <Compile Include="Support\MetadataTestBase.cs" />
     <Compile Include="SyncServiceClientTests.cs" />
     <Compile Include="TodoListTests.cs" />
     <Compile Include="CustomerServiceValidationTests.cs" />
@@ -142,7 +143,6 @@
     <Compile Include="HttpResultContentTypeTests.cs" />
     <Compile Include="RemoteEndDropsConnectionTests.cs" />
     <Compile Include="IocServiceTests.cs" />
-    <Compile Include="Support\EndpointHandlerBaseTests.cs" />
     <Compile Include="UserServiceValidationTests.cs" />
     <Compile Include="JsonpTests.cs" />
     <Compile Include="Support\Host\IocAppHost.cs" />
@@ -156,7 +156,6 @@
     <Compile Include="AppHostConfigTests.cs" />
     <Compile Include="SyncRestClientTests.cs" />
     <Compile Include="CsvContentTypeFilterTests.cs" />
-    <Compile Include="EndpointRestrictionTests.cs" />
     <Compile Include="FileUploadTests.cs" />
     <Compile Include="HttpErrorTests.cs" />
     <Compile Include="RequestContextTests.cs" />
@@ -188,23 +187,12 @@
     <Compile Include="Support\Services\GetCustomerService.cs" />
     <Compile Include="Support\Services\HelloService.cs" />
     <Compile Include="Support\Services\TestAsyncService.cs" />
-    <Compile Include="Support\Services\InSecureLiveEnvironmentRestriction.cs" />
-    <Compile Include="Support\Services\SecureLiveEnvironmentRestriction.cs" />
-    <Compile Include="Support\Services\SecureDevEnvironmentRestrictionService.cs" />
-    <Compile Include="Support\Services\InsecureDevEnvironmentRestrictionService.cs" />
-    <Compile Include="Support\Services\HttpPostXmlAndSecureLocalSubnetRestrictionService.cs" />
-    <Compile Include="Support\Services\HttpPostXmlOrSecureLocalSubnetRestrictionService.cs" />
-    <Compile Include="Support\Services\SecureLocalSubnetRestrictionService.cs" />
-    <Compile Include="Support\Services\InternalRestrictionService.cs" />
-    <Compile Include="Support\Services\LocalhostRestrictionService.cs" />
-    <Compile Include="Support\Services\LocalSubnetRestrictionService.cs" />
     <Compile Include="Support\Services\NestedService.cs" />
     <Compile Include="ServiceStackHostTests.cs" />
     <Compile Include="Support\Operations\GetCustomers.cs" />
     <Compile Include="Support\Operations\StoreCustomer.cs" />
     <Compile Include="Support\Services\TestServiceBase.cs" />
     <Compile Include="Support\Host\TestAppHost.cs" />
-    <Compile Include="Support\TestBase.cs" />
     <Compile Include="Support\Services\TestService.cs" />
     <Compile Include="WebServiceExceptionTests.cs" />
     <Compile Include="WsdlMetadataTests.cs" />

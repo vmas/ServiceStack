@@ -66,6 +66,11 @@ namespace ServiceStack.ServiceHost
 		/// </summary>
 		bool IsSecureConnection { get; }
 
+        /// <summary>
+        /// Gets a value indicating whether the request is from the local computer.
+        /// </summary>
+        bool IsLocal { get; }
+
 		string[] AcceptTypes { get; }
 
 		string PathInfo { get; }

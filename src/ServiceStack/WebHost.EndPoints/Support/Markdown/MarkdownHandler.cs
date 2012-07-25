@@ -1,11 +1,13 @@
 ﻿using System.Net;
+using System.Web;
 using ServiceStack.ServiceHost;
 using ServiceStack.Text;
+using ServiceStack.WebHost.Endpoints.Extensions;
 using ServiceStack.WebHost.Endpoints.Formats;
 
 namespace ServiceStack.WebHost.Endpoints.Support.Markdown
 {
-	public class MarkdownHandler : EndpointHandlerBase
+	public class MarkdownHandler : IServiceStackHttpHandler, IHttpHandler
 	{
 		public MarkdownFormat MarkdownFormat { get; set; }
 		public MarkdownPage MarkdownPage { get; set; }
@@ -13,7 +15,7 @@ namespace ServiceStack.WebHost.Endpoints.Support.Markdown
 		public string PathInfo { get; set; }
 		public string FilePath { get; set; }
 
-		public override void ProcessRequest(IHttpRequest httpReq, IHttpResponse httpRes, string operationName)
+		public void ProcessRequest(IHttpRequest httpReq, IHttpResponse httpRes, string operationName)
 		{
 			var contentPage = MarkdownPage;
 			if (contentPage == null)
@@ -35,14 +37,17 @@ namespace ServiceStack.WebHost.Endpoints.Support.Markdown
 			MarkdownFormat.ProcessMarkdownPage(httpReq, contentPage, null, httpRes);
 		}
 
-		public override object CreateRequest(IHttpRequest request, string operationName)
-		{
-			return null;
-		}
+        public bool IsReusable
+        {
+            get { return false; }
+        }
 
-		public override object GetResponse(IHttpRequest httpReq, IHttpResponse httpRes, object request)
-		{
-			return null;
-		}
-	}
+        public void ProcessRequest(HttpContext context)
+        {
+            var operationName = context.Request.GetOperationName();
+            var httpReq = new HttpRequestWrapper(operationName, context.Request);
+            var httpRes = new HttpResponseWrapper(context.Response);
+            ProcessRequest(httpReq, httpRes, operationName);
+        }
+    }
 }

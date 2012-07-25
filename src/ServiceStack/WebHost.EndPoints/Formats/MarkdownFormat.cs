@@ -102,7 +102,6 @@ namespace ServiceStack.WebHost.Endpoints.Formats
 				{
 					MarkdownFormat = this,
 					MarkdownPage = markdownPage,
-					RequestName = "MarkdownPage",
 					PathInfo = pathInfo,
 					FilePath = filePath
 				};

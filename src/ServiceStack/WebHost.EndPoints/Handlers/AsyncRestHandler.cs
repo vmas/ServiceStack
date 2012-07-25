@@ -36,8 +36,7 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 
                 //If no allowed content type was given from the client, the first allowed one is taken
                 if (contentType == null)
-                    contentType = validContentTypes.First();
-                
+                    contentType = validContentTypes.First();         
             }
             else
             {
@@ -75,10 +74,9 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 					responseContentType = req.ResponseContentType;
 				EndpointHost.Config.AssertContentType(responseContentType);
 
-                var requestContentType = ContentType.GetEndpointAttributes(req.ResponseContentType);
                 var requestDto = this.GetRequestDto(req, this.RestPath);
 
-                var endpointAttributes = requestContentType | EndpointHandlerBase.GetEndpointAttributes(req);
+                var endpointAttributes = GetEndpointAttributes(req);
                 var requestContext = new HttpRequestContext(req, res, requestDto, endpointAttributes);
 
 				if (EndpointHost.ApplyRequestFilters(req, res, requestDto)) return this.CancelRequestProcessing(callback);
