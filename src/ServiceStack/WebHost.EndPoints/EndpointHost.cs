@@ -30,6 +30,10 @@ namespace ServiceStack.WebHost.Endpoints
 
 		public static List<IPlugin> Plugins { get; set; }
 
+        public static DateTime StartedAt { get; set; }
+
+        public static DateTime ReadyAt { get; set; }
+
 		static EndpointHost()
 		{
 			ContentTypeFilter = HttpResponseFilter.Instance;
@@ -70,6 +74,7 @@ namespace ServiceStack.WebHost.Endpoints
 		//After configure called
 		public static void AfterInit()
 		{
+            StartedAt = DateTime.Now;
 
 			if (config.EnableFeatures != Feature.All)
 			{
@@ -110,6 +115,8 @@ namespace ServiceStack.WebHost.Endpoints
 			pluginsLoaded = true;
 
 			AfterPluginsLoaded(specifiedContentType);
+
+		    ReadyAt = DateTime.Now;
 		}
 
 		private static void AfterPluginsLoaded(string specifiedContentType)

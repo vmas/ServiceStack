@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
@@ -157,20 +158,39 @@ namespace ServiceStack.WebHost.Endpoints
             this.EnableDefaultRoutes = instance.EnableDefaultRoutes;
 		}
 
+        public static string GetAppConfigPath()
+        {
+            if (EndpointHost.AppHost == null) return null;
+
+            var configPath = "~/web.config".MapHostAbsolutePath();
+            if (File.Exists(configPath))
+                return configPath;
+
+            var appHostDll = new FileInfo(EndpointHost.AppHost.GetType().Assembly.Location).Name;
+            configPath = "~/{0}.config".Fmt(appHostDll).MapAbsolutePath();
+            return File.Exists(configPath) ? configPath : null;
+        }
+
+	    private static System.Configuration.Configuration GetAppConfig()
+        {
+            System.Reflection.Assembly entryAssembly;
+            
+            //Read the user-defined path in the Web.Config
+            if (EndpointHost.AppHost is AppHostBase)
+                return WebConfigurationManager.OpenWebConfiguration("~/");
+            
+            if ((entryAssembly = System.Reflection.Assembly.GetEntryAssembly()) != null)
+                return ConfigurationManager.OpenExeConfiguration(entryAssembly.Location);
+            
+            return null;
+        }
+
 		private static void InferHttpHandlerPath()
 		{
 			try
 			{
-				System.Reflection.Assembly entryAssembly;
-				System.Configuration.Configuration config;
-
-				//Read the user-defined path in the Web.Config
-				if (EndpointHost.AppHost is AppHostBase)
-					config = WebConfigurationManager.OpenWebConfiguration("~/");
-				else if ((entryAssembly = System.Reflection.Assembly.GetEntryAssembly()) != null)
-					config = ConfigurationManager.OpenExeConfiguration(entryAssembly.Location);
-				else
-					return;
+				var config = GetAppConfig();
+                if (config == null) return;
 
 				SetPathsFromConfiguration(config, null);
 

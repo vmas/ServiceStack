@@ -81,52 +81,37 @@
     <Compile Include="Compilation\CSharp\CSharpDirectCompilerService.cs" />
     <Compile Include="Compilation\CSharp\CSharpRazorCodeGenerator.cs" />
     <Compile Include="Compilation\CSharp\CSharpRazorCodeLanguage.cs" />
+    <Compile Include="Dapper\SqlMapper.cs" />
     <Compile Include="DynamicRequestObject.cs" />
     <Compile Include="ErrorViewPage.cs" />
     <Compile Include="ServiceStack\CSharpRazorCodeGenerator.cs" />
     <Compile Include="ServiceStack\ModelSpan.cs" />
-    <Compile Include="Compilation\DirectCompilerServiceBase.cs" />
-    <Compile Include="Compilation\DefaultCompilerServiceFactory.cs" />
-    <Compile Include="Compilation\ICompilerService.cs" />
     <Compile Include="IRazorTemplate.cs" />
     <Compile Include="MicrosoftCSharpReferenceStub.cs" />
     <Compile Include="Compilation\RazorDynamicObject.cs" />
-    <Compile Include="Compilation\HasDynamicModelAttribute.cs" />
     <Compile Include="Compilation\TypeContext.cs" />
-    <Compile Include="Configuration\ConfigurationServices.cs" />
-    <Compile Include="Configuration\NamespaceConfigurationElement.cs" />
-    <Compile Include="Configuration\NamespaceConfigurationElementCollection.cs" />
-    <Compile Include="Configuration\RazorEngineConfigurationSection.cs" />
-    <Compile Include="Configuration\TemplateServiceConfigurationElement.cs" />
-    <Compile Include="Configuration\TemplateServiceConfigurationElementCollection.cs" />
-    <Compile Include="Compilation\ICompilerServiceFactory.cs" />
     <Compile Include="Language.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RazorHost.cs" />
     <Compile Include="RazorFormat.cs" />
     <Compile Include="RazorHandler.cs" />
+    <Compile Include="Templating\IRazorViewEngine.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ViewPage.cs" />
+    <Compile Include="ViewPageBase.cs" />
     <Compile Include="ViewPage`1.cs" />
     <Compile Include="ServiceStack\MvcWebPageRazorHost.cs" />
     <Compile Include="ServiceStack\MvcCSharpRazorCodeParser.cs" />
     <Compile Include="ServiceStack\ServiceStackCSharpRazorBuildProvider.cs" />
-    <Compile Include="ServiceStack\ViewMasterPage.cs" />
-    <Compile Include="ServiceStack\ViewMasterPage`1.cs" />
-    <Compile Include="Templating\DefaultActivator.cs" />
-    <Compile Include="Templating\DelegateActivator.cs" />
-    <Compile Include="Templating\DelegateTemplateResolver.cs" />
-    <Compile Include="Templating\IActivator.cs" />
     <Compile Include="Templating\ITemplate.cs" />
     <Compile Include="Templating\ITemplateOfT.cs" />
-    <Compile Include="Templating\ITemplateResolver.cs" />
     <Compile Include="Templating\RequireNamespacesAttribute.cs" />
     <Compile Include="Templating\TemplateBase.cs" />
-    <Compile Include="Templating\TemplateBaseOfT.cs" />
     <Compile Include="Templating\TemplateCompilationException.cs" />
     <Compile Include="Templating\TemplateParsingException.cs" />
     <Compile Include="Templating\TemplateService.cs" />
     <Compile Include="Templating\TemplateService.ServiceStack.cs" />
-    <Compile Include="Templating\TemplateServiceFactory.cs" />
     <Compile Include="Templating\TemplateWriter.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -137,6 +122,10 @@
     <ProjectReference Include="..\ServiceStack.Interfaces\ServiceStack.Interfaces.csproj">
       <Project>{42E1C8C0-A163-44CC-92B1-8F416F2C0B01}</Project>
       <Name>ServiceStack.Interfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ServiceStack.ServiceInterface\ServiceStack.ServiceInterface.csproj">
+      <Project>{5A315F92-80D2-4C60-A5A4-22E027AC7E7E}</Project>
+      <Name>ServiceStack.ServiceInterface</Name>
     </ProjectReference>
     <ProjectReference Include="..\ServiceStack\ServiceStack.csproj">
       <Project>{680A1709-25EB-4D52-A87F-EE03FFD94BAA}</Project>

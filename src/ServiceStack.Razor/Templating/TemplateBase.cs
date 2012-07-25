@@ -1,11 +1,134 @@
-﻿using System.Web;
+﻿using System.Collections.Generic;
+using System.Dynamic;
+using System.Web;
 using ServiceStack.Html;
 using System;
 using System.IO;
 using System.Text;
+using ServiceStack.Razor.Compilation;
 
 namespace ServiceStack.Razor.Templating
 {
+    /// <summary>
+    /// Defines an attribute that marks the presence of a dynamic model in a template.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
+    public sealed class HasDynamicModelAttribute : Attribute {}
+
+    public abstract partial class TemplateBase
+    {
+        [ThreadStatic] public static dynamic ViewBag;
+
+        private Dictionary<string, Action> sections;
+        public Dictionary<string, Action> Sections
+        {
+            get { return sections ?? (sections = new Dictionary<string, Action>()); }
+        }
+
+        [ThreadStatic] private static string childBody;
+        [ThreadStatic] private static IRazorTemplate childTemplate;
+
+        public IRazorTemplate ChildTemplate
+        {
+            get { return childTemplate; }
+            set
+            {
+                childTemplate = value;
+                childBody = childTemplate.Result;
+            }
+        }
+
+        public void WriteSection(string name, Action contents)
+        {
+            if (name == null || contents == null)
+                return;
+
+            Sections[name] = contents;
+        }
+
+        public string RenderBody()
+        {
+            return childBody;
+        }
+
+        public string RenderSection(string sectionName)
+        {
+            return RenderSection(sectionName, false);
+        }
+
+        public string RenderSection(string sectionName, bool required)
+        {
+            if (sectionName == null)
+                throw new ArgumentNullException("sectionName");
+
+            Action renderSection;
+            this.Sections.TryGetValue(sectionName, out renderSection);
+
+            if (renderSection == null)
+            {
+                if (childTemplate == null) return null;
+
+                childTemplate.Sections.TryGetValue(sectionName, out renderSection);
+
+                if (renderSection == null)
+                {
+                    if (required)
+                        throw new ApplicationException("Section not defined: " + sectionName);
+                    return null;
+                }
+            }
+
+            renderSection();
+
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Provides a base implementation of a template with a model.
+    /// </summary>
+    /// <typeparam name="TModel">The model type.</typeparam>
+    public abstract class TemplateBase<TModel> : TemplateBase, ITemplate<TModel>
+    {
+        private object model;
+
+        /// <summary>
+        /// Gets whether this template uses a dynamic model.
+        /// </summary>
+        protected bool HasDynamicModel { get; private set; }
+        
+        protected TemplateBase()
+        {
+            HasDynamicModel = GetType()
+                .IsDefined(typeof(HasDynamicModelAttribute), true);
+        }
+
+        /// <summary>
+        /// Gets or sets the model.
+        /// </summary>
+        public TModel Model
+        {
+            get
+            {
+                if (HasDynamicModel
+                    && !typeof(TModel).IsAssignableFrom(typeof(DynamicObject))
+                    && (model is DynamicObject || model is ExpandoObject))
+                {
+                    TModel m = (dynamic)model;
+                    return m;
+                }
+                return model != null ? (TModel)model : default(TModel);
+            }
+            set
+            {
+                if (HasDynamicModel && !(value is DynamicObject) && !(value is ExpandoObject))
+                    model = new RazorDynamicObject { Model = value };
+                else
+                    model = value;
+            }
+        }
+    }
+
 	/// <summary>
     /// Provides a base implementation of a template.
     /// </summary>

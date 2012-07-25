@@ -1,82 +1,13 @@
 using System;
-using System.Collections.Generic;
+using System.Dynamic;
 using ServiceStack.Common;
 using ServiceStack.Html;
 using ServiceStack.ServiceHost;
 
 namespace ServiceStack.Razor.Templating
 {
-	public abstract partial class TemplateBase
+    public partial class TemplateService
 	{
-		private Dictionary<string, Action> sections;
-		public Dictionary<string, Action> Sections
-		{
-			get { return sections ?? (sections = new Dictionary<string, Action>()); }
-		}
-
-		[ThreadStatic] private static string childBody;
-		[ThreadStatic] private static IRazorTemplate childTemplate;
-
-		public IRazorTemplate ChildTemplate
-		{
-			get { return childTemplate; }
-			set
-			{
-				childTemplate = value;
-				childBody = childTemplate.Result;
-			}
-		}
-
-		public void WriteSection(string name, Action contents)
-		{
-			if (name == null || contents == null)
-				return;
-
-			Sections[name] = contents;
-		}
-
-		public string RenderBody()
-		{
-			return childBody;
-		}
-
-		public string RenderSection(string sectionName)
-		{
-			return RenderSection(sectionName, false);
-		}
-
-		public string RenderSection(string sectionName, bool required)
-		{
-			if (sectionName == null)
-				throw new ArgumentNullException("sectionName");
-
-			Action renderSection;
-			this.Sections.TryGetValue(sectionName, out renderSection);
-
-			if (renderSection == null)
-			{
-				if (childTemplate == null) return null;
-
-				childTemplate.Sections.TryGetValue(sectionName, out renderSection);
-
-				if (renderSection == null)
-				{
-					if (required)
-						throw new ApplicationException("Section not defined: " + sectionName);
-					return null;
-				}
-			}
-
-			renderSection();
-
-			return null;
-		}
-	}
-
-	public partial class TemplateService
-	{
-		public RazorFormat RazorFormat { get; set; }
-
 		/// <summary>
 		/// Runs and returns the template with the specified name.
 		/// </summary>
@@ -92,9 +23,10 @@ namespace ServiceStack.Razor.Templating
 
 			SetService(instance, this);
 			SetModel(instance, model);
+            TemplateBase.ViewBag = new ExpandoObject();
 
 			var razorTemplate = (IRazorTemplate)instance;
-            razorTemplate.Init(RazorFormat, new ViewDataDictionary<T>(model), httpReq, httpRes);
+            razorTemplate.Init(viewEngine, new ViewDataDictionary<T>(model), httpReq, httpRes);
 	
 			instance.Execute(); 
 

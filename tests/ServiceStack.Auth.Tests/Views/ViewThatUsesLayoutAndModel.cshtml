@@ -1,10 +1,10 @@
-﻿@model ServiceStack.RazorHostTests.ViewThatUsesLayoutAndModel2Response
+﻿@inherits ViewPage<ViewThatUsesLayoutAndModelResponse>
 
 ﻿@{
     Layout = "SimplyLayout";
 }
 
-<div>ViewThatUsesLayoutAndModel2: @Model.Name</div>
+<div>ViewThatUsesLayoutAndModel: @Model.Name</div>
 <ul>
     @foreach(var name in Model.Results) {
         <li>@name</li>
