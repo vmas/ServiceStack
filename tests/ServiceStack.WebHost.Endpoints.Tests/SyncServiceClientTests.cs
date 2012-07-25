@@ -72,5 +72,23 @@ namespace ServiceStack.WebHost.Endpoints.Tests
                 return new XmlServiceClient(ListeningOn);
             }
         }
+
+        [TestFixture]
+        public class Soap11SyncServiceClientTests : SyncServiceClientTests
+        {
+            protected override IServiceClient CreateServiceClient()
+            {
+                return new Soap11ServiceClient(ListeningOn);
+            }
+        }
+
+        [TestFixture]
+        public class Soap12SyncServiceClientTests : SyncServiceClientTests
+        {
+            protected override IServiceClient CreateServiceClient()
+            {
+                return new Soap12ServiceClient(ListeningOn);
+            }
+        }
     }
 }

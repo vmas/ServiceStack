@@ -72,6 +72,13 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 			}
 		}
 
+        protected IServiceResult CancelRequestProcessing(Action<IServiceResult> callback)
+        {
+            var emptyServiceResult = new SyncServiceResult();
+            callback(emptyServiceResult);
+            return emptyServiceResult;
+        }
+
 		public void ProcessRequest(HttpContext context)
 		{
 			throw new NotSupportedException();

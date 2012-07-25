@@ -100,13 +100,6 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 			}
 		}
 
-		public IServiceResult CancelRequestProcessing(Action<IServiceResult> callback)
-		{
-			var emptyServiceResult = new SyncServiceResult();
-			callback(emptyServiceResult);
-			return emptyServiceResult;
-		}
-
 		public override void EndProcessRequest(IHttpRequest req, IHttpResponse res, IServiceResult result)
 		{
 			try

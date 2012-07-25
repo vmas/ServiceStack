@@ -13,6 +13,7 @@ using ServiceStack.WebHost.Endpoints.Extensions;
 using ServiceStack.WebHost.Endpoints.Metadata;
 using ServiceStack.WebHost.Endpoints.Support;
 using ServiceStack.WebHost.Endpoints.Handlers;
+using ServiceStack.ServiceClient.Web;
 
 namespace ServiceStack.WebHost.Endpoints
 {
@@ -313,7 +314,7 @@ namespace ServiceStack.WebHost.Endpoints
 			var pathParts = pathInfo.TrimStart('/').Split('/');
 			if (pathParts.Length == 0) return NotFoundHttpHandler;
 
-			var handler = GetHandlerForPathParts(pathParts);
+			var handler = GetHandlerForPathParts(httpMethod, pathParts);
 			if (handler != null) return handler;
 
 			var existingFile = pathParts[0].ToLower();
@@ -328,7 +329,7 @@ namespace ServiceStack.WebHost.Endpoints
 
 			var restPath = EndpointHost.RestController.GetRestPathForRequest(httpMethod, pathInfo);
             if (restPath != null)
-                return new AsyncRestHandler(restPath); //{ RequestName = restPath.RequestType.Name };
+                return new AsyncRestHandler(restPath);
 
 			return GetCatchAllHandlerIfAny(httpMethod, pathInfo, filePath);
 		}
@@ -348,17 +349,23 @@ namespace ServiceStack.WebHost.Endpoints
 			return null;
 		}
 
-		private static IHttpHandler GetHandlerForPathParts(string[] pathParts)
+		private static IHttpHandler GetHandlerForPathParts(string httpMethod, string[] pathParts)
 		{
 			var pathController = string.Intern(pathParts[0].ToLower());
 			if (pathParts.Length == 1)
 			{
 				if (pathController == "metadata")
 					return new IndexMetadataHandler();
-				if (pathController == "soap11")
-					return new Soap11MessageSyncReplyHttpHandler();
+                if (pathController == "soap11")
+                    if(httpMethod == HttpMethod.Get)
+                        return new Soap11WsdlMetadataHandler();
+                    else
+                     return new AsyncSoapHandler(System.ServiceModel.Channels.MessageVersion.Soap11);
 				if (pathController == "soap12")
-					return new Soap12MessageSyncReplyHttpHandler();
+                    if (httpMethod == HttpMethod.Get)
+                        return new Soap12WsdlMetadataHandler();
+                    else
+                        return new AsyncSoapHandler(System.ServiceModel.Channels.MessageVersion.Soap12);
 				if (pathController == RequestInfoHandler.RestPath)
 					return new RequestInfoHandler();
 
