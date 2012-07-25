@@ -7,7 +7,7 @@ using ServiceStack.ServiceInterface.ServiceModel;
 using ServiceStack.WebHost.Endpoints;
 using ServiceStack.ServiceHost;
 
-namespace ServiceStack.WebHost.IntegrationTests.Services
+namespace ServiceStack.WebHost.Endpoints.Tests
 {
 	public class Todo
 	{

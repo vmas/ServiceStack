@@ -21,7 +21,7 @@ namespace ServiceStack.WebHost.Endpoints.Metadata
 		
 		public string OperationName { get; set; }
     	
-    	public override void Execute(HttpContext context)
+    	public override void ProcessRequest(HttpContext context)
     	{
 			ProcessRequest(
 				new HttpRequestWrapper(OperationName, context.Request),

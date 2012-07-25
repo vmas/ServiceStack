@@ -147,7 +147,6 @@ namespace ServiceStack.Razor
                 return new RazorHandler {
                     RazorFormat = this,
                     RazorPage = razorPage,
-                    RequestName = "RazorPage",
                     PathInfo = pathInfo,
                     FilePath = filePath
                 };

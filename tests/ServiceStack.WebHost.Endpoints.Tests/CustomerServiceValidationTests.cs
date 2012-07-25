@@ -21,7 +21,7 @@ using ServiceStack.WebHost.Endpoints.Tests;
 using ServiceStack.WebHost.Endpoints.Tests.Support;
 using ServiceStack.WebHost.Endpoints.Tests.Support.Host;
 
-namespace ServiceStack.WebHost.IntegrationTests.Services
+namespace ServiceStack.WebHost.Endpoints.Tests
 {
 	[RestService("/customers")]
 	[RestService("/customers/{Id}")]
@@ -37,12 +37,12 @@ namespace ServiceStack.WebHost.IntegrationTests.Services
 		public bool HasDiscount { get; set; }
 	}
 
-	public interface IAddressValidator
+	public interface IAddressValidator1
 	{
 		bool ValidAddress(string address);
 	}
 
-	public class AddressValidator : IAddressValidator
+	public class AddressValidator : IAddressValidator1
 	{
 		public bool ValidAddress(string address)
 		{
@@ -54,7 +54,7 @@ namespace ServiceStack.WebHost.IntegrationTests.Services
 
 	public class CustomersValidator : AbstractValidator<Customers>
 	{
-		public IAddressValidator AddressValidator { get; set; }
+		public IAddressValidator1 AddressValidator { get; set; }
 
 		public CustomersValidator()
 		{
@@ -123,7 +123,7 @@ namespace ServiceStack.WebHost.IntegrationTests.Services
 			public override void Configure(Container container)
 			{
 				Plugins.Add(new ValidationFeature());
-				container.Register<IAddressValidator>(new AddressValidator());
+				container.Register<IAddressValidator1>(new AddressValidator());
 				container.RegisterValidators(typeof(CustomersValidator).Assembly);
 			}
 		}
@@ -271,7 +271,6 @@ namespace ServiceStack.WebHost.IntegrationTests.Services
 
 		protected static IServiceClient UnitTestServiceClient()
 		{
-			EndpointHost.ServiceManager = new ServiceManager(typeof(SecureService).Assembly);
 			return new DirectServiceClient(EndpointHost.ServiceManager);
 		}
 

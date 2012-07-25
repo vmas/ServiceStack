@@ -6,7 +6,7 @@ using ServiceStack.WebHost.Endpoints.Support;
 
 namespace ServiceStack.Razor
 {
-	public class RazorHandler : EndpointHandlerBase
+	public class RazorHandler : HttpHandlerBase
 	{
 		public RazorFormat RazorFormat { get; set; }
 		public ViewPage RazorPage { get; set; }
@@ -43,16 +43,6 @@ namespace ServiceStack.Razor
                 : DeserializeHttpRequest(modelType, httpReq, httpReq.ContentType);
 
             RazorFormat.ProcessRazorPage(httpReq, contentPage, model, httpRes);
-		}
-
-		public override object CreateRequest(IHttpRequest request, string operationName)
-		{
-			return null;
-		}
-
-		public override object GetResponse(IHttpRequest httpReq, IHttpResponse httpRes, object request)
-		{
-			return null;
 		}
 	}
 }

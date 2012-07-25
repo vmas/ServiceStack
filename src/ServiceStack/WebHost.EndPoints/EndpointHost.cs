@@ -296,15 +296,6 @@ namespace ServiceStack.WebHost.Endpoints
 			ServiceOperations = operationTypes;
 		}
 
-		internal static object ExecuteService(object request, EndpointAttributes endpointAttributes, IHttpRequest httpReq, IHttpResponse httpRes)
-		{
-			using (Profiler.Current.Step("Execute Service"))
-			{
-				return config.ServiceController.Execute(request,
-					new HttpRequestContext(httpReq, httpRes, request, endpointAttributes));
-			}
-		}
-
         /// <summary>
         /// Call to signal the completion of a ServiceStack-handled Request
         /// </summary>

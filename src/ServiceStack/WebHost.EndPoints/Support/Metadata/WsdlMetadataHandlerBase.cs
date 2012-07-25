@@ -9,15 +9,15 @@ using ServiceStack.WebHost.Endpoints.Support.Templates;
 
 namespace ServiceStack.WebHost.Endpoints.Support.Metadata
 {
-	public abstract class WsdlMetadataHandlerBase : HttpHandlerBase
+	public abstract class WsdlMetadataHandlerBase : IHttpHandler
 	{
 		private readonly ILog log = LogManager.GetLogger(typeof(WsdlMetadataHandlerBase));
 
 		protected abstract WsdlTemplateBase GetWsdlTemplate();
 
-		public override void Execute(HttpContext context)
-		{
-			EndpointHost.Config.AssertFeatures(Feature.Metadata);
+        public void ProcessRequest(HttpContext context)
+        {
+            EndpointHost.Config.AssertFeatures(Feature.Metadata);
 
 			context.Response.ContentType = "text/xml";
 
@@ -67,5 +67,10 @@ namespace ServiceStack.WebHost.Endpoints.Support.Metadata
 
 			return wsdlTemplate;
 		}
-	}
+
+        public bool IsReusable
+        {
+            get { return false; }
+        }
+    }
 }

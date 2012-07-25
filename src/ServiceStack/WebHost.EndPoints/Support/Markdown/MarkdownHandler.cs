@@ -7,7 +7,7 @@ using ServiceStack.WebHost.Endpoints.Formats;
 
 namespace ServiceStack.WebHost.Endpoints.Support.Markdown
 {
-	public class MarkdownHandler : IServiceStackHttpHandler, IHttpHandler
+	public class MarkdownHandler : HttpHandlerBase
 	{
 		public MarkdownFormat MarkdownFormat { get; set; }
 		public MarkdownPage MarkdownPage { get; set; }
@@ -15,7 +15,7 @@ namespace ServiceStack.WebHost.Endpoints.Support.Markdown
 		public string PathInfo { get; set; }
 		public string FilePath { get; set; }
 
-		public void ProcessRequest(IHttpRequest httpReq, IHttpResponse httpRes, string operationName)
+		public override void ProcessRequest(IHttpRequest httpReq, IHttpResponse httpRes, string operationName)
 		{
 			var contentPage = MarkdownPage;
 			if (contentPage == null)
@@ -36,18 +36,5 @@ namespace ServiceStack.WebHost.Endpoints.Support.Markdown
 
 			MarkdownFormat.ProcessMarkdownPage(httpReq, contentPage, null, httpRes);
 		}
-
-        public bool IsReusable
-        {
-            get { return false; }
-        }
-
-        public void ProcessRequest(HttpContext context)
-        {
-            var operationName = context.Request.GetOperationName();
-            var httpReq = new HttpRequestWrapper(operationName, context.Request);
-            var httpRes = new HttpResponseWrapper(context.Response);
-            ProcessRequest(httpReq, httpRes, operationName);
-        }
     }
 }

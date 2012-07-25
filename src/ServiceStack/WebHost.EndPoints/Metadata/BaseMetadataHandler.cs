@@ -16,7 +16,7 @@ namespace ServiceStack.WebHost.Endpoints.Metadata
 	using System.Text;
 	using ServiceHost;
 
-	public abstract class BaseMetadataHandler : HttpHandlerBase, IServiceStackHttpHandler
+	public abstract class BaseMetadataHandler : IHttpHandler, IServiceStackHttpHandler
 	{
 		const string ResponseSuffix = "Response";
 
@@ -25,13 +25,13 @@ namespace ServiceStack.WebHost.Endpoints.Metadata
 		public string ContentType { get; set; }
 		public string ContentFormat { get; set; }
 
-		public override void Execute(HttpContext context)
-		{
-			var writer = new HtmlTextWriter(context.Response.Output);
-			context.Response.ContentType = "text/html";
+        public virtual void ProcessRequest(HttpContext context)
+        {
+            var writer = new HtmlTextWriter(context.Response.Output);
+            context.Response.ContentType = "text/html";
 
-			ProcessOperations(writer, new HttpRequestWrapper(GetType().Name, context.Request));
-		}
+            ProcessOperations(writer, new HttpRequestWrapper(GetType().Name, context.Request));
+        }
 
 		public virtual void ProcessRequest(IHttpRequest httpReq, IHttpResponse httpRes, string operationName)
 		{
@@ -134,5 +134,10 @@ namespace ServiceStack.WebHost.Endpoints.Metadata
 			return restPaths.ToString();
 		}
 
-	}
+
+        public bool IsReusable
+        {
+            get { return false; }
+        }
+    }
 }
