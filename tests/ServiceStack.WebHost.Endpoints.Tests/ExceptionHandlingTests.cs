@@ -192,7 +192,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 
         public string PredefinedJsonUrl<T>()
         {
-            return ListeningOn + "json/syncreply/" + typeof(T).Name;
+            return ListeningOn + "json/requestreply/" + typeof(T).Name;
         }
 
         [Test]
