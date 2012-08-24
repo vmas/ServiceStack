@@ -98,6 +98,11 @@ namespace ServiceStack.ServiceHost.Tests.Formats
 			{
 				plugins.ToList().ForEach(x => x.Register(this));
 			}
+
+            public Dictionary<Type, ResponseBinderFn> ResponseBinders
+            {
+                get { throw new NotImplementedException(); }
+            }
 		}
 
 		public string GetHtml(object dto, string format)

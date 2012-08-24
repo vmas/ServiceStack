@@ -28,7 +28,7 @@ namespace ServiceStack.WebHost.Endpoints.Formats
 			appHost.ContentTypeFilters.Register(ContentType.Html, SerializeToStream, null);
 			appHost.ContentTypeFilters.Register(ContentType.JsonReport, SerializeToStream, null);
 
-			appHost.Config.DefaultContentType = ContentType.Html;
+			appHost.Config.DefaultResponseContentType = ContentType.Html;
 			appHost.Config.IgnoreFormatsInMetadata.Add(ContentType.Html.ToContentFormat());
 			appHost.Config.IgnoreFormatsInMetadata.Add(ContentType.JsonReport.ToContentFormat());
 		}

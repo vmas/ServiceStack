@@ -51,7 +51,7 @@ namespace ServiceStack.ServiceHost.Tests
 		{
 			var requestType = typeof(BasicRequest);
 
-			serviceController.RegisterService(requestType, typeof(BasicService), new TypeFactoryWrapper(t => new BasicService()));
+            serviceController.RegisterService(new TypeFactoryWrapper(t => new BasicService()), typeof(BasicService));
 
 			object request = Activator.CreateInstance(requestType);
 

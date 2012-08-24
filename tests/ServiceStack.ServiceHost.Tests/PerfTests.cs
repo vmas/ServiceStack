@@ -69,7 +69,7 @@ namespace ServiceStack.ServiceHost.Tests
 		[Test]
 		public void With_ServiceStackFunq()
 		{
-			serviceController.RegisterService(typeof(BasicRequest), typeof(BasicService), new TypeFactoryWrapper(t => new BasicService()));
+            serviceController.RegisterService(new TypeFactoryWrapper(t => new BasicService()), typeof(BasicService));
 			var request = new BasicRequest();
 
 			Console.WriteLine("With_TypedArguments(): {0}", Measure(() => serviceController.Execute(request), Times));
@@ -89,7 +89,7 @@ namespace ServiceStack.ServiceHost.Tests
 		{
 			var requestType = typeof(BasicRequest);
 
-			serviceController.RegisterService(requestType, typeof(BasicService), new TypeFactoryWrapper(t => new BasicService()));
+            serviceController.RegisterService(new TypeFactoryWrapper(t => new BasicService()), typeof(BasicService));
 			var request = new BasicRequest();
 
 			Console.WriteLine("With_Expressions(): {0}", Measure(() => serviceController.Execute(request), Times));
@@ -100,7 +100,7 @@ namespace ServiceStack.ServiceHost.Tests
 		{
 			var requestType = typeof(BasicRequest);
 
-			serviceController.RegisterService(requestType, typeof(BasicService), new TypeFactoryWrapper(type => new BasicService()));
+            serviceController.RegisterService(new TypeFactoryWrapper(t => new BasicService()), typeof(BasicService));
 
 			var request = new BasicRequest();
 
@@ -119,7 +119,7 @@ namespace ServiceStack.ServiceHost.Tests
 		public void With_TypeFactory()
 		{
 			var requestType = typeof(BasicRequest);
-			serviceController.RegisterService(requestType, typeof(BasicService), new TypeFactoryWrapper(type => new BasicServiceTypeFactory()));
+            serviceController.RegisterService(new TypeFactoryWrapper(t => new BasicService()), typeof(BasicService));
 
 			var request = new BasicRequest();
 

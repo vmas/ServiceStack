@@ -49,63 +49,26 @@ namespace ServiceStack.ServiceHost
 		///		The comma-delimited list of HTTP verbs supported by the path, 
 		///		such as "GET,PUT,DELETE".
 		/// </param>
-		/// <param name="defaultContentType">
+		/// <param name="defaultResponseContentType">
 		///		The default MIME type in which the response object returned to the client
 		///		is formatted, if formatting hints are not provided by the client.
 		///		Specify <see langword="null"/> or empty to require formatting hints from
 		///		the client.
 		/// </param>
-		/// <returns>The same <see cref="IServiceRoutes"/> instance;
-		///		never <see langword="null"/>.</returns>
-		IServiceRoutes Add<TRequest>(string restPath, string verbs, string defaultContentType);
-
-        /// <summary>
-        ///		Maps the specified REST path to the specified request DTO, 
-        ///		specifies the HTTP verbs supported by the path, and indicates
-        ///		the default MIME type of the returned response.
-        /// </summary>
-        /// <typeparam name="TRequest">The type of request DTO to map 
-        ///		the path to.</typeparam>
-        /// <param name="restPath">The path to map the request DTO to.
-        ///		See <see cref="RestServiceAttribute.Path">RestServiceAttribute.Path</see>
-        ///		for details on the correct format.</param>
-        /// <param name="verbs">
-        ///		The comma-delimited list of HTTP verbs supported by the path, 
-        ///		such as "GET,PUT,DELETE".
+        /// <param name="preferredResponseContentType">
+        ///     Sets the preferred response content type. This content type will be selected
+        ///     if the 'Accept' header containts multiple ones.
+        /// </param>
+        /// <param name="allowedContentTypes">
+        ///     Sets a comma-delimited list of allowed content types for this route.
         /// </param>
         /// <param name="isOneWay">
         ///		Specifies if this route should be a one way route.
         /// </param>
         /// <returns>The same <see cref="IServiceRoutes"/> instance;
         ///		never <see langword="null"/>.</returns>
-        IServiceRoutes Add<TRequest>(string restPath, string verbs, bool isOneWay);
-
-        /// <summary>
-        ///		Maps the specified REST path to the specified request DTO, 
-        ///		specifies the HTTP verbs supported by the path, and indicates
-        ///		the default MIME type of the returned response.
-        /// </summary>
-        /// <typeparam name="TRequest">The type of request DTO to map 
-        ///		the path to.</typeparam>
-        /// <param name="restPath">The path to map the request DTO to.
-        ///		See <see cref="RestServiceAttribute.Path">RestServiceAttribute.Path</see>
-        ///		for details on the correct format.</param>
-        /// <param name="verbs">
-        ///		The comma-delimited list of HTTP verbs supported by the path, 
-        ///		such as "GET,PUT,DELETE".
-        /// </param>
-        /// <param name="defaultContentType">
-        ///		The default MIME type in which the response object returned to the client
-        ///		is formatted, if formatting hints are not provided by the client.
-        ///		Specify <see langword="null"/> or empty to require formatting hints from
-        ///		the client.
-        /// </param>
-        /// <param name="isOneWay">
-        ///		Specifies if this route should be a one way route.
-        /// </param>
-        /// <returns>The same <see cref="IServiceRoutes"/> instance;
-        ///		never <see langword="null"/>.</returns>
-        IServiceRoutes Add<TRequest>(string restPath, string verbs, string defaultContentType, bool isOneWay);
+        IServiceRoutes Add<TRequest>(string restPath, string verbs = null, string defaultResponseContentType = null,
+            string preferredResponseContentType = null, string allowedContentTypes = null, bool isOneWay = false);
 
         /// <summary>
         ///		Maps the specified REST path to the specified request DTO, 

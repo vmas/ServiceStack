@@ -54,6 +54,20 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 			}
 		}
 
+        private void SetResponseContentType(IHttpRequest req)
+        {
+            if (req.AcceptTypes == null || req.AcceptTypes.Count() <= 0)
+            {
+                if (!string.IsNullOrEmpty(this.RestPath.DefaultResponseContentType))
+                    req.ResponseContentType = this.RestPath.DefaultResponseContentType;
+            }
+            else if (!string.IsNullOrEmpty(this.RestPath.PreferredResponseContentType) &&
+                req.AcceptTypes.Contains(this.RestPath.PreferredResponseContentType))
+            {
+                req.ResponseContentType = this.RestPath.PreferredResponseContentType;
+            }
+        }
+
         //Used by ASP.net
         public override IAsyncResult BeginProcessRequest(System.Web.HttpContext context, AsyncCallback cb, object extraData)
         {
@@ -67,12 +81,10 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 
 		public override IServiceResult BeginProcessRequest(IHttpRequest req, IHttpResponse res, Action<IServiceResult> callback)
 		{
-			var responseContentType = EndpointHost.Config.DefaultContentType;
 			try
 			{
-				if (!string.IsNullOrEmpty(req.ResponseContentType))
-					responseContentType = req.ResponseContentType;
-				EndpointHost.Config.AssertContentType(responseContentType);
+                this.SetResponseContentType(req);
+                EndpointHost.Config.AssertContentType(req.ResponseContentType);
 
                 var requestDto = this.GetRequestDto(req, this.RestPath);
 

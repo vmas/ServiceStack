@@ -18,24 +18,24 @@ namespace ServiceStack.ServiceHost
         {
             foreach (var requestType in requestTypes)
             {
-                this.RegisterRestPath(new RestPath(requestType, "/xml/requestreply/" + requestType.Name, "*", ContentType.Xml, ContentType.Xml, false));
-                this.RegisterRestPath(new RestPath(requestType, "/xml/oneway/" + requestType.Name, "*", ContentType.Xml, ContentType.Xml, true));
+                this.RegisterRestPath(new RestPath(requestType, "/xml/requestreply/" + requestType.Name, "*", ContentType.Xml, null, ContentType.Xml, false));
+                this.RegisterRestPath(new RestPath(requestType, "/xml/oneway/" + requestType.Name, "*", ContentType.Xml, null, ContentType.Xml, true));
 
-                this.RegisterRestPath(new RestPath(requestType, "/json/requestreply/" + requestType.Name, "*", ContentType.Json, ContentType.Json, false));
-                this.RegisterRestPath(new RestPath(requestType, "/json/oneway/" + requestType.Name, "*", ContentType.Json, ContentType.Json, true));
+                this.RegisterRestPath(new RestPath(requestType, "/json/requestreply/" + requestType.Name, "*", ContentType.Json, null, ContentType.Json, false));
+                this.RegisterRestPath(new RestPath(requestType, "/json/oneway/" + requestType.Name, "*", ContentType.Json, null, ContentType.Json, true));
 
-                this.RegisterRestPath(new RestPath(requestType, "/html/requestreply/" + requestType.Name, "*", ContentType.Html, ContentType.Html, false));
-                this.RegisterRestPath(new RestPath(requestType, "/html/oneway/" + requestType.Name, "*", ContentType.Html, ContentType.Html, true));
+                this.RegisterRestPath(new RestPath(requestType, "/html/requestreply/" + requestType.Name, "*", ContentType.Html, null, ContentType.Html, false));
+                this.RegisterRestPath(new RestPath(requestType, "/html/oneway/" + requestType.Name, "*", ContentType.Html, null, ContentType.Html, true));
 
-                this.RegisterRestPath(new RestPath(requestType, "/jsv/requestreply/" + requestType.Name, "*", ContentType.Jsv, ContentType.Jsv, false));
-                this.RegisterRestPath(new RestPath(requestType, "/jsv/oneway/" + requestType.Name, "*", ContentType.Jsv, ContentType.Jsv, true));
+                this.RegisterRestPath(new RestPath(requestType, "/jsv/requestreply/" + requestType.Name, "*", ContentType.Jsv, null, ContentType.Jsv, false));
+                this.RegisterRestPath(new RestPath(requestType, "/jsv/oneway/" + requestType.Name, "*", ContentType.Jsv, null, ContentType.Jsv, true));
 
-                this.RegisterRestPath(new RestPath(requestType, "/csv/requestreply/" + requestType.Name, "*", ContentType.Csv, ContentType.Csv, false));
-                this.RegisterRestPath(new RestPath(requestType, "/csv/oneway/" + requestType.Name, "*", ContentType.Csv, ContentType.Csv, true));
+                this.RegisterRestPath(new RestPath(requestType, "/csv/requestreply/" + requestType.Name, "*", ContentType.Csv, null, ContentType.Csv, false));
+                this.RegisterRestPath(new RestPath(requestType, "/csv/oneway/" + requestType.Name, "*", ContentType.Csv, null, ContentType.Csv, true));
 
                 var formContentType = ContentType.FormUrlEncoded + ',' + ContentType.MultiPartFormData;
-                this.RegisterRestPath(new RestPath(requestType, "/form/requestreply/" + requestType.Name, "*", null, formContentType, false));
-                this.RegisterRestPath(new RestPath(requestType, "/form/oneway/" + requestType.Name, "*", null, formContentType, true));
+                this.RegisterRestPath(new RestPath(requestType, "/form/requestreply/" + requestType.Name, "*", null, null, formContentType, false));
+                this.RegisterRestPath(new RestPath(requestType, "/form/oneway/" + requestType.Name, "*", null, null, formContentType, true));
             }
         }
 
@@ -44,7 +44,8 @@ namespace ServiceStack.ServiceHost
 			var attrs = requestType.GetCustomAttributes(typeof(RouteAttribute), true);
 			foreach (RouteAttribute attr in attrs)
 			{
-				var restPath = new RestPath(requestType, attr.Path, attr.Verbs, attr.DefaultContentType, attr.AllowedContentTypes, attr.IsOneWay);
+                var restPath = new RestPath(requestType, attr.Path, attr.Verbs, attr.DefaultResponseContentType,
+                    attr.PreferredResponseContentType, attr.AllowedContentTypes, attr.IsOneWay);
 				if (!restPath.IsValid)
 					throw new NotSupportedException(string.Format(
 						"RestPath '{0}' on Type '{1}' is not Valid", attr.Path, requestType.Name));

@@ -20,7 +20,8 @@ namespace ServiceStack.ServiceHost
 
 		readonly bool[] componentsWithSeparators = new bool[0];
 
-		public string DefaultContentType { get; private set; }
+		public string DefaultResponseContentType { get; private set; }
+        public string PreferredResponseContentType { get; private set; }
         public string AllowedContentTypes { get; private set; }
 
 		private readonly string restPath;
@@ -90,15 +91,17 @@ namespace ServiceStack.ServiceHost
 			}
 		}
 
-		public RestPath(Type requestType, string path) : this(requestType, path, null, null, null, false) { }
+        public RestPath(Type requestType, string path) : this(requestType, path, null, null, null, null, false) { }
 
-		public RestPath(Type requestType, string path, string verbs, string defaultContentType, string allowedContentTypes, bool isOneWay)
+		public RestPath(Type requestType, string path, string verbs, string defaultResponseContentType, 
+            string preferredResponseContentType, string allowedContentTypes, bool isOneWay)
 		{
 			this.RequestType = requestType;
             this.IsOneWay = isOneWay;
 
 			this.restPath = path;
-			this.DefaultContentType = defaultContentType;
+            this.DefaultResponseContentType = defaultResponseContentType;
+            this.PreferredResponseContentType = preferredResponseContentType;
             this.AllowedContentTypes = allowedContentTypes;
 			this.allowsAllVerbs = verbs == null || verbs == WildCard;
 			if (!this.allowsAllVerbs)

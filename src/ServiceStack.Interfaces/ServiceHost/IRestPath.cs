@@ -7,7 +7,9 @@ namespace ServiceStack.ServiceHost
 	{
 		Type RequestType { get; }
 
-        string DefaultContentType { get; }
+        string DefaultResponseContentType { get; }
+
+        string PreferredResponseContentType { get; }
 
         string AllowedContentTypes { get; }
 

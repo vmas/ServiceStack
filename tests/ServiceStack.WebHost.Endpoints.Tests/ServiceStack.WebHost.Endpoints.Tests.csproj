@@ -130,6 +130,7 @@
     <Compile Include="AttributeFiltersTest.cs" />
     <Compile Include="AuthTests.cs" />
     <Compile Include="CompressionTests.cs" />
+    <Compile Include="ContentTypeTests.cs" />
     <Compile Include="DefaultRouteTests.cs" />
     <Compile Include="IntegrationTests\ErrorRestTests.cs" />
     <Compile Include="ProtoBufServiceTests.cs" />

@@ -297,7 +297,7 @@ namespace ServiceStack.WebHost.Endpoints.Extensions
 			var defaultContentType = httpReq.ContentType;
 			if (httpReq.HasAnyOfContentTypes(ContentType.FormUrlEncoded, ContentType.MultiPartFormData))
 			{
-				defaultContentType = EndpointHost.Config.DefaultContentType;
+				defaultContentType = EndpointHost.Config.DefaultResponseContentType;
 			}
 
 			var customContentTypes = EndpointHost.ContentTypeFilter.ContentTypeFormats.Values;
@@ -338,7 +338,7 @@ namespace ServiceStack.WebHost.Endpoints.Extensions
 			}
 
 			//We could also send a '406 Not Acceptable', but this is allowed also
-			return EndpointHost.Config.DefaultContentType;
+			return EndpointHost.Config.DefaultResponseContentType;
 		}
 
 	}

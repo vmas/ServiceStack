@@ -109,7 +109,7 @@ namespace ServiceStack.WebHost.Endpoints
 			if ((Feature.ProtoBuf & config.EnableFeatures) != Feature.ProtoBuf)
 				Plugins.RemoveAll(x => x is IProtoBufPlugin); //external
 
-			var specifiedContentType = config.DefaultContentType; //Before plugins loaded
+            var specifiedContentType = config.DefaultResponseContentType; //Before plugins loaded
 
 			AppHost.LoadPlugin(Plugins.ToArray());
 			pluginsLoaded = true;
@@ -122,9 +122,9 @@ namespace ServiceStack.WebHost.Endpoints
 		private static void AfterPluginsLoaded(string specifiedContentType)
 		{
 			if (!string.IsNullOrEmpty(specifiedContentType))
-				config.DefaultContentType = specifiedContentType;
-			else if (string.IsNullOrEmpty(config.DefaultContentType))
-				config.DefaultContentType = ContentType.Json;
+				config.DefaultResponseContentType = specifiedContentType;
+			else if (string.IsNullOrEmpty(config.DefaultResponseContentType))
+				config.DefaultResponseContentType = ContentType.Json;
 
 			config.ServiceManager.ReloadServiceOperations();
 			ServiceManager = config.ServiceManager; //reset operations

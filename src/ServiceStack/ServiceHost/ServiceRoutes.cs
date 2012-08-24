@@ -15,31 +15,21 @@ namespace ServiceStack.ServiceHost
 
         public IServiceRoutes Add<TRequest>(string restPath, string verbs)
         {
-            RestPaths.Add(new RestPath(typeof(TRequest), restPath, verbs, null, null, false));
+            RestPaths.Add(new RestPath(typeof(TRequest), restPath, verbs, null, null, null, false));
             return this;
         }
 
-        public IServiceRoutes Add<TRequest>(string restPath, string verbs, string defaultContentType)
+        public IServiceRoutes Add<TRequest>(string restPath, string verbs = null, string defaultResponseContentType = null,
+            string preferredResponseContentType = null, string allowedContentTypes = null, bool isOneWay = false)
         {
-            RestPaths.Add(new RestPath(typeof(TRequest), restPath, verbs, defaultContentType, null, false));
-            return this;
-        }
-
-        public IServiceRoutes Add<TRequest>(string restPath, string verbs, bool isOneWay)
-        {
-            RestPaths.Add(new RestPath(typeof(TRequest), restPath, verbs, null, null, isOneWay));
-            return this;
-        }
-
-        public IServiceRoutes Add<TRequest>(string restPath, string verbs, string defaultContentType, bool isOneWay)
-        {
-            RestPaths.Add(new RestPath(typeof(TRequest), restPath, verbs, defaultContentType, null, isOneWay));
+            RestPaths.Add(new RestPath(typeof(TRequest), restPath, verbs, defaultResponseContentType,
+                preferredResponseContentType, allowedContentTypes, isOneWay));
             return this;
         }
 
         public IServiceRoutes Add(Type requestType, string restPath, string verbs, string defaultContentType)
         {
-            RestPaths.Add(new RestPath(requestType, restPath, verbs, defaultContentType, null, false));
+            RestPaths.Add(new RestPath(requestType, restPath, verbs, defaultContentType, null, null, false));
             return this;
         }
 

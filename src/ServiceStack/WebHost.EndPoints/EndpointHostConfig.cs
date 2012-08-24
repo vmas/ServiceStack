@@ -60,7 +60,7 @@ namespace ServiceStack.WebHost.Endpoints
 						WebHostPhysicalPath = "~".MapServerPath(),
 						ServiceStackHandlerFactoryPath = ServiceStackPath,
 						MetadataRedirectPath = null,
-						DefaultContentType = null,
+						DefaultResponseContentType = null,
 						AllowJsonpRequests = true,
                         EnableDefaultRoutes = true,
 						DebugMode = false,
@@ -134,7 +134,7 @@ namespace ServiceStack.WebHost.Endpoints
 			this.DefaultRedirectPath = instance.DefaultRedirectPath;
 			this.MetadataRedirectPath = instance.MetadataRedirectPath;
 			this.ServiceStackHandlerFactoryPath = instance.ServiceStackHandlerFactoryPath;
-			this.DefaultContentType = instance.DefaultContentType;
+			this.DefaultResponseContentType = instance.DefaultResponseContentType;
 			this.AllowJsonpRequests = instance.AllowJsonpRequests;
 			this.DebugMode = instance.DebugMode;
 			this.DefaultDocuments = instance.DefaultDocuments;
@@ -285,7 +285,7 @@ namespace ServiceStack.WebHost.Endpoints
 		public string MetadataOperationPageBodyHtml { get; set; }
 
 		public string ServiceName { get; set; }
-		public string DefaultContentType { get; set; }
+		public string DefaultResponseContentType { get; set; }
 		public bool AllowJsonpRequests { get; set; }
 		public bool DebugMode { get; set; }
 		public bool DebugOnlyReturnRequestInfo { get; set; }
@@ -387,6 +387,9 @@ namespace ServiceStack.WebHost.Endpoints
 
 		public void AssertContentType(string contentType)
 		{
+            if (string.IsNullOrEmpty(contentType))
+                throw new NotSupportedException("Response content type is unknown.");
+
 			if (EndpointHost.Config.EnableFeatures == Feature.All) return;
 
 			var contentTypeFeature = ContentType.GetFeature(contentType);

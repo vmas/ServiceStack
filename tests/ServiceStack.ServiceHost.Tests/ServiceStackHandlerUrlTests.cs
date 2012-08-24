@@ -67,6 +67,11 @@ namespace ServiceStack.ServiceHost.Tests
 			public IFile[] Files { get; private set; }
 
 			public string ApplicationFilePath { get; private set; }
+
+            public bool IsLocal
+            {
+                get { throw new NotImplementedException(); }
+            }
 		}
 
 		readonly List<MockUrlHttpRequest> allResults = new List<MockUrlHttpRequest> {

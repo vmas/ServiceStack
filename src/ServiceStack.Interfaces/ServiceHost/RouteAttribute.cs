@@ -59,7 +59,7 @@ namespace ServiceStack.ServiceHost
 		{
 			Path = path;
 			Verbs = verbs;
-			DefaultContentType = defaultContentType;
+			DefaultResponseContentType = defaultContentType;
 		}
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace ServiceStack.ServiceHost
         {
             Path = path;
             Verbs = verbs;
-            DefaultContentType = defaultContentType;
+            DefaultResponseContentType = defaultContentType;
             IsOneWay = isOneWay;
         }
 
@@ -173,13 +173,18 @@ namespace ServiceStack.ServiceHost
 		///		<see langword="null"/> or empty if formatting hints are required 
 		///		from the client.
 		/// </value>
-		public string DefaultContentType { get; set; }
+		public string DefaultResponseContentType { get; set; }
 
         /// <summary>
         /// Gets or sets a comma-delimited list of allowed content types for this route.
         /// If this property is empty, all content types are allowed.
         /// </summary>
         public string AllowedContentTypes { get; set; }
+
+        /// <summary>
+        /// Gets or sets the preferred response content type if the client accepts multiple content types.
+        /// </summary>
+        public string PreferredResponseContentType { get; set; }
 
         /// <summary>
         /// Indicates if the service is executed in one way,
