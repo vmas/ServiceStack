@@ -474,10 +474,6 @@
     <Compile Include="ServiceHost\Feature.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ServiceHost\ICanResolve.cs">
-    <Compile Include="ServiceHost\IAsyncService.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="ServiceHost\IResolver.cs">
       <SubType>Code</SubType>
     </Compile>

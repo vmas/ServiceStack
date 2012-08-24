@@ -128,7 +128,6 @@ namespace ServiceStack.WebHost.Endpoints.Formats
                 return new MarkdownHandler {
                     MarkdownFormat = this,
                     MarkdownPage = markdownPage,
-                    RequestName = "MarkdownPage",
                     PathInfo = pathInfo,
                     FilePath = filePath
                 };

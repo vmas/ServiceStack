@@ -232,7 +232,6 @@
     <Compile Include="WebHost.Endpoints\Handlers\AsyncHandlerBase.cs" />
     <Compile Include="WebHost.Endpoints\Handlers\AsyncRestHandler.cs" />
     <Compile Include="WebHost.Endpoints\Handlers\AsyncSoapHandler.cs" />
-    <Compile Include="WebHost.Endpoints\IPlugin.cs" />
     <Compile Include="WebHost.Endpoints\Support\IServiceStackHttpAsyncHandler.cs" />
     <Compile Include="WebHost.Endpoints\Support\Markdown\Evaluator.cs" />
     <Compile Include="WebHost.Endpoints\Support\Markdown\ITemplateWriter.cs" />
