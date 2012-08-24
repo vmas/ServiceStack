@@ -21,9 +21,9 @@
     </SccProvider>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
+    <DebugSymbols>True</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
+    <Optimize>False</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -31,19 +31,19 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
+    <Optimize>True</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>True</SignAssembly>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'MONOTOUCH|AnyCPU'">
     <OutputPath>bin\MONOTOUCH\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
+    <Optimize>True</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <CodeAnalysisLogFile>bin\Release\RazorEngine.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
@@ -55,6 +55,7 @@
     <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
     <CodeAnalysisRuleDirectories>;C:\Program Files\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
     <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ServiceStack.Text">
@@ -63,9 +64,7 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Web">
-      <HintPath>C:\Windows\Microsoft.NET\Framework\v2.0.50727\System.Web.dll</HintPath>
-    </Reference>
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -73,6 +72,9 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Web.Razor">
       <HintPath>..\..\lib\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Mvc">
+      <HintPath>..\..\lib\System.Web.Mvc.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -92,18 +94,16 @@
     <Compile Include="Compilation\TypeContext.cs" />
     <Compile Include="Language.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RazorHost.cs" />
     <Compile Include="RazorFormat.cs" />
     <Compile Include="RazorHandler.cs" />
     <Compile Include="Templating\IRazorViewEngine.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ViewPage.cs" />
     <Compile Include="ViewPageBase.cs" />
     <Compile Include="ViewPage`1.cs" />
     <Compile Include="ServiceStack\MvcWebPageRazorHost.cs" />
     <Compile Include="ServiceStack\MvcCSharpRazorCodeParser.cs" />
-    <Compile Include="ServiceStack\ServiceStackCSharpRazorBuildProvider.cs" />
+    <Compile Include="CSharpRazorBuildProvider.cs" />
     <Compile Include="Templating\ITemplate.cs" />
     <Compile Include="Templating\ITemplateOfT.cs" />
     <Compile Include="Templating\RequireNamespacesAttribute.cs" />
@@ -113,21 +113,9 @@
     <Compile Include="Templating\TemplateService.cs" />
     <Compile Include="Templating\TemplateService.ServiceStack.cs" />
     <Compile Include="Templating\TemplateWriter.cs" />
-    <Compile Include="VirtualPath\AbstractVirtualDirectoryBase.cs" />
-    <Compile Include="VirtualPath\AbstractVirtualFileBase.cs" />
-    <Compile Include="VirtualPath\AbstractVirtualPathProviderBase.cs" />
-    <Compile Include="VirtualPath\FileSystemVirtualDirectory.cs" />
-    <Compile Include="VirtualPath\FileSystemVirtualFile.cs" />
-    <Compile Include="VirtualPath\FileSystemVirtualPathProvider.cs" />
-    <Compile Include="VirtualPath\IVirtualDirectory.cs" />
-    <Compile Include="VirtualPath\IVirtualFile.cs" />
-    <Compile Include="VirtualPath\IVirtualNode.cs" />
-    <Compile Include="VirtualPath\IVirtualPathProvider.cs" />
-    <Compile Include="VirtualPath\MultiVirtualPathProvider.cs" />
-    <Compile Include="VirtualPath\ResourceVirtualDirectory.cs" />
-    <Compile Include="VirtualPath\ResourceVirtualFile.cs" />
-    <Compile Include="VirtualPath\ResourceVirtualPathProvider.cs" />
-    <Compile Include="VirtualPath\VirtualPathExtension.cs" />
+    <Compile Include="XlinqExtensions.cs" />
+    <Compile Include="ViewPageRef.cs" />
+    <Compile Include="ViewPage.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ServiceStack.Common\ServiceStack.Common.csproj">

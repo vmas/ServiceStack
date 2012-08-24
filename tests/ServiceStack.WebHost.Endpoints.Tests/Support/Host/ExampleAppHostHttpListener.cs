@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Runtime.Serialization;
+using System.Threading;
 using Funq;
 using ServiceStack.Common.Extensions;
 using ServiceStack.Common.Web;
@@ -340,7 +341,75 @@ namespace ServiceStack.WebHost.Endpoints.Tests.Support.Host
 		}
 	}
 
-	public class ExampleAppHostHttpListener
+
+    [RestService("inbox/{Id}/responses", "GET, PUT, OPTIONS")]
+    public class InboxPostResponseRequest
+    {
+        public int Id { get; set; }
+        public List<PageElementResponseDTO> Responses { get; set; }
+    }
+
+    public class InboxPostResponseRequestResponse
+    {
+        public int Id { get; set; }
+        public List<PageElementResponseDTO> Responses { get; set; }
+    }
+
+    public class PageElementResponseDTO
+    {
+        public int PageElementId { get; set; }
+        public string PageElementType { get; set; }
+        public string PageElementResponse { get; set; }
+    }
+
+    public class InboxPostResponseRequestService : ServiceBase<InboxPostResponseRequest>
+    {
+        protected override object Run(InboxPostResponseRequest request)
+        {
+            if (request.Responses == null || request.Responses.Count == 0)
+            {
+                throw new ArgumentNullException("Responses");
+            }
+            return new InboxPostResponseRequestResponse {
+                Id = request.Id,
+                Responses = request.Responses
+            };
+        }
+    }
+
+    [RestService("inbox/{Id}/responses", "GET, PUT, OPTIONS")]
+    public class InboxPost
+    {
+        public bool Throw { get; set; }
+        public int Id { get; set; }
+    }
+
+    public class InboxPostService : ServiceBase<InboxPost>
+    {
+        protected override object Run(InboxPost request)
+        {
+            if (request.Throw)
+                throw new ArgumentNullException("Throw");
+            
+            return null;
+        }
+    }
+
+    [DataContract]
+    [RestService("/long_running")]
+    public class LongRunning { }
+
+    public class LongRunningService : ServiceBase<LongRunning>
+    {
+        protected override object Run(LongRunning request)
+        {
+            Thread.Sleep(5000);
+
+            return "LongRunning done.";
+        }
+    }
+
+    public class ExampleAppHostHttpListener
 		: AppHostHttpListenerBase
 	{
 		//private static ILog log;
@@ -408,5 +477,73 @@ namespace ServiceStack.WebHost.Endpoints.Tests.Support.Host
 		}
 	}
 
+    public class ExampleAppHostHttpListenerLongRunning
+    : AppHostHttpListenerLongRunningBase
+    {
+        //private static ILog log;
+
+        public ExampleAppHostHttpListenerLongRunning()
+            : base("ServiceStack Examples", 500, typeof(GetFactorialService).Assembly)
+        {
+            LogManager.LogFactory = new DebugLogFactory();
+            //log = LogManager.GetLogger(typeof(ExampleAppHostHttpListener));
+        }
+
+        public Action<Container> ConfigureFilter { get; set; }
+
+        public override void Configure(Container container)
+        {
+            EndpointHostConfig.Instance.GlobalResponseHeaders.Clear();
+
+            //Signal advanced web browsers what HTTP Methods you accept
+            base.SetConfig(new EndpointHostConfig
+            {
+                GlobalResponseHeaders =
+				{
+					{ "Access-Control-Allow-Origin", "*" },
+					{ "Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS" },
+				},
+                WsdlServiceNamespace = "http://www.servicestack.net/types",
+                LogFactory = new ConsoleLogFactory(),
+                DebugMode = true,
+            });
+
+            this.RegisterRequestBinder<CustomRequestBinder>(
+                httpReq => new CustomRequestBinder { IsFromBinder = true });
+
+            Routes
+                .Add<Movies>("/custom-movies", "GET")
+                .Add<Movies>("/custom-movies/genres/{Genre}")
+                .Add<Movie>("/custom-movies", "POST,PUT")
+                .Add<Movie>("/custom-movies/{Id}")
+                .Add<GetFactorial>("/fact/{ForNumber}")
+                .Add<MoviesZip>("/movies.zip")
+                .Add<GetHttpResult>("/gethttpresult")
+            ;
+
+            container.Register<IResourceManager>(new ConfigurationResourceManager());
+
+            //var appSettings = container.Resolve<IResourceManager>();
+
+            container.Register(c => new ExampleConfig(c.Resolve<IResourceManager>()));
+            //var appConfig = container.Resolve<ExampleConfig>();
+
+            container.Register<IDbConnectionFactory>(c =>
+                new OrmLiteConnectionFactory(
+                    ":memory:", false,
+                    SqliteOrmLiteDialectProvider.Instance));
+
+            var resetMovies = container.Resolve<ResetMoviesService>();
+            resetMovies.Post(null);
+
+            //var movies = container.Resolve<IDbConnectionFactory>().Exec(x => x.Select<Movie>());
+            //Console.WriteLine(movies.Dump());
+
+            if (ConfigureFilter != null)
+            {
+                ConfigureFilter(container);
+            }
+        }
+    }
 
 }

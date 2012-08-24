@@ -9,7 +9,7 @@ namespace ServiceStack.Razor
 	public class RazorHandler : HttpHandlerBase
 	{
 		public RazorFormat RazorFormat { get; set; }
-		public ViewPage RazorPage { get; set; }
+		public ViewPageRef RazorPage { get; set; }
 
 		public string PathInfo { get; set; }
 		public string FilePath { get; set; }

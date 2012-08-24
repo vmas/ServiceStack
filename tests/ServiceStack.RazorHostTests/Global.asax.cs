@@ -7,9 +7,9 @@ using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite;
 using ServiceStack.OrmLite.Sqlite;
 using ServiceStack.Razor;
-using ServiceStack.Razor.VirtualPath;
 using ServiceStack.ServiceHost;
 using ServiceStack.ServiceInterface;
+using ServiceStack.VirtualPath;
 using ServiceStack.WebHost.Endpoints;
 using System.Reflection;
 
@@ -54,13 +54,7 @@ namespace ServiceStack.RazorHostTests
 
         public override void Configure(Container container)
         {
-            Plugins.Add(new RazorFormat()
-            {
-                VirtualPathProvider = new MultiVirtualPathProvider(this,
-                        new ResourceVirtualPathProvider(this),
-                        new FileSystemVirtualPathProvider(this)
-                    )
-            });
+            Plugins.Add(new RazorFormat());
 
             container.Register(new DataSource());
 

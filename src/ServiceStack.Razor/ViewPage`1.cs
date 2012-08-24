@@ -10,6 +10,16 @@ namespace ServiceStack.Razor
 	{
 		public HtmlHelper<TModel> Html = new HtmlHelper<TModel>();
 
+        private IViewEngine viewEngine;
+        public override IViewEngine ViewEngine
+        {
+            get { return viewEngine; }
+            set
+            {
+                Html.ViewEngine = viewEngine = value;
+            }
+        }
+
         protected ViewPage()
         {
             this.ScopeArgs = new Dictionary<string, object>();

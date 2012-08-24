@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Dynamic;
 using ServiceStack.Common;
 using ServiceStack.Html;
 using ServiceStack.ServiceHost;
+using ServiceStack.Text;
 
 namespace ServiceStack.Razor.Templating
 {
@@ -30,16 +32,12 @@ namespace ServiceStack.Razor.Templating
 	
 			instance.Execute(); 
 
-			if (!razorTemplate.Layout.IsNullOrEmpty())
+			if (templatePath == null && !razorTemplate.Layout.IsNullOrEmpty())
 				templatePath = razorTemplate.Layout.MapServerPath();
 
-			if (templatePath != null)
+            var layoutTemplate = GetTemplate(templatePath ?? RazorFormat.DefaultTemplate);
+            if (layoutTemplate != null)
 			{
-				var layoutTemplate = GetTemplate(templatePath);
-				if (layoutTemplate == null)
-					throw new ArgumentException(
-						"No template exists with the specified Layout: " + templatePath);
-
 				layoutTemplate.ChildTemplate = razorTemplate;
 				SetService(layoutTemplate, this);
 				SetModel(layoutTemplate, model);
@@ -47,8 +45,30 @@ namespace ServiceStack.Razor.Templating
 
 				return layoutTemplate;
 			}
+            else if (templatePath != null)
+            {
+                throw new ArgumentException(
+                    "No template exists with the specified Layout: " + templatePath);
+            }
 
 			return razorTemplate;
+		}
+
+        readonly Dictionary<string, string> pagePathAndNames = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
+
+		public void RegisterPage(string pagePath, string pageName)
+		{
+			pagePathAndNames[pagePath] = pageName;
+		}
+
+		public bool ContainsPagePath(string pagePath)
+		{
+			return pagePathAndNames.ContainsKey(pagePath);
+		}
+		
+		public bool ContainsPageName(string pageName)
+		{
+			return pagePathAndNames.ContainsValue(pageName);
 		}
 
 		public IRazorTemplate GetTemplate(string name)
@@ -68,7 +88,17 @@ namespace ServiceStack.Razor.Templating
 			//since executing templates clears the buffer we need to capture 
 			//what's been rendered and prepend after.
 			var capture = template.Result;
-			template.Execute();
+
+		    try
+		    {
+                template.Execute();
+            }
+		    catch (Exception ex)
+		    {
+		        throw new InvalidOperationException(
+                    "Could not execute partial: " + name + ", model: " + model);
+		    }
+
 			template.Prepend(capture);
 			
 			return template;

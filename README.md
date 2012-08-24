@@ -276,6 +276,7 @@ http://www.jetbrains.com/profiler/
 
  - [mythz](https://github.com/mythz) (Demis Bellot)
  - [arxisos](https://github.com/arxisos) (Steffen Müller)
+ - [desunit](https://github.com/desunit) (Sergey Bogdanov)
 
 ## Contributors 
 A big thanks to GitHub and all of ServiceStack's contributors:
@@ -366,6 +367,10 @@ A big thanks to GitHub and all of ServiceStack's contributors:
  - [mikaelwaltersson](https://github.com/mikaelwaltersson) (Mikael Waltersson)
  - [asunar](https://github.com/asunar) (Alper)
  - [chucksavage](https://github.com/chucksavage) (Chuck Savage)
+ - [sashagit](https://github.com/sashagit) (Sasha)
+ - [froyke](https://github.com/froyke) (Froyke)
+ - [dbhobbs](https://github.com/dbhobbs) (Daniel Hobbs)
+ - [bculberson](https://github.com/bculberson) (Brad Culberson)
 
 ***
 

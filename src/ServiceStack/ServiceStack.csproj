@@ -33,19 +33,18 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
+    <DebugSymbols>True</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
+    <Optimize>False</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>TRACE;DEBUG;MONO</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
+    <Optimize>True</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -54,9 +53,9 @@
     <DocumentationFile>bin\Release\ServiceStack.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'DEBUG MONO|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
+    <DebugSymbols>True</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
+    <Optimize>False</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -67,7 +66,7 @@
     <OutputPath>bin\MONOTOUCH\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <DocumentationFile>bin\Release\ServiceStack.XML</DocumentationFile>
-    <Optimize>true</Optimize>
+    <Optimize>True</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <CodeAnalysisLogFile>bin\Release\ServiceStack.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
@@ -79,6 +78,7 @@
     <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
     <CodeAnalysisRuleDirectories>;C:\Program Files\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
     <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -179,6 +179,12 @@
     <Compile Include="ServiceHost\FileExtensions.cs" />
     <Compile Include="ServiceHost\IRestController.cs" />
     <Compile Include="ServiceHost\RestController.cs" />
+    <Compile Include="VirtualPath\AbstractVirtualDirectoryBase.cs" />
+    <Compile Include="VirtualPath\AbstractVirtualFileBase.cs" />
+    <Compile Include="VirtualPath\AbstractVirtualPathProviderBase.cs" />
+    <Compile Include="VirtualPath\FileSystemVirtualDirectory.cs" />
+    <Compile Include="VirtualPath\FileSystemVirtualFile.cs" />
+    <Compile Include="VirtualPath\FileSystemVirtualPathProvider.cs" />
     <Compile Include="WebHost.Endpoints\AppHostExtensions.cs" />
     <Compile Include="Markdown\CachedExpressionCompiler.cs" />
     <Compile Include="Markdown\DynamicTypeGenerator .cs" />
@@ -218,6 +224,7 @@
     <Compile Include="ServiceHost\ServiceOperations.cs" />
     <Compile Include="ServiceHost\ServiceRoutes.cs" />
     <Compile Include="WebHost.Endpoints\AppHostBase.cs" />
+    <Compile Include="WebHost.Endpoints\AppHostHttpListenerLongRunningBase.cs" />
     <Compile Include="WebHost.Endpoints\Extensions\HttpResponseStreamExtensions.cs" />
     <Compile Include="WebHost.Endpoints\Formats\CsvFormat.cs" />
     <Compile Include="WebHost.Endpoints\Extensions\HttpListenerRequestWrapper.cs" />
@@ -238,7 +245,6 @@
     <Compile Include="WebHost.Endpoints\Support\Markdown\TemplateExtensions.cs" />
     <Compile Include="WebHost.Endpoints\Support\Markdown\TextBlock.cs" />
     <Compile Include="WebHost.Endpoints\Formats\HtmlFormat.cs" />
-    <Compile Include="WebHost.Endpoints\IAppHost.cs" />
     <Compile Include="WebHost.Endpoints\Metadata\CustomMetadataHandler.cs" />
     <Compile Include="WebHost.Endpoints\Extensions\HttpRequestWrapper.cs" />
     <Compile Include="WebHost.Endpoints\Metadata\JsvMetadataHandler.cs" />
@@ -294,6 +300,8 @@
     <Compile Include="WebHost.Endpoints\Support\Metadata\XsdTypes.cs" />
     <Compile Include="WebHost.Endpoints\Utils\XsdUtils.cs" />
     <Compile Include="WebHost.Endpoints\Support\Templates\ListTemplate.cs" />
+    <Compile Include="WebHost.Endpoints\IAppHost.cs" />
+    <Compile Include="WebHost.Endpoints\IPlugin.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Funq\Container.Adapter.cs" />

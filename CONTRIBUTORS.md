@@ -2,6 +2,7 @@
 
  - [mythz](https://github.com/mythz) (Demis Bellot)
  - [arxisos](https://github.com/arxisos) (Steffen M)
+ - [desunit](https://github.com/desunit) (Sergey Bogdanov)
  - [bman654](https://github.com/bman654) (Brandon Wallace)
  - [Iristyle](https://github.com/Iristyle) (Ethan Brown)
  - [superlogical](https://github.com/superlogical) (Jake Scott)
@@ -88,3 +89,7 @@
  - [mikaelwaltersson](https://github.com/mikaelwaltersson) (Mikael Waltersson)
  - [asunar](https://github.com/asunar) (Alper)
  - [chucksavage](https://github.com/chucksavage) (Chuck Savage)
+ - [sashagit](https://github.com/sashagit) (Sasha)
+ - [froyke](https://github.com/froyke) (Froyke)
+ - [dbhobbs](https://github.com/dbhobbs) (Daniel Hobbs)
+ - [bculberson](https://github.com/bculberson) (Brad Culberson)
