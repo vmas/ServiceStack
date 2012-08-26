@@ -75,6 +75,8 @@ namespace ServiceStack.Razor
 
         public Dictionary<string, Type> RazorExtensionBaseTypes { get; set; }
 
+		TemplateProvider templateProvider = new TemplateProvider(DefaultTemplateName);
+
         public Type DefaultBaseType
         {
             get
@@ -165,7 +167,8 @@ namespace ServiceStack.Razor
                     if (catchAllPathsNotFound.Count > 1000) //prevent DDOS
                         catchAllPathsNotFound = new HashSet<string>();
 
-                    catchAllPathsNotFound.Add(pathInfo);
+					var tmp = new HashSet<string>(catchAllPathsNotFound) { pathInfo };
+                    catchAllPathsNotFound = tmp;
                     return null;
                 }
 
@@ -209,7 +212,7 @@ namespace ServiceStack.Razor
                 return result ?? "<!--{0} not found-->".Fmt(pageName);
             }
 
-            //Razor writes partial to static StringBuilder so don't return or it will write x2
+            //Razor writes partial to static StringBuilder so don't return or it will write zx2
             template.RenderPartial(model, pageName);
 
             //return template.Result;
@@ -228,7 +231,6 @@ namespace ServiceStack.Razor
                 throw new ConfigurationErrorsException("Microsoft.CSharp not properly loaded");
 
             templateServices = new Dictionary<string, TemplateService>(StringComparer.CurrentCultureIgnoreCase);
-            var compilerService = new CSharpDirectCompilerService();
 
             foreach (var entry in RazorExtensionBaseTypes)
             {
@@ -237,7 +239,7 @@ namespace ServiceStack.Razor
                     throw new ConfigurationErrorsException(razorBaseType.FullName + " must inherit from RazorBasePage");
 
                 var ext = entry.Key[0] == '.' ? entry.Key.Substring(1) : entry.Key;
-                templateServices[ext] = new TemplateService(this, compilerService, razorBaseType) {
+                templateServices[ext] = new TemplateService(this, razorBaseType) {
                     Namespaces = TemplateNamespaces
                 };
             }
@@ -349,14 +351,27 @@ namespace ServiceStack.Razor
             return httpReq != null ? GetViewPage(httpReq.OperationName) : null;
         }
 
+        public IViewPage GetView(string name)
+        {
+            return GetViewPage(name);
+        }
+
         public ViewPageRef GetViewPage(string pageName)
         {
             ViewPageRef razorPage;
 
             ViewPages.TryGetValue(pageName, out razorPage);
-            if (razorPage != null) return razorPage;
+            if (razorPage != null)
+            {
+                razorPage.EnsureCompiled();
+                return razorPage;
+            }
 
             ViewSharedPages.TryGetValue(pageName, out razorPage);
+            if (razorPage != null)
+            {
+                razorPage.EnsureCompiled();
+            }
             return razorPage;
         }
 
@@ -366,6 +381,8 @@ namespace ServiceStack.Razor
             {
                 AddPage(page);
             }
+
+            templateProvider.StartCompiling();
         }
 
         public IEnumerable<ViewPageRef> FindRazorPages(string dirPath)
@@ -393,7 +410,7 @@ namespace ServiceStack.Razor
                     templateService.RegisterPage(csHtmlFile.VirtualPath, pageName);
 
                     var templatePath = pageType == RazorPageType.ContentPage
-                        ? GetTemplatePath(csHtmlFile.Directory)
+						? templateProvider.GetTemplatePath(csHtmlFile.Directory)
                         : null;
 
                     yield return new ViewPageRef(this, csHtmlFile.VirtualPath, pageName, pageContents, pageType) {
@@ -408,48 +425,12 @@ namespace ServiceStack.Razor
                 WatchForModifiedPages = false;
         }
 
-        readonly Dictionary<string, IVirtualFile> templatePathsFound = new Dictionary<string, IVirtualFile>(StringComparer.InvariantCultureIgnoreCase);
-        readonly HashSet<string> templatePathsNotFound = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
-
-        private string GetTemplatePath(IVirtualDirectory fileDir)
-        {
-            try
-            {
-                if (templatePathsNotFound.Contains(fileDir.VirtualPath)) return null;
-
-                var templateDir = fileDir;
-                IVirtualFile templateFile;
-                while (templateDir != null && templateDir.GetFile(DefaultTemplateName) == null)
-                {
-                    if (templatePathsFound.TryGetValue(templateDir.VirtualPath, out templateFile))
-                        return templateFile.RealPath;
-
-                    templateDir = templateDir.ParentDirectory;
-                }
-
-                if (templateDir != null)
-                {
-                    templateFile = templateDir.GetFile(DefaultTemplateName);
-                    templatePathsFound[templateDir.VirtualPath] = templateFile;
-                    return templateFile.VirtualPath;
-                }
-
-                templatePathsNotFound.Add(fileDir.VirtualPath);
-                return null;
-
-            }
-            catch (Exception ex)
-            {
-                ex.Message.Print();
-                throw;
-            }
-        }
-
         public void AddPage(ViewPageRef page)
         {
             try
             {
-                page.Prepare();
+                //page.Compile();
+                templateProvider.QueuePageToCompile(page);
                 AddViewPage(page);
             }
             catch (TemplateCompilationException tcex)
@@ -464,7 +445,7 @@ namespace ServiceStack.Razor
                     PageType = page.PageType,
                     FilePath = page.FilePath,
                 };
-                errorViewPage.Prepare();
+                errorViewPage.Compile();
                 AddViewPage(errorViewPage);
                 Log.Error("Razor AddViewPage() page.Prepare(): " + ex.Message, ex);
             }
@@ -526,7 +507,8 @@ namespace ServiceStack.Razor
             
             try
             {
-                template.Prepare();
+                //template.Compile();
+                templateProvider.QueuePageToCompile(template);
                 return template;
             }
             catch (Exception ex)
@@ -539,25 +521,31 @@ namespace ServiceStack.Razor
         public ViewPageRef GetContentPage(string pageFilePath)
         {
             ViewPageRef razorPage;
-            ContentPages.TryGetValue(pageFilePath, out razorPage);
+            if (ContentPages.TryGetValue(pageFilePath, out razorPage))
+            {
+                razorPage.EnsureCompiled();
+            }
             return razorPage;
         }
 
         static readonly char[] DirSeps = new[] { '\\', '/' };
         public ViewPageRef GetContentResourcePage(string pathInfo)
         {
-            ViewPageRef razorPage;
-            ContentPages.TryGetValue(pathInfo.TrimStart(DirSeps), out razorPage);
-            return razorPage;
+            return GetContentPage(pathInfo.TrimStart(DirSeps));
         }
 
         public string GetTemplate(string name)
         {
             ViewPageRef template;
             MasterPageTemplates.TryGetValue(name, out template); //e.g. /NoModelNoController.cshtml
-            return template != null ? template.Contents : null;
+            if (template != null)
+            {
+                template.EnsureCompiled();
+                return template.Contents;
+            }
+            return null;
         }
-
+        
         public ITemplate CreateInstance(Type type)
         {
             var instance = type.CreateInstance();

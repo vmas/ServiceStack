@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
@@ -12,7 +12,7 @@ using ServiceStack.WebHost.Endpoints.Formats;
 
 namespace ServiceStack.WebHost.Endpoints.Support.Markdown
 {
-	public class MarkdownPage : IExpirable
+	public class MarkdownPage : IExpirable, IViewPage
 	{
 		public const string ModelName = "Model";
 
@@ -123,7 +123,7 @@ namespace ServiceStack.WebHost.Endpoints.Support.Markdown
 					exprSeq = 0;
 					timesRun = 0;
 					ExecutionContext = new EvaluatorExecutionContext();
-					Prepare();
+					Compile();
 				}
 				catch (Exception ex)
 				{
@@ -134,7 +134,9 @@ namespace ServiceStack.WebHost.Endpoints.Support.Markdown
 			}
 		}
 
-		public void Prepare()
+        public bool IsCompiled { get; set; }
+
+	    public void Compile()
 		{
 			if (!typeof(MarkdownViewBase).IsAssignableFrom(this.Markdown.MarkdownBaseType))
 			{

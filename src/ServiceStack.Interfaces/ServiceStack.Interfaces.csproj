@@ -626,11 +626,6 @@
     <Compile Include="Translators\TranslateMemberAttribute.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="VirtualPath\IVirtualDirectory.cs" />
-    <Compile Include="VirtualPath\IVirtualFile.cs" />
-    <Compile Include="VirtualPath\IVirtualNode.cs" />
-    <Compile Include="VirtualPath\IVirtualPathProvider.cs" />
-    <Compile Include="VirtualPath\VirtualPathExtension.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
