@@ -5,6 +5,7 @@ using ServiceStack.ServiceHost;
 using ServiceStack.ServiceInterface.Testing;
 using ServiceStack.Text;
 using ServiceStack.WebHost.Endpoints;
+using ServiceStack.WebHost.Endpoints.Handlers;
 
 namespace ServiceStack.Common.Tests
 {
@@ -15,7 +16,8 @@ namespace ServiceStack.Common.Tests
         {
             var httpReq = new MockHttpRequest("test", HttpMethods.Get, ContentType.Json, "/", null, null, null)
             {                
-                UserHostAddress = userHostAddress
+                UserHostAddress = userHostAddress,
+                IsLocal = false
             };
             return httpReq;
         }
@@ -23,7 +25,7 @@ namespace ServiceStack.Common.Tests
         [Test]
         public void Can_parse_Ips()
         {
-            var handler = new RestHandler();
+            var handler = new AsyncRestHandler(new RestPath(typeof(object), "/test"));
             var result = handler.GetEndpointAttributes(CreateRequest("204.2.145.235"));
 
             Assert.That(result.Has(EndpointAttributes.External));

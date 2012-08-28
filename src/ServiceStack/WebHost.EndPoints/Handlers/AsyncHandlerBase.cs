@@ -84,7 +84,7 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 			throw new NotSupportedException();
 		}
 
-        protected EndpointAttributes GetEndpointAttributes(IHttpRequest request)
+        public EndpointAttributes GetEndpointAttributes(IHttpRequest request)
         {
             var endpointAttributes = EndpointAttributes.None;
 

@@ -120,7 +120,8 @@ namespace ServiceStack.ServiceInterface.Testing
 
         public bool IsLocal
         {
-            get { throw new NotImplementedException(); }
+            get;
+            set; 
         }
     }
 }
