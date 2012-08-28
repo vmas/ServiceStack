@@ -44,7 +44,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 		}
 	}
 
-    [RestService("/todolist")]
+    [Route("/todolist")]
 	public class TodoList : List<Todo>
 	{
 		public TodoList() {}

@@ -9,16 +9,19 @@ using ServiceStack.VirtualPath;
 
 namespace ServiceStack.Html
 {
-
     public class TemplateProvider
     {
+        public bool CompileInParallel { get; set; }
+        public int CompileWithNoOfThreads { get; set; }
+
         private static readonly ILog Log = LogManager.GetLogger(typeof(TemplateProvider));
 
-        string defaultTemplateName;
+        readonly string defaultTemplateName;
 
         public TemplateProvider(string defaultTemplateName)
         {
             this.defaultTemplateName = defaultTemplateName;
+            this.CompileInParallel = false;
         }
 
         readonly Dictionary<string, IVirtualFile> templatePathsFound = new Dictionary<string, IVirtualFile>(StringComparer.InvariantCultureIgnoreCase);
@@ -73,41 +76,52 @@ namespace ServiceStack.Html
         //}
 
         private int runningThreads;
-        public void StartCompiling()
+        public void CompileQueuedPages()
         {
-            Log.InfoFormat("Starting to compile {0}/{1} pages",
-                compilePages.Count, priorityCompilePages.Count);
+            Log.InfoFormat("Starting to compile {0}/{1} pages, {2}",
+                compilePages.Count, priorityCompilePages.Count,
+                CompileInParallel ? "In Parallel" : "Sequentially");
 
-            var threadsToRun = Math.Min(Environment.ProcessorCount * 2, compilePages.Count);
-            if (threadsToRun <= runningThreads) return;
+            if (CompileInParallel)
+            {
+                var threadsToRun = Math.Min(CompileWithNoOfThreads, compilePages.Count);
+                if (threadsToRun <= runningThreads) return;
 
-            Log.InfoFormat("Starting {0} threads..", threadsToRun);
+                Log.InfoFormat("Starting {0} threads..", threadsToRun);
 
-            threadsToRun.Times(x => {
-                ThreadPool.QueueUserWorkItem(waitHandle => {
-                    try
-                    {
-                        Interlocked.Increment(ref runningThreads);
-                        while (!compilePages.IsEmpty || !priorityCompilePages.IsEmpty)
-                        {
-                            IViewPage viewPage;
-                            //if (priorityCompilePages.TryDequeue(out viewPage))
-                            //{
-                            //    viewPage.Compile();
-                            //}
-                            if (compilePages.TryDequeue(out viewPage))
-                            {
-                                viewPage.Compile();
-                            }
-                        }
-                    }
-                    finally
-                    {
-                        Interlocked.Decrement(ref runningThreads);
-                        Log.InfoFormat("Compilation threads remaining {0}...", runningThreads);
-                    }
+                threadsToRun.Times(x => {
+                    ThreadPool.QueueUserWorkItem(waitHandle => CompileAllPages());
                 });
-            });
+            }
+            else
+            {
+                CompileAllPages();
+            }
+        }
+
+        private void CompileAllPages()
+        {
+            try
+            {
+                Interlocked.Increment(ref runningThreads);
+                while (!compilePages.IsEmpty || !priorityCompilePages.IsEmpty)
+                {
+                    IViewPage viewPage;
+                    //if (priorityCompilePages.TryDequeue(out viewPage))
+                    //{
+                    //    viewPage.Compile();
+                    //}
+                    if (compilePages.TryDequeue(out viewPage))
+                    {
+                        viewPage.Compile();
+                    }
+                }
+            }
+            finally
+            {
+                Interlocked.Decrement(ref runningThreads);
+                Log.InfoFormat("Compilation threads remaining {0}...", runningThreads);
+            }
         }
     }
 

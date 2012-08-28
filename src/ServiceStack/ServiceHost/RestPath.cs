@@ -100,9 +100,11 @@ namespace ServiceStack.ServiceHost
             this.IsOneWay = isOneWay;
 
 			this.restPath = path;
+
             this.DefaultResponseContentType = defaultResponseContentType;
             this.PreferredResponseContentType = preferredResponseContentType;
             this.AllowedContentTypes = allowedContentTypes;
+
 			this.allowsAllVerbs = verbs == null || verbs == WildCard;
 			if (!this.allowsAllVerbs)
 			{

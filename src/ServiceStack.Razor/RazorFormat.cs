@@ -6,7 +6,6 @@ using System.Linq;
 using ServiceStack.Common;
 using ServiceStack.Html;
 using ServiceStack.Logging;
-using ServiceStack.Razor.Compilation.CSharp;
 using ServiceStack.Razor.Templating;
 using ServiceStack.ServiceHost;
 using ServiceStack.Text;
@@ -44,6 +43,7 @@ namespace ServiceStack.Razor
 
         public static string DefaultTemplateName = "_Layout.cshtml";
         public static string DefaultTemplate = "_Layout";
+        public static string DefaultPage = "default";
         public static string TemplatePlaceHolder = "@RenderBody()";
 
         // ~/View - Dynamic Pages
@@ -75,7 +75,7 @@ namespace ServiceStack.Razor
 
         public Dictionary<string, Type> RazorExtensionBaseTypes { get; set; }
 
-		TemplateProvider templateProvider = new TemplateProvider(DefaultTemplateName);
+        public TemplateProvider TemplateProvider { get; set; }
 
         public Type DefaultBaseType
         {
@@ -115,6 +115,10 @@ namespace ServiceStack.Razor
 				{"cshtml", typeof(ViewPage<>) },
 				{"rzr", typeof(ViewPage<>) },
 			};
+            this.TemplateProvider = new TemplateProvider(DefaultTemplateName) {
+                CompileInParallel = true,
+                CompileWithNoOfThreads = Environment.ProcessorCount * 2,
+            };            
         }
 
         public void Register(IAppHost appHost)
@@ -123,6 +127,7 @@ namespace ServiceStack.Razor
             Configure(appHost);
         }
 
+        static readonly char[] DirSeps = new[] { '\\', '/' };
         static HashSet<string> catchAllPathsNotFound = new HashSet<string>();
 
         public void Configure(IAppHost appHost)
@@ -133,7 +138,7 @@ namespace ServiceStack.Razor
             foreach (var ns in EndpointHostConfig.RazorNamespaces)
                 TemplateNamespaces.Add(ns);
 
-            this.ReplaceTokens = new Dictionary<string, string>(appHost.Config.MarkdownReplaceTokens);
+            this.ReplaceTokens = appHost.Config.MarkdownReplaceTokens ?? new Dictionary<string, string>();
             if (!appHost.Config.WebHostUrl.IsNullOrEmpty())
                 this.ReplaceTokens["~/"] = appHost.Config.WebHostUrl.WithTrailingSlash();
 
@@ -142,7 +147,7 @@ namespace ServiceStack.Razor
 
             Init();
 
-            RegisterRazorPages(appHost.Config.RazorSearchPath);
+            RegisterRazorPages(appHost.Config.WebHostPhysicalPath);
 
             appHost.CatchAllHandlers.Add((httpMethod, pathInfo, filePath) => {
                 ViewPageRef razorPage = null;
@@ -150,14 +155,10 @@ namespace ServiceStack.Razor
                 if (catchAllPathsNotFound.Contains(pathInfo))
                     return null;
 
-                if (filePath != null)
-                    razorPage = GetContentPage(filePath.WithoutExtension());
-
-                if (razorPage == null)
-                    razorPage = GetContentResourcePage(pathInfo);
-
-                if (razorPage == null)
-                    razorPage = GetContentPage(pathInfo);
+                var normalizedPathInfo = pathInfo.IsNullOrEmpty() ? DefaultPage : pathInfo.TrimStart(DirSeps);
+                razorPage = GetContentPage(
+                    normalizedPathInfo,
+                    normalizedPathInfo.CombineWith(DefaultPage));
 
                 if (WatchForModifiedPages)
                     ReloadModifiedPageAndTemplates(razorPage);
@@ -180,7 +181,6 @@ namespace ServiceStack.Razor
                 };
             });
         }
-
         public bool ProcessRequest(IHttpRequest httpReq, IHttpResponse httpRes, object dto)
         {
             ViewPageRef razorPage;
@@ -252,17 +252,7 @@ namespace ServiceStack.Razor
             //Add extensible way to control caching
             //httpRes.AddHeaderLastModified(razorPage.GetLastModified());
 
-            var template = httpReq.GetTemplate();
-            if (template == null || !HasTemplate(template))
-                template = razorPage.Template;
-
-            if (httpReq != null && httpReq.QueryString["format"] != null)
-            {
-                if (!httpReq.GetFormatModifier().StartsWithIgnoreCase("bare"))
-                    template = null;
-            }
-
-            var razorTemplate = ExecuteTemplate(dto, razorPage.PageName, template, httpReq, httpRes);
+            var razorTemplate = ExecuteTemplate(dto, razorPage.PageName, razorPage.Template, httpReq, httpRes);
             var html = razorTemplate.Result;
 
             var htmlBytes = html.ToUtf8Bytes();
@@ -293,7 +283,7 @@ namespace ServiceStack.Razor
 
         public void ReloadModifiedPageAndTemplates(ViewPageRef razorPage)
         {
-            if (razorPage.FilePath == null) return;
+            if (razorPage == null || razorPage.FilePath == null) return;
 
             var lastWriteTime = File.GetLastWriteTime(razorPage.FilePath);
             if (lastWriteTime > razorPage.LastModified)
@@ -375,6 +365,21 @@ namespace ServiceStack.Razor
             return razorPage;
         }
 
+        private ViewPageRef GetTemplatePage(string pageName)
+        {
+            ViewPageRef razorPage;
+
+            var key = "Views/Shared/{0}.cshtml".Fmt(pageName);
+            MasterPageTemplates.TryGetValue(key, out razorPage);
+            if (razorPage != null)
+            {
+                razorPage.EnsureCompiled();
+                return razorPage;
+            }
+            return null;
+        }
+
+
         private void RegisterRazorPages(string razorSearchPath)
         {
             foreach (var page in FindRazorPagesFn(razorSearchPath))
@@ -382,7 +387,14 @@ namespace ServiceStack.Razor
                 AddPage(page);
             }
 
-            templateProvider.StartCompiling();
+            try
+            {
+                TemplateProvider.CompileQueuedPages();
+            }
+            catch (Exception ex)
+            {
+                HandleCompilationException(null, ex);
+            }
         }
 
         public IEnumerable<ViewPageRef> FindRazorPages(string dirPath)
@@ -410,7 +422,7 @@ namespace ServiceStack.Razor
                     templateService.RegisterPage(csHtmlFile.VirtualPath, pageName);
 
                     var templatePath = pageType == RazorPageType.ContentPage
-						? templateProvider.GetTemplatePath(csHtmlFile.Directory)
+						? TemplateProvider.GetTemplatePath(csHtmlFile.Directory)
                         : null;
 
                     yield return new ViewPageRef(this, csHtmlFile.VirtualPath, pageName, pageContents, pageType) {
@@ -429,25 +441,12 @@ namespace ServiceStack.Razor
         {
             try
             {
-                //page.Compile();
-                templateProvider.QueuePageToCompile(page);
+                TemplateProvider.QueuePageToCompile(page);
                 AddViewPage(page);
-            }
-            catch (TemplateCompilationException tcex)
-            {
-                "Error compiling page {0}".Fmt(page.Name).Print();
-                tcex.Errors.PrintDump();
             }
             catch (Exception ex)
             {
-                var errorViewPage = new ErrorViewPage(this, ex) {
-                    Name = page.Name,
-                    PageType = page.PageType,
-                    FilePath = page.FilePath,
-                };
-                errorViewPage.Compile();
-                AddViewPage(errorViewPage);
-                Log.Error("Razor AddViewPage() page.Prepare(): " + ex.Message, ex);
+                HandleCompilationException(page, ex);
             }
 
             try
@@ -465,6 +464,35 @@ namespace ServiceStack.Razor
             {
                 Log.Error("Error compiling template " + page.Template + ": " + ex.Message, ex);
             }
+        }
+
+        private void HandleCompilationException(ViewPageRef page, Exception ex)
+        {
+            var tcex = ex as TemplateCompilationException;
+            if (page == null)
+            {
+                Log.Error("Error compiling Razor page", ex);
+                if (tcex != null)
+                {
+                    Log.Error(tcex.Errors.Dump());
+                }
+                return;
+            }
+
+            if (tcex != null)
+            {
+                Log.Error("Error compiling page {0}".Fmt(page.Name));
+                Log.Error(tcex.Errors.Dump());
+            }
+
+            var errorViewPage = new ErrorViewPage(this, ex) {
+                Name = page.Name,
+                PageType = page.PageType,
+                FilePath = page.FilePath,
+            };
+            errorViewPage.Compile();
+            AddViewPage(errorViewPage);
+            Log.Error("Razor AddViewPage() page.Prepare(): " + ex.Message, ex);
         }
 
         private void AddViewPage(ViewPageRef page)
@@ -508,7 +536,7 @@ namespace ServiceStack.Razor
             try
             {
                 //template.Compile();
-                templateProvider.QueuePageToCompile(template);
+                TemplateProvider.QueuePageToCompile(template);
                 return template;
             }
             catch (Exception ex)
@@ -528,10 +556,15 @@ namespace ServiceStack.Razor
             return razorPage;
         }
 
-        static readonly char[] DirSeps = new[] { '\\', '/' };
-        public ViewPageRef GetContentResourcePage(string pathInfo)
+        public ViewPageRef GetContentPage(params string[] pageFilePaths)
         {
-            return GetContentPage(pathInfo.TrimStart(DirSeps));
+            foreach (var pageFilePath in pageFilePaths)
+            {
+                var razorPage = GetContentPage(pageFilePath);
+                if (razorPage != null)
+                    return razorPage;
+            }
+            return null;
         }
 
         public string GetTemplate(string name)

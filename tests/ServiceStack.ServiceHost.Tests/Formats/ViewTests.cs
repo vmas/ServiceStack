@@ -36,7 +36,9 @@ namespace ServiceStack.ServiceHost.Tests.Formats
 		public void OnBeforeEachTest()
 		{
 			appHost = new AppHost();
-			markdownFormat = new MarkdownFormat();
+			markdownFormat = new MarkdownFormat {
+                VirtualPathProvider = appHost.VirtualPathProvider
+            };
 			markdownFormat.Register(appHost);
 		}
 
@@ -45,7 +47,6 @@ namespace ServiceStack.ServiceHost.Tests.Formats
 			public AppHost()
 			{
 				this.Config = new EndpointHostConfig {					
-					MarkdownSearchPath = "~".MapProjectPath(),
 					MarkdownReplaceTokens = new Dictionary<string, string>(),
 					IgnoreFormatsInMetadata = new HashSet<string>(),
 				};
@@ -53,7 +54,7 @@ namespace ServiceStack.ServiceHost.Tests.Formats
 				this.ResponseFilters = new List<Action<IHttpRequest, IHttpResponse, object>>();
 				this.ViewEngines = new List<IViewEngine>();
 				this.CatchAllHandlers = new List<HttpHandlerResolverDelegate>();
-				this.VirtualPathProvider = new FileSystemVirtualPathProvider(this);
+				this.VirtualPathProvider = new FileSystemVirtualPathProvider(this, "~".MapProjectPath());
 			}
 
 			public void Register<T>(T instance)
@@ -187,7 +188,7 @@ namespace ServiceStack.ServiceHost.Tests.Formats
 		{
 			var html = GetHtml(response.Customer);
 
-			Console.WriteLine(html);
+            html.Print();
 			//File.WriteAllText("~/AppData/TestsResults/Customer.htm".MapAbsolutePath(), html);
 
 			Assert.That(html.StartsWith("<!doctype html>"));

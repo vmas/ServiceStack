@@ -561,7 +561,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ServiceHost\RouteAttribute.cs" />
-    <Compile Include="ServiceHost\Licence.cs" />
     <Compile Include="ServiceInterface.ServiceModel\RequestLogEntry.cs" />
     <Compile Include="ServiceHost\RestServiceAttribute.cs">
       <SubType>Code</SubType>

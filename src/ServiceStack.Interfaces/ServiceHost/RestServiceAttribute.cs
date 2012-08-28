@@ -2,14 +2,15 @@ using System;
 
 namespace ServiceStack.ServiceHost
 {
-    /// <summary>
-    ///		Used to decorate Request DTO's to associate a RESTful request 
-    ///		path mapping with a service.  Multiple attributes can be applied to 
-    ///		each request DTO, to map multiple paths to the service.
-    /// </summary>
-    [Obsolete("Use [Route] instead of [RestService]")]
+	/// <summary>
+	///		Used to decorate Request DTO's to associate a RESTful request 
+	///		path mapping with a service.  Multiple attributes can be applied to 
+	///		each request DTO, to map multiple paths to the service.
+	/// </summary>
+    [Obsolete("Use [Route] instead of [RestService].")]
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
-    public class RestServiceAttribute : RouteAttribute
+    public class RestServiceAttribute
+        : RouteAttribute
     {
         /// <summary>
         /// 	<para>Initializes an instance of the <see cref="RestServiceAttribute"/> class.</para>
