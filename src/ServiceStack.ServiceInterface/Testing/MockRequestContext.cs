@@ -62,10 +62,5 @@ namespace ServiceStack.ServiceInterface.Testing
         public void Dispose()
         {
         }
-
-        public IAppHost CreateAppHost()
-        {
-            return new TestAppHost(this.Container);
-        }
     }
 }

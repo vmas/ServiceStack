@@ -59,7 +59,7 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 				//if there is a problem writing to response, by now it will be closed
 				if (!httpRes.IsClosed)
 				{
-                    httpRes.WriteErrorToResponse(httpReq.ResponseContentType, httpReq.OperationName, errorMessage, ex, statusCode);
+                    httpRes.WriteErrorToResponse(httpReq.ResponseContentType, httpReq.OperationName, errorMessage, ex, (int)statusCode);
 				}
 			}
 			catch (Exception writeErrorEx)

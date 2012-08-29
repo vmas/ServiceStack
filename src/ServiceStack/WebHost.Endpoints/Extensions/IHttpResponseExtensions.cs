@@ -113,7 +113,7 @@ namespace ServiceStack.WebHost.Endpoints.Extensions
 				    var disposableResult = result as IDisposable;
 					if (httpResult != null)
 					{
-						response.StatusCode = (int) httpResult.StatusCode;
+						response.StatusCode = httpResult.Status;
 						response.StatusDescription = httpResult.StatusDescription ?? httpResult.StatusCode.ToString();
 						if (String.IsNullOrEmpty(httpResult.ContentType))
 						{
@@ -251,19 +251,19 @@ namespace ServiceStack.WebHost.Endpoints.Extensions
 		public static void WriteError(this IHttpResponse response, IHttpRequest httpReq, object dto, string errorMessage)
 		{
 			WriteErrorToResponse(response, httpReq.ResponseContentType, dto.GetType().Name, errorMessage, null,
-				HttpStatusCode.InternalServerError);
+                (int)HttpStatusCode.InternalServerError);
 		}
 
 		public static void WriteErrorToResponse(this IHttpResponse response, string contentType,
 			string operationName, string errorMessage, Exception ex)
 		{
 			WriteErrorToResponse(response, contentType, operationName, errorMessage, ex,
-				HttpStatusCode.InternalServerError);
+				(int)HttpStatusCode.InternalServerError);
 		}
 
 		public static void WriteErrorToResponse(this IHttpResponse response,
 			string contentType, string operationName, string errorMessage,
-			Exception ex, HttpStatusCode statusCode)
+			Exception ex, int statusCode)
 		{
 			switch (contentType)
 			{
@@ -289,14 +289,14 @@ namespace ServiceStack.WebHost.Endpoints.Extensions
 		}
 
 		private static void WriteErrorTextToResponse(this IHttpResponse response, StringBuilder sb,
-			string contentType, HttpStatusCode statusCode)
+            string contentType, int statusCode)
 		{
-			response.StatusCode = (int)statusCode;
+			response.StatusCode = statusCode;
 			WriteTextToResponse(response, sb.ToString(), contentType);
 			response.Close();
 		}
 
-		private static void WriteXmlErrorToResponse(this IHttpResponse response, string operationName, string errorMessage, Exception ex, HttpStatusCode statusCode)
+        private static void WriteXmlErrorToResponse(this IHttpResponse response, string operationName, string errorMessage, Exception ex, int statusCode)
 		{
 			var sb = new StringBuilder();
 			sb.AppendFormat("<{0}Response xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"{1}\">\n",
@@ -311,7 +311,7 @@ namespace ServiceStack.WebHost.Endpoints.Extensions
 			response.WriteErrorTextToResponse(sb, ContentType.Xml, statusCode);
 		}
 
-		private static void WriteJsonErrorToResponse(this IHttpResponse response, string operationName, string errorMessage, Exception ex, HttpStatusCode statusCode)
+        private static void WriteJsonErrorToResponse(this IHttpResponse response, string operationName, string errorMessage, Exception ex, int statusCode)
 		{
 			var sb = new StringBuilder();
 			sb.AppendLine("{");
@@ -326,7 +326,7 @@ namespace ServiceStack.WebHost.Endpoints.Extensions
 			response.WriteErrorTextToResponse(sb, ContentType.Json, statusCode);
 		}
 
-		private static void WriteJsvErrorToResponse(this IHttpResponse response, string operationName, string errorMessage, Exception ex, HttpStatusCode statusCode)
+        private static void WriteJsvErrorToResponse(this IHttpResponse response, string operationName, string errorMessage, Exception ex, int statusCode)
 		{
 			var sb = new StringBuilder();
 			sb.Append("{");
@@ -342,6 +342,7 @@ namespace ServiceStack.WebHost.Endpoints.Extensions
 
         public static void ApplyGlobalResponseHeaders(this HttpListenerResponse httpRes)
         {
+            if (EndpointHost.Config == null) return;
             foreach (var globalResponseHeader in EndpointHost.Config.GlobalResponseHeaders)
             {
                 httpRes.AddHeader(globalResponseHeader.Key, globalResponseHeader.Value);
@@ -350,6 +351,7 @@ namespace ServiceStack.WebHost.Endpoints.Extensions
 
         public static void ApplyGlobalResponseHeaders(this HttpResponse httpRes)
         {
+            if (EndpointHost.Config == null) return;
             foreach (var globalResponseHeader in EndpointHost.Config.GlobalResponseHeaders)
             {
                 httpRes.AddHeader(globalResponseHeader.Key, globalResponseHeader.Value);
@@ -358,7 +360,8 @@ namespace ServiceStack.WebHost.Endpoints.Extensions
 
 	    public static void ApplyGlobalResponseHeaders(this IHttpResponse httpRes)
 	    {
-	        foreach (var globalResponseHeader in EndpointHost.Config.GlobalResponseHeaders)
+            if (EndpointHost.Config == null) return;
+            foreach (var globalResponseHeader in EndpointHost.Config.GlobalResponseHeaders)
 	        {
 	            httpRes.AddHeader(globalResponseHeader.Key, globalResponseHeader.Value);
 	        }

@@ -74,10 +74,6 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 				"ServiceName",
 				new ServiceManager(GetType().Assembly));
 
-			var assembly = typeof (CompressionTests).Assembly;
-			EndpointHost.ConfigureHost(
-				new TestAppHost(new Container(), assembly), "Name", new ServiceManager(assembly));
-
 			var mockResponse = new HttpResponseMock();
 
 			var simpleDto = new TestCompress(1, "name");
