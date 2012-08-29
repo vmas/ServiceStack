@@ -33,6 +33,16 @@ namespace ServiceStack.Tests.ServiceHost
 			Assert.That(request.Name, Is.EqualTo("HelloWorld!"));
 		}
 
+        [Test]
+        public void Can_deserialize_SimpleType_in_middle_of_path()
+        {
+            var restPath = new RestPath(typeof(SimpleType), "/simple/");
+            var request = restPath.CreateRequest("/simple?Name=HelloWorld!") as SimpleType;
+
+            Assert.That(request, Is.Not.Null);
+            Assert.That(request.Name, Is.EqualTo("HelloWorld!"));
+        }
+
 		[Test]
 		public void ShowAllow()
 		{

@@ -51,7 +51,7 @@ namespace ServiceStack.ServiceHost.Tests
 
             var httpRequestContext = new HttpRequestContext(httpReq, httpRes, dto);
 
-            var appHost = new TestAppHost();
+            var appHost = new BasicAppHost();
             if (pluginFormat != null) pluginFormat.Register(appHost);
 
             EndpointHost.ContentTypeFilter = appHost.ContentTypeFilters;
