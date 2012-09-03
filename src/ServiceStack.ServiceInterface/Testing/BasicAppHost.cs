@@ -15,6 +15,7 @@ namespace ServiceStack.ServiceInterface.Testing
         public BasicAppHost()
         {
             this.Container = new Container();
+            this.PreRequestFilters = new List<Action<IHttpRequest, IHttpResponse>>();
             this.RequestFilters = new List<Action<IHttpRequest, IHttpResponse, object>>();
             this.ResponseFilters = new List<Action<IHttpRequest, IHttpResponse, object>>();
             this.ViewEngines = new List<IViewEngine>();
@@ -45,11 +46,15 @@ namespace ServiceStack.ServiceInterface.Testing
 
         public IContentTypeFilter ContentTypeFilters { get; set; }
 
+        public List<Action<IHttpRequest, IHttpResponse>> PreRequestFilters { get; set; }
+
         public List<Action<IHttpRequest, IHttpResponse, object>> RequestFilters { get; set; }
 
         public List<Action<IHttpRequest, IHttpResponse, object>> ResponseFilters { get; set; }
 
         public List<IViewEngine> ViewEngines { get; set; }
+
+        public Action<IHttpRequest, IHttpResponse, Exception> ExceptionHandler { get; set; }
 
         public List<HttpHandlerResolverDelegate> CatchAllHandlers { get; set; }
 

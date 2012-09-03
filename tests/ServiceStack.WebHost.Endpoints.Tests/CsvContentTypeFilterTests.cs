@@ -16,7 +16,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 	public class CsvContentTypeFilterTests
 	{
 		const int HeaderRowCount = 1;
-		private const string ListeningOn = "http://localhost:82/";
+		private const string ListeningOn = "http://localhost:1182/";
 
 		ExampleAppHostHttpListener appHost;
 
@@ -35,7 +35,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 		}
 
 		[Test]
-		[Ignore("Helps debugging when you need to find out WTF is going on")]
+		[Explicit("Helps debugging when you need to find out WTF is going on")]
 		public void Run_for_30secs()
 		{
 			Thread.Sleep(30000);
@@ -83,7 +83,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 			};
 
 			MoviesResponse response = null;
-			asyncClient.SendAsync<MoviesResponse>(HttpMethods.Get, "http://localhost:82/movies", null,
+			asyncClient.SendAsync<MoviesResponse>(HttpMethods.Get, ListeningOn + "movies", null,
 				r => response = r, FailOnAsyncError);
 
 			Thread.Sleep(1000);
@@ -94,7 +94,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 		[Test]
 		public void Can_download_CSV_movies_using_csv_syncreply_endpoint()
 		{
-			var req = (HttpWebRequest)WebRequest.Create("http://localhost:82/csv/requestreply/Movies");
+			var req = (HttpWebRequest)WebRequest.Create(ListeningOn + "csv/requestreply/Movies");
 			
 			var res = req.GetResponse();
 			Assert.That(res.ContentType, Is.EqualTo(ContentType.Csv));
@@ -111,7 +111,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 		[Test]
 		public void Can_download_CSV_movies_using_csv_Accept_and_RestPath()
 		{
-			var req = (HttpWebRequest)WebRequest.Create("http://localhost:82/movies");
+			var req = (HttpWebRequest)WebRequest.Create(ListeningOn + "movies");
 			req.Accept = ContentType.Csv;
 
 			var res = req.GetResponse();
@@ -127,7 +127,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 		[Test]
 		public void Can_download_CSV_Hello_using_csv_syncreply_endpoint()
 		{
-			var req = (HttpWebRequest)WebRequest.Create("http://localhost:82/csv/requestreply/Hello?Name=World!");
+			var req = (HttpWebRequest)WebRequest.Create(ListeningOn + "csv/requestreply/Hello?Name=World!");
 
 			var res = req.GetResponse();
 			Assert.That(res.ContentType, Is.EqualTo(ContentType.Csv));
@@ -142,7 +142,7 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 		[Test]
 		public void Can_download_CSV_Hello_using_csv_Accept_and_RestPath()
 		{
-			var req = (HttpWebRequest)WebRequest.Create("http://localhost:82/hello/World!");
+			var req = (HttpWebRequest)WebRequest.Create(ListeningOn + "hello/World!");
 			req.Accept = ContentType.Csv;
 
 			var res = req.GetResponse();
@@ -158,7 +158,8 @@ namespace ServiceStack.WebHost.Endpoints.Tests
 		[Test]
 		public void Can_download_CSV_movies_using_csv_SyncReply_Path()
 		{
-			var req = (HttpWebRequest)WebRequest.Create("http://localhost:82/csv/requestreply/Movies");
+			var req = (HttpWebRequest)WebRequest.Create(ListeningOn + "csv/requestreply/Movies");
+
 			req.Accept = "application/xml";
 
 			var res = req.GetResponse();

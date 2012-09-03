@@ -10,6 +10,7 @@ using ServiceStack.ServiceHost;
 using ServiceStack.Text;
 using ServiceStack.VirtualPath;
 using ServiceStack.WebHost.Endpoints.Extensions;
+using ServiceStack.WebHost.Endpoints.Support;
 using ServiceStack.WebHost.Endpoints.Support.Markdown;
 
 namespace ServiceStack.WebHost.Endpoints.Formats
@@ -63,7 +64,7 @@ namespace ServiceStack.WebHost.Endpoints.Formats
 
         public IAppHost AppHost { get; set; }
 
-        public Dictionary<string, string> MarkdownReplaceTokens { get; set; }
+        public Dictionary<string, string> ReplaceTokens { get; set; }
 
         public IVirtualPathProvider VirtualPathProvider { get; set; }
 
@@ -79,7 +80,7 @@ namespace ServiceStack.WebHost.Endpoints.Formats
             this.MarkdownBaseType = typeof(MarkdownViewBase);
             this.MarkdownGlobalHelpers = new Dictionary<string, Type>();
             this.FindMarkdownPagesFn = FindMarkdownPages;
-            this.MarkdownReplaceTokens = new Dictionary<string, string>();
+            this.ReplaceTokens = new Dictionary<string, string>();
         }
 
         internal static readonly char[] DirSeps = new[] { '\\', '/' };
@@ -96,9 +97,10 @@ namespace ServiceStack.WebHost.Endpoints.Formats
             this.MarkdownBaseType = appHost.Config.MarkdownBaseType ?? this.MarkdownBaseType;
             this.MarkdownGlobalHelpers = appHost.Config.MarkdownGlobalHelpers ?? this.MarkdownGlobalHelpers;
 
-            this.MarkdownReplaceTokens = appHost.Config.MarkdownReplaceTokens ?? new Dictionary<string, string>();
-            if (!appHost.Config.WebHostUrl.IsNullOrEmpty() && this.MarkdownReplaceTokens.ContainsKey("~/"))
-                this.MarkdownReplaceTokens["~/"] = appHost.Config.WebHostUrl.WithTrailingSlash();
+            this.ReplaceTokens = appHost.Config.HtmlReplaceTokens ?? new Dictionary<string, string>();
+            var webHostUrl = appHost.Config.WebHostUrl;
+            if (!webHostUrl.IsNullOrEmpty())
+                this.ReplaceTokens["~/"] = webHostUrl.WithTrailingSlash();
 
             if (VirtualPathProvider == null)
                 VirtualPathProvider = AppHost.VirtualPathProvider;
@@ -121,12 +123,23 @@ namespace ServiceStack.WebHost.Endpoints.Formats
 
                 if (markdownPage == null)
                 {
+                    if (pathInfo.EndsWith(".md"))
+                    {
+                        return new RedirectHttpHandler {
+                            AbsoluteUrl = webHostUrl.IsNullOrEmpty()
+                                ? null
+                                : webHostUrl.CombineWith(pathInfo.WithoutExtension()),
+                            RelativeUrl = webHostUrl.IsNullOrEmpty()
+                                ? pathInfo.WithoutExtension()
+                                : null
+                        };
+                    }
+
                     if (catchAllPathsNotFound.Count > 1000) //prevent DDOS
                         catchAllPathsNotFound = new HashSet<string>();
 
-					var tmp = new HashSet<string>(catchAllPathsNotFound);
-					tmp.Add(pathInfo);
-					catchAllPathsNotFound = tmp;
+					var tmp = new HashSet<string>(catchAllPathsNotFound) { pathInfo };
+                    catchAllPathsNotFound = tmp;
 					return null;
                 }
                 
@@ -156,14 +169,31 @@ namespace ServiceStack.WebHost.Endpoints.Formats
             return ProcessMarkdownPage(httpReq, markdownPage, dto, httpRes);
         }
 
-        public bool HasView(string viewName)
+        public bool HasView(string viewName, IHttpRequest httpReq = null)
         {
-            return GetViewPage(viewName) != null;
+            return GetViewPage(viewName, httpReq) != null;
         }
 
-        public string RenderPartial(string pageName, object model, bool renderHtml)
+        public string RenderPartial(string pageName, object model, bool renderHtml, IHttpRequest httpReq = null)
         {
-            return RenderDynamicPage(GetViewPage(pageName), pageName, model, renderHtml, false);
+            return RenderDynamicPage(GetViewPage(pageName, httpReq), pageName, model, renderHtml, false);
+        }
+
+        public MarkdownPage GetViewPage(string viewName, IHttpRequest httpReq)
+        {
+            var view = GetViewPage(viewName);
+            if (view != null) return view;
+            if (httpReq == null || httpReq.PathInfo == null) return null;
+
+            var normalizedPathInfo = httpReq.PathInfo
+                .ParentDirectory().CombineWith(viewName)
+                .TrimStart(DirSeps);
+
+            view = GetContentPage(
+                normalizedPathInfo,
+                normalizedPathInfo.CombineWith(DefaultPage));
+
+            return view;
         }
 
         public bool ProcessMarkdownPage(IHttpRequest httpReq, MarkdownPage markdownPage, object dto, IHttpResponse httpRes)
@@ -198,39 +228,47 @@ namespace ServiceStack.WebHost.Endpoints.Formats
         {
             if (markdownPage == null || markdownPage.FilePath == null) return;
 
-            var lastWriteTime = File.GetLastWriteTime(markdownPage.FilePath);
-            if (lastWriteTime > markdownPage.LastModified)
+            var latestPage = GetLatestPage(markdownPage);
+            if (latestPage.LastModified > markdownPage.LastModified)
             {
-                markdownPage.Reload();
+                markdownPage.Reload(GetPageContents(latestPage), latestPage.LastModified);
             }
 
             MarkdownTemplate template;
             if (markdownPage.DirectiveTemplate != null
                 && this.MasterPageTemplates.TryGetValue(markdownPage.DirectiveTemplate, out template))
             {
-                lastWriteTime = File.GetLastWriteTime(markdownPage.DirectiveTemplate);
-                if (lastWriteTime > template.LastModified)
-                    ReloadTemplate(template);
+                latestPage = GetLatestPage(markdownPage.DirectiveTemplate);
+                if (latestPage.LastModified > template.LastModified)
+                    template.Reload(GetPageContents(latestPage), latestPage.LastModified);
             }
             if (markdownPage.Template != null
                 && this.MasterPageTemplates.TryGetValue(markdownPage.Template, out template))
             {
-                lastWriteTime = File.GetLastWriteTime(markdownPage.Template);
-                if (lastWriteTime > template.LastModified)
-                    ReloadTemplate(template);
+                latestPage = GetLatestPage(template);
+                if (latestPage.LastModified > template.LastModified)
+                    template.Reload(GetPageContents(latestPage), latestPage.LastModified);
             }
         }
 
-        private void ReloadTemplate(MarkdownTemplate template)
+        private IVirtualFile GetLatestPage(MarkdownPage markdownPage)
         {
-			var contents = VirtualPathProvider.GetFile(template.FilePath).ReadAllText();
-            foreach (var markdownReplaceToken in MarkdownReplaceTokens)
-            {
-                contents = contents.Replace(markdownReplaceToken.Key, markdownReplaceToken.Value);
-            }
-            template.Reload(contents);
+            var file = VirtualPathProvider.GetFile(markdownPage.FilePath);
+            return file;
         }
 
+        private IVirtualFile GetLatestPage(string markdownPagePath)
+        {
+            var file = VirtualPathProvider.GetFile(markdownPagePath);
+            return file;
+        }
+
+        private IVirtualFile GetLatestPage(MarkdownTemplate markdownPage)
+        {
+            var file = VirtualPathProvider.GetFile(markdownPage.FilePath);
+            return file;
+        }
+        
         /// <summary>
         /// Render Markdown for text/markdown and text/plain ContentTypes
         /// </summary>
@@ -325,7 +363,7 @@ namespace ServiceStack.WebHost.Endpoints.Formats
             {
                 try
                 {
-                    var templateContents = templateFile.ReadAllText();
+                    var templateContents = GetPageContents(templateFile);
                     AddTemplate(templateFile.VirtualPath, templateContents);
                 }
                 catch (Exception ex)
@@ -346,7 +384,7 @@ namespace ServiceStack.WebHost.Endpoints.Formats
                     hasReloadableWebPages = true;
 
                 var pageName = markDownFile.Name.WithoutExtension();
-                var pageContents = markDownFile.ReadAllText();
+                var pageContents = GetPageContents(markDownFile);
 
                 var pageType = MarkdownPageType.ContentPage;
                 if (VirtualPathProvider.IsSharedFile(markDownFile))
@@ -378,7 +416,6 @@ namespace ServiceStack.WebHost.Endpoints.Formats
         {
             try
             {
-                //Log.InfoFormat("Compiling {0}...", page.FilePath);
 				page.Compile();
                 AddViewPage(page);
             }
@@ -394,10 +431,8 @@ namespace ServiceStack.WebHost.Endpoints.Formats
 
                 if (MasterPageTemplates.ContainsKey(templatePath)) return;
 
-                //AddTemplate(templatePath, File.ReadAllText(templatePath));
-
                 var templateFile = VirtualPathProvider.GetFile(templatePath);
-                var templateContents = templateFile.ReadAllText();
+                var templateContents = GetPageContents(templateFile);
                 AddTemplate(templatePath, templateContents);
             }
             catch (Exception ex)
@@ -430,12 +465,7 @@ namespace ServiceStack.WebHost.Endpoints.Formats
 
             var templateFile = VirtualPathProvider.GetFile(templatePath);
             var templateName = templateFile.Name.WithoutExtension();
-
-            foreach (var markdownReplaceToken in MarkdownReplaceTokens)
-            {
-                templateContents = templateContents.Replace(markdownReplaceToken.Key, markdownReplaceToken.Value);
-            }
-
+            
             template = new MarkdownTemplate(templatePath, templateName, templateContents) {
                 LastModified = templateFile.LastModified,
             };
@@ -452,6 +482,20 @@ namespace ServiceStack.WebHost.Endpoints.Formats
                 Log.Error("AddViewPage() template.Prepare(): " + ex.Message, ex);
                 return null;
             }
+        }
+
+        private string GetPageContents(IVirtualFile page)
+        {
+            return ReplaceContentWithRewriteTokens(page.ReadAllText());
+        }
+
+        private string ReplaceContentWithRewriteTokens(string contents)
+        {
+            foreach (var replaceToken in ReplaceTokens)
+            {
+                contents = contents.Replace(replaceToken.Key, replaceToken.Value);
+            }
+            return contents;
         }
 
         public string Transform(string template)
@@ -508,7 +552,7 @@ namespace ServiceStack.WebHost.Endpoints.Formats
                         if (virtualFile == null)
                             throw new FileNotFoundException("Could not find template: " + directiveTemplate);
 
-                        var templateContents = virtualFile.ReadAllText();
+                        var templateContents = GetPageContents(virtualFile);
                         markdownTemplate = AddTemplate(directiveTemplate, templateContents);
                     }
                 }

@@ -58,7 +58,7 @@ namespace RazorRockstars.Web
 			});
 		}
 
-		public static string Host = "http://localhost:1338";
+        public static string Host = "http://localhost:1338";
 
 		static string ViewRockstars = "<!--view:Rockstars.cshtml-->";
         static string ViewRockstars2 = "<!--view:Rockstars2.cshtml-->";
@@ -144,6 +144,13 @@ namespace RazorRockstars.Web
         }
 
         [Test]
+        public void Can_get_razor_content_pages_with_partials()
+        {
+            Assert200(Host + "/pages/dir2/Page4",
+                ViewPage4, Template_HtmlReport, ViewRazorPartial, ViewMarkdownPartial, ViewMPage3);
+        }
+
+        [Test]
         public void Can_get_markdown_content_pages()
         {
             Assert200(Host + "/MRootPage",
@@ -152,6 +159,20 @@ namespace RazorRockstars.Web
                 ViewMPage1, TemplateM_Pages_Layout);
             Assert200(Host + "/pages/dir/mPage2",
                 ViewMPage2, TemplateM_Pages_Dir_Layout);
+        }
+
+        [Test]
+        public void Redirects_when_trying_to_get_razor_page_with_extension()
+        {
+            Assert200(Host + "/pages/dir2/Page4.cshtml",
+                ViewPage4, Template_HtmlReport, ViewRazorPartial, ViewMarkdownPartial, ViewMPage3);
+        }
+
+        [Test]
+        public void Redirects_when_trying_to_get_markdown_page_with_extension()
+        {
+            Assert200(Host + "/pages/mpage1.md",
+                ViewMPage1, TemplateM_Pages_Layout);
         }
 
         [Test]

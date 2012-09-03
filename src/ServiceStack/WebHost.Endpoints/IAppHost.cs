@@ -42,6 +42,11 @@ namespace ServiceStack.WebHost.Endpoints
 		/// </summary>
 		IContentTypeFilter ContentTypeFilters { get; }
 		
+        /// <summary>
+        /// Add Request Filters, to be applied before the dto is deserialized
+        /// </summary>
+        List<Action<IHttpRequest, IHttpResponse>> PreRequestFilters { get; }
+
 		/// <summary>
 		/// Add Request Filters
 		/// </summary>
@@ -56,6 +61,11 @@ namespace ServiceStack.WebHost.Endpoints
 		/// Add alternative HTML View Engines
 		/// </summary>
 		List<IViewEngine> ViewEngines { get; }
+
+        /// <summary>
+        /// Provide an exception handler
+        /// </summary>
+        Action<IHttpRequest, IHttpResponse, Exception> ExceptionHandler { get; set; }
 
 		/// <summary>
 		/// Provide a catch-all handler that doesn't match any routes

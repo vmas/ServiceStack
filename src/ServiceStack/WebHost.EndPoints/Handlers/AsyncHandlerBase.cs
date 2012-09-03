@@ -49,27 +49,24 @@ namespace ServiceStack.WebHost.Endpoints.Handlers
 
 		protected virtual void HandleException(IHttpRequest httpReq, IHttpResponse httpRes, Exception ex)
 		{
-			var errorMessage = string.Format("Error occured while Processing Request: {0}", ex.Message);
-			Log.Error(errorMessage, ex);
+            var errorMessage = string.Format("Error occured while Processing Request: {0}", ex.Message);
+            Log.Error(errorMessage, ex);
 
-			try
-			{
-				var statusCode = ex is SerializationException ? HttpStatusCode.BadRequest : HttpStatusCode.InternalServerError;
-				//httpRes.WriteToResponse always calls .Close in it's finally statement so 
-				//if there is a problem writing to response, by now it will be closed
-				if (!httpRes.IsClosed)
-				{
-                    httpRes.WriteErrorToResponse(httpReq.ResponseContentType, httpReq.OperationName, errorMessage, ex, (int)statusCode);
-				}
-			}
-			catch (Exception writeErrorEx)
-			{
-				//Exception in writing to response should not hide the original exception
-				Log.Info("Failed to write error to response: {0}", writeErrorEx);
-
-				//rethrow the original exception
-				throw ex;
-			}
+            try
+            {
+                EndpointHost.ExceptionHandler(httpReq, httpRes, ex);
+            }
+            catch (Exception writeErrorEx)
+            {
+                //Exception in writing to response should not hide the original exception
+                Log.Info("Failed to write error to response: {0}", writeErrorEx);
+                //rethrow the original exception
+                throw ex;
+            }
+            finally
+            {
+                httpRes.EndServiceStackRequest(skipHeaders: true);
+            }
 		}
 
         protected IServiceResult CancelRequestProcessing(Action<IServiceResult> callback)

@@ -168,6 +168,14 @@ namespace ServiceStack.WebHost.Endpoints
 			}
 		}
 
+        public List<Action<IHttpRequest, IHttpResponse>> PreRequestFilters
+		{
+			get
+			{
+				return EndpointHost.RawRequestFilters;
+			}
+		}
+
 		public List<Action<IHttpRequest, IHttpResponse, object>> RequestFilters
 		{
 			get
@@ -191,6 +199,12 @@ namespace ServiceStack.WebHost.Endpoints
 				return EndpointHost.ViewEngines;
 			}
 		}
+
+	    public Action<IHttpRequest, IHttpResponse, Exception> ExceptionHandler
+	    {
+	        get { return EndpointHost.ExceptionHandler; }
+           set { EndpointHost.ExceptionHandler = value; }
+        }
 
 		public List<HttpHandlerResolverDelegate> CatchAllHandlers
 		{

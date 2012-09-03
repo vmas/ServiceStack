@@ -34,7 +34,7 @@ namespace ServiceStack.Tests.ServiceHost
 		}
 
         [Test]
-        public void Can_deserialize_SimpleType_in_middle_of_path()
+        public void Can_deserialize_url()
         {
             var restPath = new RestPath(typeof(SimpleType), "/simple/");
             var request = restPath.CreateRequest("/simple?Name=HelloWorld!") as SimpleType;

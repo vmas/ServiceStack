@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using System.Web;
+using ServiceStack.Common;
 using ServiceStack.Common.Web;
 using ServiceStack.ServiceHost;
 using ServiceStack.Text;
@@ -33,8 +34,17 @@ namespace ServiceStack.WebHost.Endpoints.Support
 			}
 			else
 			{
-				var absoluteUrl = request.AbsoluteUri.WithTrailingSlash() + this.RelativeUrl;
-				response.StatusCode = (int)HttpStatusCode.Redirect;
+                var absoluteUrl = request.GetApplicationUrl();
+                if (!string.IsNullOrEmpty(RelativeUrl))
+                {
+                    if (this.RelativeUrl.StartsWith("/"))
+                        absoluteUrl = absoluteUrl.CombineWith(this.RelativeUrl);
+                    else if (this.RelativeUrl.StartsWith("~/"))
+                        absoluteUrl = absoluteUrl.CombineWith(this.RelativeUrl.Replace("~/", ""));
+                    else
+                        absoluteUrl = request.AbsoluteUri.CombineWith(this.RelativeUrl);
+                }
+                response.StatusCode = (int)HttpStatusCode.Redirect;
 				response.AddHeader(HttpHeaders.Location, absoluteUrl);
 			}
 
@@ -58,11 +68,18 @@ namespace ServiceStack.WebHost.Endpoints.Support
 				response.StatusCode = (int)HttpStatusCode.Redirect;
 				response.AddHeader(HttpHeaders.Location, this.AbsoluteUrl);
 			}
-			else
+            else 
 			{
-			    var absoluteUrl = this.RelativeUrl.Contains("~/")
-                    ? request.GetApplicationUrl().WithTrailingSlash() + this.RelativeUrl.Replace("~/", "")
-                    : request.Url.AbsoluteUri.WithTrailingSlash() + this.RelativeUrl;
+                var absoluteUrl = request.GetApplicationUrl();
+                if (!string.IsNullOrEmpty(RelativeUrl))
+                {
+                    if (this.RelativeUrl.StartsWith("/"))
+                        absoluteUrl = absoluteUrl.CombineWith(this.RelativeUrl);
+                    else if (this.RelativeUrl.StartsWith("~/"))
+                        absoluteUrl = absoluteUrl.CombineWith(this.RelativeUrl.Replace("~/", ""));
+                    else
+                        absoluteUrl = request.Url.AbsoluteUri.CombineWith(this.RelativeUrl);
+                }
 			    response.StatusCode = (int)HttpStatusCode.Redirect;
                 response.AddHeader(HttpHeaders.Location, absoluteUrl);
 			}

@@ -150,6 +150,13 @@ namespace RazorRockstars.Console.Files
         }
 
         [Test]
+        public void Can_get_razor_content_pages_with_partials()
+        {
+            Assert200(Host + "/pages/dir2/Page4",
+                ViewPage4, Template_HtmlReport, ViewRazorPartial, ViewMarkdownPartial, ViewMPage3);
+        }
+
+        [Test]
         public void Can_get_markdown_content_pages()
         {
             Assert200(Host + "/MRootPage",
@@ -158,6 +165,20 @@ namespace RazorRockstars.Console.Files
                 ViewMPage1, TemplateM_Pages_Layout);
             Assert200(Host + "/pages/dir/mPage2",
                 ViewMPage2, TemplateM_Pages_Dir_Layout);
+        }
+
+        [Test]
+        public void Redirects_when_trying_to_get_razor_page_with_extension()
+        {
+            Assert200(Host + "/pages/dir2/Page4.cshtml",
+                ViewPage4, Template_HtmlReport, ViewRazorPartial, ViewMarkdownPartial, ViewMPage3);
+        }
+
+        [Test]
+        public void Redirects_when_trying_to_get_markdown_page_with_extension()
+        {
+            Assert200(Host + "/pages/mpage1.md",
+                ViewMPage1, TemplateM_Pages_Layout);
         }
 
         [Test]

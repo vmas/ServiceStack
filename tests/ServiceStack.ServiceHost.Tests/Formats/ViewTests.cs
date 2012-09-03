@@ -47,7 +47,7 @@ namespace ServiceStack.ServiceHost.Tests.Formats
 			public AppHost()
 			{
 				this.Config = new EndpointHostConfig {					
-					MarkdownReplaceTokens = new Dictionary<string, string>(),
+					HtmlReplaceTokens = new Dictionary<string, string>(),
 					IgnoreFormatsInMetadata = new HashSet<string>(),
 				};
 				this.ContentTypeFilters = HttpResponseFilter.Instance;
@@ -78,13 +78,17 @@ namespace ServiceStack.ServiceHost.Tests.Formats
 
 			public IContentTypeFilter ContentTypeFilters { get; set; }
 
+            public List<Action<IHttpRequest, IHttpResponse>> PreRequestFilters { get; set; }
+
 			public List<Action<IHttpRequest, IHttpResponse, object>> RequestFilters { get; set; }
 
 			public List<Action<IHttpRequest, IHttpResponse, object>> ResponseFilters { get; set; }
 
             public List<IViewEngine> ViewEngines { get; set; }
 
-			public List<HttpHandlerResolverDelegate> CatchAllHandlers { get; set; }
+            public Action<IHttpRequest, IHttpResponse, Exception> ExceptionHandler { get; set; }
+
+		    public List<HttpHandlerResolverDelegate> CatchAllHandlers { get; set; }
 
 			public Dictionary<Type, Func<IHttpRequest, object>> RequestBinders
 			{
